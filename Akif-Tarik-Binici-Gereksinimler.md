@@ -4,7 +4,7 @@
 
 3. Dil Seçenekleri: Uygulama birden fazla dili desteklemelidir. Kullanıcılar tercih ettikleri dili seçerek arayüzü o dile çevirebilir.
 
-4. İzleme Listesi Oluşturma: Kullanıcılar izlemek istedikleri filmleri ekleyebilecekleri bir liste oluşturabilir. Birden fazla liste yapabilirler (örneğin, "Favorilerim" veya "Hafta Sonu İzlenecekler"). Listeler özel veya herkese açık olabilir. Kullanıcılar başkalarının herkese açık listelerini görüntüleyebilir, ancak yalnızca kendi listelerini düzenleyebilirler.
+4. İzleme Listesi Oluşturma: Kullanıcılar izlemek istedikleri filmleri ekleyebilecekleri bir liste oluşturabilir. Birden fazla liste yapabilirler . Listeler özel veya herkese açık olabilir. Kullanıcılar başkalarının herkese açık listelerini görüntüleyebilir, ancak yalnızca kendi listelerini düzenleyebilirler.
 
 5. Favori Listesi Oluşturma: Kullanıcılar en sevdikleri filmleri "Favoriler" listesine ekleyebilir. Bu liste özel olur ve sadece kullanıcı tarafından görülebilir. Kullanıcılar istedikleri zaman favorilerine yeni filmler ekleyebilir veya çıkartabilir.
 
