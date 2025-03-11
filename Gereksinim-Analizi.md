@@ -11,7 +11,7 @@
 10. Dil seçenekleri (Akif Tarık Binici)
 11. Favori listesi oluşturma (Akif Tarık Binici)
 12. İzlenen filmler listesi (Akif Tarık Binici)
-13. Film Arama (Ylyas Yylkybayev)
+13. Film arama (Ylyas Yylkybayev)
 14. Rastgele film önerme (Ylyas Yylkybayev)
 15. Popüler film önerme (Ylyas Yylkybayev)
 16. Yeni Filmler önerme (Ylyas Yylkybayev)
