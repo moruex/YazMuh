@@ -6,9 +6,9 @@
 
 **Proje Kategorisi:** Film
 
-**Referans Uygulama:** [imdb.com](imdb.com), [rottentomatoes.com](rottentomatoes.com)
+**Referans Uygulama:** [https://www.imdb.com/](imdb.com), [https://www.rottentomatoes.com/](rottentomatoes.com)
 
-**Uygulama Adresi:** [movieq.com](movieq.com)
+**Uygulama Adresi:** [https://www.movieq.com/](movieq.com)
 
 **Grup Adı:** SAYFA
 
