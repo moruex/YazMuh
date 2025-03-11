@@ -1,19 +1,17 @@
-1. **Oyuncu ve Yönetmen Bilgileri Ekleme**  
-   1.1. Yönetici, panel üzerinden oyuncu ve yönetmen bilgilerini ekleyebilmelidir.  
-   1.2. İlgili form, ad, doğum tarihi, biyografi ve oynadığı filmler gibi alanları içermelidir.  
-   1.3. Eklenen bilgiler veritabanına kaydedilmeli ve gerektiğinde güncellenebilmelidir.  
+1. Oyuncu ve Yönetmen Bilgileri Ekleme
+Bu özellik, filmlere oyuncu ve yönetmen bilgileri eklemeyi sağlar. Kullanıcılar ya da yöneticiler, filme ait olan oyuncu ve yönetmen bilgilerini, film sayfasına ekleyerek, izleyicilerin filmle ilgili daha fazla bilgiye erişmesini sağlar. Oyuncu ve yönetmen adı, rolü ve diğer biyografik bilgiler gibi detaylar eklenebilir.
 
-2. **Film Haberleri Yönetimi**  
-   2.1. Yönetici, yeni film haberleri ekleyebilmelidir.  
-   2.2. Haber ekleme işlemi sırasında başlık, içerik, görsel ve yayın tarihi gibi alanlar girilmelidir.  
-   2.3. Yönetici, mevcut haberleri düzenleyebilmelidir.  
-   2.4. Güncelleme işlemi, mevcut haberin detaylarının değiştirilmesini sağlamalıdır.  
-   2.5. Yönetici, haberleri silebilmelidir.  
-   2.6. Silme işlemi, ilgili haberin veritabanından kaldırılmasını sağlamalıdır.  
+2. Film Haberleri
+Film haberleri, sinema dünyasında olan gelişmeleri takip etmek ve kullanıcılara bu konuda bilgi sunmak için kullanılır. Bu özellik, yeni çıkan filmler, vizyona girecek yapımlar, ödüller ve diğer sinema haberlerini kullanıcılarla paylaşmaya olanak tanır. Film haberleri, kullanıcıları sinema dünyasında güncel tutar.
 
-3. **Yorum Onaylama**  
-   3.1. Yönetici, kullanıcıların yaptığı yorumları inceleyerek onaylayabilmelidir.  
-   3.2. Onaylanan yorumlar, kullanıcılar tarafından görüntülenebilir hâle gelmelidir.  
-   3.3. Yönetici, uygunsuz veya istenmeyen yorumları silebilmelidir.  
-   3.4. Silinen yorumlar, sistemden tamamen kaldırılmalıdır.  
-   3.5. Yorumlar, belirli kriterlere göre filtrelenerek yöneticiye sunulmalıdır.
+3. Haber Ekleme
+Haber ekleme, platforma yeni haberlerin eklenmesini sağlar. Yöneticiler veya yetkilendirilmiş kullanıcılar, sinema dünyasında yaşanan önemli gelişmeleri siteye ekler. Haber başlığı, içeriği ve ilgili görseller gibi detaylar girilerek, filmle ilgili en son gelişmeler kullanıcılarla paylaşılır.
+
+4. Haber Düzenleme
+Bu özellik, daha önce eklenen bir haberin içeriğini değiştirmeyi sağlar. Yanlış ya da eksik bilgi eklenmişse, haber düzenlenebilir ve doğru bilgiyle güncellenebilir. Düzenleme işleminde, başlık, metin veya görseller gibi öğeler üzerinde değişiklik yapılabilir.
+
+5. Haber Silme
+Haber silme özelliği, platformdaki gereksiz veya yanlış eklenmiş haberleri kaldırmak için kullanılır. Silinen haber, platformda bir daha görünmez. Bu özellik, sadece yöneticiler veya yetkilendirilmiş kullanıcılar tarafından kullanılabilir.
+
+6. Yorum Onaylama
+Yorum onaylama, kullanıcıların eklediği yorumların önce onaylanmasını sağlayan bir özelliktir. Bu özellik, platformda kötü niyetli veya spam yorumların engellenmesine yardımcı olur. Yöneticiler ya da moderatörler, kullanıcı yorumlarını gözden geçirir ve onayladıktan sonra yayına alır. Bu sayede, platformun kaliteli ve güvenilir yorumlarla dolmasını sağlar.
