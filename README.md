@@ -10,7 +10,7 @@
 
 **Uygulama Adresi:** [movieq.com](movieq.com)
 
-**Grup Adı:** *SAYFA*
+**Grup Adı:** SAYFA
 
 **Proje Ekibi:** Semih Çantal, Akif Tarık Binici, Ylyas Yylkybayev, Furkan Sayar, Abdullah Kural
 
