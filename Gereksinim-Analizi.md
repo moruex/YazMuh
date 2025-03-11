@@ -1,9 +1,37 @@
-Tüm gereksinimlerinizi çıkardıktan sonra beraber tartışıyoruz ve son gereksinimlerin isimlerini ve kısa açıklamalarını buraya numaralı bir şekilde yazıyorsunuz. Daha sonra aşağıya herkes kendi gereksinimiyle ilgili sayfayı oluşturmalı ve kendi sayfasında kendine ait gereksinimleri numaralı bir şekilde listeleyerek her bir gereksinimin açıklamalarını yazmalı. Toplamda grup üyesi sayısı kadar sayfa oluşturulmalı. Her grup üyesine eşit sayıda gereksinim atanmalı.
-
 # Gereksinimler
-1. Üye Olma (Ali Atabak)
-2. Kayıt Olma (Ali Atabak
-3. .....
+1. Kullanıcı kaydı (Semih Çantal)
+2. Kullanıcı girişi (Semih Çantal)
+3. Kullanıcı avatar yükleme (Semih Çantal)
+4. Kullanıcı profili oluşturma (Semih Çantal)
+5. Profil düzenleme (Semih Çantal)
+6. Şifre sıfırlama (Semih Çantal)
+7. Film detayını görme (Akif Tarık Binici)
+8. Film puanlama (Akif Tarık Binici)
+9. İzleme listesi oluşturma (Akif Tarık Binici)
+10. Dil seçenekleri (Akif Tarık Binici)
+11. Favori listesi oluşturma (Akif Tarık Binici)
+12. İzlenen filmler listesi (Akif Tarık Binici)
+13. Film Arama (Ylyas Yylkybayev)
+14. Rastgele film önerme (Ylyas Yylkybayev)
+15. Popüler film önerme (Ylyas Yylkybayev)
+16. Yeni Filmler önerme (Ylyas Yylkybayev)
+17. Film testi (Ylyas Yylkybayev)
+18. Film kategorileri ekleme (Ylyas Yylkybayev)
+19. Yorum silme (Furkan Sayar)
+20. Yorum ekleme (Furkan Sayar)
+21. Yorum düzenleme (Furkan Sayar)
+22. Film ekleme (Furkan Sayar)
+23. Film silme (Furkan Sayar)
+24. Film güncelleme (Furkan Sayar)
+25. Oyuncu ve yönetmen bilgileri ekleme (Abdullah Kural)
+26. Film haberleri (Abdullah Kural)
+27. Haber ekleme (Abdullah Kural)
+28. Haber düzenleme (Abdullah Kural)
+29. Haber silme (Abdullah Kural)
+30. Yorum onaylama (Abdullah Kural)
+
+
+
 
 # Gereksinim Dağılımları
 1. [Semih Çantal'ın Gereksinimleri](Semih-Çantal-Gereksinimler.md)
