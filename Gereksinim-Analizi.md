@@ -6,6 +6,8 @@ Tüm gereksinimlerinizi çıkardıktan sonra beraber tartışıyoruz ve son gere
 3. .....
 
 # Gereksinim Dağılımları
-1. [Ali Atabak'ın Gereksinimleri](Ali-Atabak-Gereksinimler.md)
-2. [Ayşe Topu Tut'nn Gereksinimleri](Ali-Atabak-Gereksinimler.md)
-3. ........
+1. [Semih Çantal'ın Gereksinimleri](Semih-Çantal-Gereksinimler.md)
+2. [Akif Tarık Binici'nin Gereksinimleri](Akif-Tarik-Binici-Gereksinimler.md)
+3. [Ylyas Yylkybayev'in Gereksinimleri](Ylyas-Yylkybayev-Gereksinimler.md)
+4. [Furkan Sayar'ın Gereksinimleri](Furkan-Sayar-Gereksinimler.md)
+5. [Abdullah Kural'ın Gereksinimleri](Abdullah-Kural-Gereksinimler.md)
