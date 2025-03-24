@@ -16,7 +16,7 @@
 15. Popüler film önerme (Ylyas Yylkybayev)
 16. Yeni Filmler önerme (Ylyas Yylkybayev)
 17. Film testi (Ylyas Yylkybayev)
-18. Film kategorileri ekleme (Ylyas Yylkybayev)
+18. Film türleri ekleme (Ylyas Yylkybayev)
 19. Yorum silme (Furkan Sayar)
 20. Yorum ekleme (Furkan Sayar)
 21. Yorum düzenleme (Furkan Sayar)
