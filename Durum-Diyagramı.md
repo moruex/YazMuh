@@ -1,1 +1,1 @@
-![Durum-Diyagrami]([files/Durum-Diyagrami.png])
+![Durum-Diyagrami]([../files/Durum-Diyagrami.png])
