@@ -7,7 +7,7 @@
 6. Şifre sıfırlama (Semih Çantal)
 7. Film detayını görme (Akif Tarık Binici)
 8. Film puanlama (Akif Tarık Binici)
-9. İzleme listesi oluşturma (Akif Tarık Binici)
+9. İzlenecekler listesi oluşturma (Akif Tarık Binici)
 10. Dil seçenekleri (Akif Tarık Binici)
 11. Favori listesi oluşturma (Akif Tarık Binici)
 12. İzlenen filmler listesi (Akif Tarık Binici)
