@@ -20,3 +20,4 @@ MovIeQ isimli film yorumlama sitemiz kullanıcılarının eski ve yeni çıkmı�
 5. [Back-End](Back-End.md)
 6. [Video Sunum](Sunum.md)
 
+![Durum-Diyagrami](https://github.com/user-attachments/assets/eb9a8c77-3d07-4c3e-b952-1b240d6d094a)
