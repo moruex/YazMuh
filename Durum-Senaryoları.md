@@ -4,4 +4,4 @@ Gereksinim analizi sayfasında olduğu gibi herkes kendi ismiyle aşağıya numa
 2. [Akif Tarık Binici Durum Senaryosu]
 3. [Ylyas Yylkybayev Durum Senaryosu]
 4. [Furkan Sayar Durum Senaryosu](https://github.com/moruex/YazMuh/blob/main/files/Furkan-Sayar.pdf)
-5. [Abdullah Kural Durum Senaryosu]
+5. [Abdullah Kural Durum Senaryosu](https://github.com/moruex/YazMuh/blob/main/files/Abdullah_Kural.pdf)
