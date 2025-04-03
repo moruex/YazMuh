@@ -2,7 +2,7 @@
 1. Kullanıcı kaydı (Semih Çantal)
 2. Kullanıcı girişi (Semih Çantal)
 3. Kullanıcı avatar yükleme (Semih Çantal)
-4. Kullanıcı profili oluşturma (Semih Çantal)
+4. Film filtreleme (Semih Çantal)
 5. Profil düzenleme (Semih Çantal)
 6. Şifre sıfırlama (Semih Çantal)
 7. Film detayını görme (Akif Tarık Binici)
