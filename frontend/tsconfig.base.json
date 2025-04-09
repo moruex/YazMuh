@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2015",
+    "lib": ["DOM", "DOM.Iterable", "ESNext", "WebWorker"],
     "module": "ESNext",
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "baseUrl": ".",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "paths": {
       "@src/*": ["src/*"],
       "@components/*": ["src/components/*"],

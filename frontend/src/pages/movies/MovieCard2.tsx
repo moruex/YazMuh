@@ -1,6 +1,7 @@
 import React from 'react';
+import './MovieCard2.css'
 
-const MovieCard2: React.FC<{ movie: any, index: any }> = ({ movie, index }) => {
+export const MovieCard2: React.FC<{ movie: any; }> = ({ movie }) => {
     return (
         <div className="ms-movie-card">
             <a href={`/movies/${movie.id}`} className="ms-movie-card-link">
@@ -23,6 +24,4 @@ const MovieCard2: React.FC<{ movie: any, index: any }> = ({ movie, index }) => {
         </div>
     );
 };
-
-export default MovieCard2;
 

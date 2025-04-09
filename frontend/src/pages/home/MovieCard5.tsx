@@ -1,12 +1,7 @@
 import React from "react";
+import './MovieCard5.css';
 
 export const MovieCard5: React.FC<{ movie: any; index: any, renderStars: any }> = ({ movie, index, renderStars }) => {
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const target = e.target as HTMLImageElement;
-    target.style.display = 'none';
-    console.error(`Failed to load image: ${movie.posterUrl}`);
-  };
-
   return (
     <div
       key={`${movie.id || index}-${movie.position}`}

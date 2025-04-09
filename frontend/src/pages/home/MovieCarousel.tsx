@@ -179,34 +179,6 @@ const MovieCarousel: React.FC<MovieCarouselProps> = ({
     }, [autoPlayInterval, totalMovies, isTransitioning]); // isTransitioning IS needed here to restart timer after manual nav
 
 
-    // --- Star Rendering Utility ---
-    const renderStars = (ratingOutOf10: number | null | undefined) => {
-        if (ratingOutOf10 === null || ratingOutOf10 === undefined || isNaN(ratingOutOf10)) {
-            return <span className="mc-rating-value mc-rating-na">N/A</span>;
-        }
-        const ratingOutOf5 = Math.max(0, Math.min(10, ratingOutOf10)) / 2;
-        const stars = [];
-        const fullStars = Math.floor(ratingOutOf5);
-        const hasHalfStar = ratingOutOf5 % 1 >= 0.5;
-        const maxStars = 5;
-
-        for (let i = 0; i < maxStars; i++) {
-            if (i < fullStars) {
-                stars.push(<span key={i} className="mc-star mc-full" aria-hidden="true">★</span>);
-            } else if (i === fullStars && hasHalfStar) {
-                stars.push(<span key={i} className="mc-star mc-half" aria-hidden="true">★</span>);
-            } else {
-                stars.push(<span key={i} className="mc-star mc-empty" aria-hidden="true">☆</span>);
-            }
-        }
-        const accessibleText = `${ratingOutOf5.toFixed(1)} out of 5 stars`;
-        return (
-             <div className="mc-rating-stars" role="img" aria-label={accessibleText}>
-                {stars}
-            </div>
-        );
-    };
-
     // --- DEBUGGING ---
     // Uncomment this line temporarily to see exactly what data is being mapped
     // console.log('Displayed Movies Data:', displayedMovies);
@@ -321,7 +293,7 @@ const MovieCarousel: React.FC<MovieCarouselProps> = ({
                                                 <span className="mc-rating-source">MovieQ</span>
                                                 <span className="mc-rating-value">
                                                     {/* Use nullish coalescing for cleaner N/A */}
-                                                    {movie.imdbRating?.toFixed(1) ?? <span className="mc-rating-na">N/A</span>}
+                                                    {movie.movieQRating?.toFixed(1) ?? <span className="mc-rating-na">N/A</span>}
                                                 </span>
                                             </div>
                                             {/* KinoPoisk */}

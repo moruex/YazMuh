@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Movie } from '@src/types/Movie'; // Import the base Movie type
 
 import MovieSection from "./MovieSection";
 import Footer from "@components/app/Footer";
@@ -228,7 +229,7 @@ const mockMovies = [
 ]
 
 // Example of data you would pass to the component:
-const myMovieData = [
+const myMovieDataRaw = [
   {
       id: 'm1',
       title: "Interstellar",
@@ -281,6 +282,12 @@ const myMovieData = [
   // ... add more movies
 ];
 
+// Map the raw data to include the base 'rating' field
+const myMovieData = myMovieDataRaw.map(movie => ({
+  ...movie,
+  rating: movie.movieQRating ?? movie.imdbRating ?? 0 // Use MovieQ rating, fallback to IMDb, then 0
+}));
+
 const mockMoviesSections = {
   popular: mockMovies,
   newReleases: mockMovies,
@@ -288,7 +295,15 @@ const mockMoviesSections = {
   recentlyAdded: mockMovies,
 };
 
-const NewsCard = ({ title, posterUrl, description, date }) => (
+// Interface for NewsCard props
+interface NewsCardProps {
+  title: string;
+  posterUrl: string;
+  description: string;
+  date: string;
+}
+
+const NewsCard = ({ title, posterUrl, description, date }: NewsCardProps) => (
   <div className="movie-news-card">
     <a href={`/newsd`} className="movie-card-link">
       <div className="movie-news-image">

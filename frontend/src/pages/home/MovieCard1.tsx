@@ -1,20 +1,16 @@
 import React from "react";
+import './MovieCard1.css';
 
 interface MovieCard1Props {
-  id: number;
+  // id: number;
   title: string;
   posterUrl: string;
   rating: number;
   year: number;
+  genres: string[];
 }
 
-const MovieCard1: React.FC<MovieCard1Props> = ({
-  id,
-  title,
-  posterUrl,
-  rating,
-  year,
-}) => {
+const MovieCard1 = ({ title, year, posterUrl, rating, genres }: MovieCard1Props) => {
   return (
     <div className="hm-movie-card">
       <a href={`/movies/1`} className="hm-movie-card-link">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import './PersonDetailsPage.css';
 import { FaPlus, FaHeart, FaRegHeart } from 'react-icons/fa'; // Keep needed icons
 import Footer from '@components/app/Footer';
