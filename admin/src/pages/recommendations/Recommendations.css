@@ -1,0 +1,206 @@
+.recommendations-container {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+}
+
+.recommendations-container * {
+    user-select: none;
+}
+
+.selectable {
+    user-select: text;
+}
+
+img {
+    user-select: none;
+}
+
+span.rec-checkbox {
+    position: absolute;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+}
+
+.category-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.add-movie-modal {
+    background-color: #f8f9fb;
+}
+
+.category-header {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+}
+
+.movie-section-title span {
+    margin-left: 10px;
+    font-size: 20px;
+    color: var(--combo-gray2);
+}
+
+.category-footer {
+    display: flex;
+    margin-top: 10px;
+    gap: 10px;
+    padding: 20px 0px;
+}
+
+.category-actions {
+    display: flex;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.category-actions button{
+    margin-top: 0;
+    margin-right: 0;
+    box-shadow: none;
+}
+
+.category-actions button.add-button-rec {
+    background-color: var(--mui-accent-green);
+}
+
+.category-actions button.select-button-rec {
+    display: flex;
+    flex-direction: row;
+    justify-content:space-around;
+    min-width: 155px;
+    background-color: var(--mui-select-all-button);
+}
+
+.category-actions button.view-button-rec {
+    background-color: var(--mui-accent-blue);
+    padding: 6px 16px;
+}
+.category-actions button.view-button-rec.Mui-disabled {
+    color: var(--mui-disbaled-button);
+    background-color: var(--mui-disbaled-button-bg);
+}
+
+.category-actions button.delete-button-rec {
+    padding: 6px 16px;
+}
+
+.category-actions button.delete-button-rec.Mui-disabled {
+    color: var(--mui-disbaled-button);
+    background-color: var(--mui-disbaled-button-bg);
+}
+
+.movie-grid div {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px var(--bw10);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.4s ease;
+}
+
+.movie-grid div:hover {
+    transform: scale(1.01);
+}
+
+.movie-grid div:active {
+    transform: scale(0.99);
+}
+
+.movie-card div.movie-card-content:last-child {
+    padding: 0px 10px;
+}
+
+.movie-card div.movie-card-content {
+    background-color: none;
+    border: none;
+    box-shadow: none;
+    color: var(--text-primary);
+    display: flex;
+    width: 100%;
+    height: 60px;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 10px;
+}
+
+.movie-card div.movie-card-content p.title-rec {
+    padding-left: 8px;
+    align-content: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.movie-card div.movie-card-content button.delete-button-rec {
+    margin-left: auto;
+}
+
+.selected-movies-grid {
+    margin-top: 20px;
+}
+
+.selected-movie-card {
+    position: relative;
+}
+
+.movie-grid1 div {
+    background-color: #f8f9fb;
+    color: #333333;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px var(--bw10);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.4s ease;
+}
+
+.movie-grid1 div:hover {
+    transform: scale(1.01);
+}
+
+.movie-grid1 div:active {
+    transform: scale(0.99);
+}
+
+.movie-card1 div.movie-card1-content:last-child {
+    padding: 0px 5px;
+}
+
+.movie-card1 div.movie-card1-content {
+    background: none;
+    border: none;
+    box-shadow: none;
+    color: #333333;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 50px;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 5px;
+}
+
+.movie-card1 div.movie-card1-content p.title-rec {
+    padding-left: 8px;
+    align-content: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.movie-card1 div.movie-card1-content button.delete-button-rec {
+    margin-left: auto;
+}

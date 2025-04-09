@@ -1,0 +1,201 @@
+// src/interfaces/interfaces.ts
+
+// --- Frontend Specific Interfaces ---
+
+// Represents the input for the login mutation
+export interface LoginInput {
+    username: string; // Changed from email to username as requested
+    password: string;
+}
+
+// Represents the successful payload from the login mutation
+export interface LoginPayload {
+    token: string;
+    user: ApiUser; // Assuming the API returns user info on login
+}
+
+// Input for the ADMIN login mutation
+export interface AdminLoginInput {
+    username: string; // Admin-specific username
+    password: string;
+}
+
+// Role enum for Admins (must match backend exactly)
+export enum AdminRole {
+    SUPER_ADMIN = 'SUPER_ADMIN',
+    ADMIN = 'ADMIN',
+    CONTENT_MODERATOR = 'CONTENT_MODERATOR',
+}
+
+// Represents the Admin structure from the backend (Admin type)
+export interface ApiAdmin {
+    id: string;
+    username: string; // Admin-specific username
+    role: AdminRole;
+    createdAt: string; // Or DateTime if using scalar
+    updatedAt: string; // Or DateTime if using scalar
+    user: ApiUser; // The nested regular user profile
+}
+
+// Payload from ADMIN login mutation
+export interface AdminLoginPayload {
+    token: string; // This will be the admin JWT
+    admin: ApiAdmin; // Details of the logged-in admin
+}
+
+// Represents the Movie structure used primarily in the frontend components (MoviesPage, Modals, Table)
+export interface Movie {
+    id: string;
+    title: string;
+    imageUrl: string;
+    trailerUrl?: string | null;
+    description: string;
+    shortDescription?: string;
+    genres: string[];
+    directors: string[];
+    actors: string[];
+    rating: number;
+    releaseDate: string;
+    duration: number;
+}
+
+// Represents the data structure needed to send to the API mutations (Create/Update)
+// Maps frontend fields back to the API's expected field names and structure.
+export interface MovieInputData {
+    title: string;              // Maps to API title
+    release_date: string;       // Maps from frontend releaseDate (YYYY-MM-DD)
+    plot_summary: string;       // Maps from frontend description
+    poster_url: string;         // Maps from frontend imageUrl
+    duration_minutes: number;   // Maps from frontend duration
+    trailer_url?: string | null; // Maps from frontend trailerUrl (send null if empty)
+
+    // ---- Relationship Handling ----
+    // The backend schema (as indicated by errors) DOES NOT accept these fields
+    // in MovieUpdateInput. Relationship updates must be handled differently,
+    // either by changing the backend or using separate linking/unlinking mutations.
+    // genreNames?: string[];    // REMOVED - Not defined in MovieUpdateInput
+    // directorNames?: string[]; // REMOVED - Not defined in MovieUpdateInput
+    // actorNames?: string[];    // REMOVED - Not defined in MovieUpdateInput
+
+    // If your backend *does* accept IDs for updates, the structure might be:
+    // genreIds?: string[];
+    // personLinks?: { personId: string; roleType: RoleType; characterName?: string | null }[];
+}
+
+// --- API Specific Interfaces (Mirroring GraphQL Schema Fragments) ---
+
+// Matches the RoleType enum used in the schema and fragments
+export enum RoleType { // Keep existing RoleType enum
+    ACTOR = 'ACTOR',
+    DIRECTOR = 'DIRECTOR',
+    WRITER = 'WRITER',
+    PRODUCER = 'PRODUCER',
+    CINEMATOGRAPHER = 'CINEMATOGRAPHER',
+    COMPOSER = 'COMPOSER',
+}
+
+export interface ApiPersonCore {
+    id: string;
+    name: string;
+    profile_image_url?: string | null;
+}
+
+export interface ApiGenreCore {
+    id: string;
+    name: string;
+    is_collection?: boolean | null;
+}
+
+export interface ApiMoviePerson {
+    id: string;
+    role_type: RoleType;
+    character_name?: string | null;
+    person: ApiPersonCore;
+}
+
+export interface ApiMovieDetail {
+    id: string;
+    title: string;
+    release_date?: string | null;
+    plot_summary?: string | null;
+    poster_url?: string | null;
+    duration_minutes?: number | null;
+    trailer_url?: string | null;
+    avg_rating?: number | null;
+    created_at: string;
+    updated_at: string;
+    genres?: ApiGenreCore[];
+    persons?: ApiMoviePerson[];
+}
+
+export interface ApiMovieCore {
+    id: string;
+    title: string;
+    poster_url?: string | null;
+    release_date?: string | null;
+    avg_rating?: number | null;
+    duration_minutes?: number | null;
+    genres?: Pick<ApiGenreCore, 'id' | 'name'>[];
+}
+
+export interface ApiUser {
+    id: string;
+    first_name?: string | null;
+    last_name?: string | null;
+    username: string;
+    email: string;
+    avatar_url?: string | null;
+    bio?: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ApiComment {
+    id: string;
+    content: string;
+    parent_comment_id?: string | null;
+    likes_count: number;
+    created_at: string;
+    updated_at: string;
+    user: Pick<ApiUser, 'id' | 'username'>;
+    movie: Pick<ApiMovieCore, 'id' | 'title'>;
+    replies?: ApiComment[];
+}
+
+export interface ApiNews {
+     id: string;
+    title: string;
+    short_content?: string | null;
+    content: string;
+    image_url?: string | null;
+    published_at: string;
+    created_at: string;
+    updated_at: string;
+    author?: Pick<ApiUser, 'id' | 'username'> | null;
+    movies?: Pick<ApiMovieCore, 'id' | 'title'>[];
+}
+
+// Quiz Interfaces (based on preference analysis)
+export interface ApiQuizChoice {
+    id: string;
+    question_id: string;
+    choice_text: string;
+    image_url?: string | null;
+    created_at: string;
+}
+
+export interface ApiQuizQuestion {
+    id: string;
+    question_text: string;
+    allowed_choices_count: number;
+    created_at: string;
+    choices: ApiQuizChoice[];
+}
+
+export interface ApiUserQuizAnswer {
+     id: string;
+     user: Pick<ApiUser, 'id' | 'username'>;
+     question: Pick<ApiQuizQuestion, 'id' | 'question_text'>;
+     choice: Pick<ApiQuizChoice, 'id' | 'choice_text'>;
+     answered_at: string;
+}

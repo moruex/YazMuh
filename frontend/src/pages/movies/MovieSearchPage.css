@@ -1,0 +1,672 @@
+/* MovieSearch.css */
+
+:root {
+    --dark-bg: #080a0b;
+    --dark-surface: #121212;
+    --primary-green: #00e054;
+    --accent-green: #008c2b;
+    --dark-green: #004d2b;
+    --text-primary: #ffffff;
+    --text-secondary: #ddd;
+    --text-disabled: #999;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --card-bg: rgba(18, 18, 18, 0.8);
+    --hover-bg: rgba(255, 255, 255, 0.05);
+    --dropdown-bg: #1a1a1a;
+    --dropdown-hover: #222222;
+}
+
+.ms-page {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    padding-bottom: 0;
+}
+
+.ms-movie-search-page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: calc(100vh - var(--navbar-height));
+    /* background-color: var(--dark-bg); */
+}
+
+.ms-page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+}
+
+/* Search Container Styles */
+.ms-search-container1 {
+    background-color: var(--dark-surface);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+}
+
+.ms-main-search1 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.ms-search-input1 {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 12px 16px;
+    color: var(--text-primary);
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+input.ms-search-input1[type=number]::-webkit-inner-spin-button,
+input.ms-search-input1[type=number]::-webkit-outer-spin-button {
+    filter: invert(100%);
+    opacity: 1;
+}
+
+.ms-search-input1:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 2px rgba(0, 224, 84, 0.2);
+}
+
+.ms-search-input1::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.ms-search-button {
+    background-color: var(--primary-green);
+    color: var(--dark-bg);
+    border: none;
+    border-radius: 20px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ms-search-button:hover {
+    background-color: var(--accent-green);
+    transform: translateY(-2px);
+}
+
+.ms-advanced-toggle {
+    background-color: transparent;
+    color: var(--primary-green);
+    border: 2px solid var(--primary-green);
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ms-advanced-toggle:hover {
+    background-color: rgba(0, 224, 84, 0.1);
+}
+
+/* Advanced Search Styles */
+.ms-advanced-search {
+    margin-top: 16px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 16px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ms-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 16px;
+}
+
+.ms-filter-row:last-child {
+    margin-bottom: 0;
+}
+
+.ms-filter-group {
+    flex: 1;
+    /* min-width: 200px; */
+}
+
+.ms-filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.ms-filter-rating-container {
+    display: flex;
+    width: 100%;
+}
+
+.ms-filter-select {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 10px 12px;
+    color: #f0f0f0;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2300e054' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+}
+
+.ms-filter-select.rating {
+    min-height: 44px;
+    flex: 1;
+}
+
+.ms-filter-select:focus {
+    border-color: #00e054;
+    box-shadow: 0 0 0 2px rgba(0, 224, 84, 0.2);
+}
+
+.ms-filter-select.option {
+    background-color: #2b2b2b;
+    color: #00e054;
+}
+
+.ms-filter-select.option:hover {
+    background-color: #008c2b;
+    color: #008c2b;
+}
+
+.ms-sort-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ms-sort-order-toggle {
+    background-color: var(--dropdown-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    width: 36px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-green);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ms-sort-order-toggle:hover {
+    background-color: var(--dropdown-hover);
+}
+
+.ms-filter-actions {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.ms-apply-filters-button {
+    background-color: var(--primary-green);
+    color: var(--dark-bg);
+    border: none;
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.ms-apply-filters-button:hover {
+    background-color: var(--accent-green);
+}
+
+.ms-reset-filters-button {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.ms-reset-filters-button:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+/* Results Container Styles */
+.ms-results-container {
+    margin-top: 30px;
+}
+
+.ms-loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    color: var(--text-secondary);
+}
+
+.ms-loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid var(--border-color);
+    border-bottom-color: var(--primary-green);
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.ms-no-results {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.ms-reset-search-button {
+    background-color: var(--primary-green);
+    color: var(--dark-bg);
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ms-reset-search-button:hover {
+    background-color: var(--accent-green);
+}
+
+/* Movie Grid Styles */
+.ms-movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+    margin-top: 30px;
+    /* width: 100%; */
+}
+
+.ms-movie-card {
+    /* width: 100%; */
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+}
+
+.ms-movie-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+  }
+
+.ms-movie-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.ms-movie-poster {
+    position: relative;
+    aspect-ratio: 2/3;
+    background-color: #1a1a1a;
+    overflow: hidden;
+}
+
+.ms-movie-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.ms-movie-card:hover .movie-poster img {
+    transform: scale(1.05);
+}
+
+.ms-movie-rating {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--primary-green);
+    color: var(--dark-bg);
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.ms-rating-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: var(--accent);
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    z-index: 2;
+}
+
+.ms-movie-info {
+    padding: 16px;
+}
+
+.ms-movie-title {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.ms-movie-year {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.ms-movie-details {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.ms-movie-genres {
+    color: var(--text-disabled);
+    font-size: 12px;
+}
+
+@media (max-width: 1200px) {
+    .movie-search-page {
+        max-width: 100%;
+        margin: 0;
+    }
+}
+
+/* Responsive Styles */
+@media (max-width: 960px) {
+
+    .movie-search-page {
+        width: auto;
+        max-width: 100%;
+        margin: 0;
+    }
+
+    .filter-row {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .ms-page {
+        padding: 10px;
+        padding-bottom: 0;
+    }
+
+    .movie-search-page {
+        padding: 12px 18px;
+    }
+
+    .ms-page-title {
+        font-size: 1.5rem;
+        padding-top: 10px;
+    }
+
+    .ms-filter-group.genres {
+        min-width: 80vw;
+    }
+
+    .main-search1 {
+        flex-direction: column;
+    }
+
+    .search-input1,
+    .search-button,
+    .advanced-toggle {
+        width: 100%;
+    }
+
+    .ms-search-container1 {
+        background-color: var(--dark-surface);
+        border-radius: 8px;
+        padding: 5px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-color);
+    }
+    
+
+    .movie-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 16px;
+    }
+}
+
+/* Pagination styles */
+.ms-pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 24px 0;
+    margin-bottom: 0;
+    gap: 8px;
+}
+
+.ms-pagination-button {
+    background-color: var(--dark-surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ms-pagination-button:hover:not(:disabled) {
+    background-color: var(--hover-bg);
+}
+
+.ms-pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ms-pagination-active {
+    background-color: var(--primary-green);
+    color: var(--dark-bg);
+}
+
+/* Multi-select dropdown styles */
+.ms-multi-select-container {
+    position: relative;
+    width: 100%;
+}
+
+.ms-multi-select-input {
+    background-color: var(--dropdown-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ms-multi-select-input.active {
+    border-color: var(--primary-green);
+}
+
+.ms-multi-select-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: var(--dropdown-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    z-index: 10;
+    margin-top: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ms-multi-select-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+input.ms-multi-select-checkbox {
+    accent-color: #00e054;
+    background-color: #1e1e1e;
+    border: 1px solid #00e054;
+    color: #00e054;
+}
+
+input.ms-multi-select-checkbox:checked {
+    background-color: #00e054;
+    border-color: #00e054;
+}
+
+.ms-multi-select-option:hover {
+    background-color: var(--dropdown-hover);
+}
+
+.ms-multi-select-search {
+    display: flex;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ms-multi-select-search input {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.ms-selected-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.ms-selected-item {
+    background-color: rgba(0, 224, 84, 0.1);
+    color: var(--primary-green);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ms-selected-item button {
+    background: none;
+    border: none;
+    color: var(--primary-green);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.ms-year-range-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ms-year-range-container span {
+    margin: 10px;
+}
+
+.ms-year-input {
+    flex: 1;
+    background-color: var(--dropdown-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+    width: 80px;
+}

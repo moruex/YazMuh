@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800px" height="800px">
+  <ellipse style="fill:#E30A17" cx="400" cy="400" rx="400" ry="400" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, 0)"></ellipse>
+  <circle cx="381.898" cy="400" r="200" style="fill:#ffffff" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, 0)"></circle>
+  <circle cx="431.898" cy="400" r="160" style="fill:#E30A17" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, 0)"></circle>
+  <polygon style="fill:#ffffff" points="522.99 401.724 703.891 460.503 592.088 306.618 592.088 496.83 703.891 342.945" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, 0)"></polygon>
+</svg>
