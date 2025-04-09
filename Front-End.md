@@ -16,6 +16,14 @@ Frontend'i yayınladığınız domain adresi: http://frontend.com
 5. Favori listesi oluşturma  [Favorites](https://movieq.com.tr/profile)
 6. İzlenen filmler listesi oluşturma  [Watched List](https://movieq.com.tr/profile)
 
+# Ylyas Yylkybayev #
+1. Film arama [Search Movie](https://movieq.com.tr/search?query=one)
+2. Rastgele film önerme [Random Movies Rec](https://movieq.com.tr/movies)
+3. Popüler film önerme [Popular Movies Rec](https://movieq.com.tr/movies)
+4. Yeni Filmler önerme [Latest Movies Rec](https://movieq.com.tr/movies)
+5. Film testi [Quiz](https://movieq.com.tr/quiz)
+6. Film türleri ekleme [Add Genre](/genres)
+
 # Abdullah Kural #
 1. Oyuncu ve yönetmen bilgileri ekleme [Actors/Directors](/actors)
 2. Film haberleri [News](https://movieq.com.tr/news)
