@@ -1,0 +1,350 @@
+:root {
+  --bg-dark: #121212;
+  --bg-darker: #1e1e1e96;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --accent-color: #00e676;
+  --accent-color-hover: #00c964;
+  --error-color: #ff4d4d;
+}
+
+.animated-background {
+  /* display: none; */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+}
+
+button.uv-button {
+  color: #ffffff86;
+}
+
+button.uv-button:focus, button.uv-button:focus-visible {
+  outline: none;
+}
+
+.lr-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc((99vh - var(--navbar-height)));
+  background-color: var(--bg-dark);
+  margin: 0;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  z-index: 1;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 450px;
+  background-color: var(--bg-darker);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  padding: 2.5rem;
+  box-sizing: border-box;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.title {
+  color: var(--text-primary);
+  font-size: 2.25rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember-me input[type="checkbox"] {
+  margin-right: 0.5rem;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+
+.form-options a {
+  color: var(--accent-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.form-options a:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  background-color: rgba(255, 77, 77, 0.1);
+  color: var(--error-color);
+  padding: 0.75rem;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.875rem;
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.prompt {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.prompt a {
+  color: var(--accent-color);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.prompt a:hover {
+  text-decoration: underline;
+}
+
+/* Material UI TextField Overrides */
+.MuiTextField-root {
+  background-color: var(--bg-dark) !important;
+  border-radius: 8px !important;
+}
+
+.MuiOutlinedInput-root {
+  background-color: var(--bg-dark) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.23) !important;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--accent-color) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--accent-color) !important;
+}
+
+.MuiInputLabel-root {
+  color: var(--text-secondary) !important;
+}
+
+.MuiButton-root {
+  background-color: var(--accent-color) !important;
+  color: var(--bg-dark) !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  padding: 12px 16px !important;
+  border-radius: 8px !important;
+  transition: background-color 0.3s ease !important;
+}
+
+.MuiButton-root:hover {
+  background-color: var(--accent-color-hover) !important;
+}
+
+.MuiButton-root.Mui-disabled {
+  background-color: rgba(0, 230, 118, 0.5) !important;
+  color: rgba(18, 18, 18, 0.7) !important;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 480px) {
+
+  .lr-container {
+    align-items: baseline;
+  }
+
+  .form-container {
+    width: 95%;
+    padding: 1.5rem;
+    margin: 0 10px;
+    margin-top: 30px;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+}
+
+/* Animated Background styles */
+
+.bg-body {
+  margin: 0;
+  height: 100vh;
+  background: #000;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 500px;
+}
+
+.tunnel {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  transform-style: preserve-3d;
+}
+
+.a-structure {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  /* Changed to align at bottom */
+  animation: approach 4s linear infinite;
+  bottom: 10%;
+  /* Start position for the A */
+}
+
+.a-structure:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.a-structure:nth-child(2) {
+  animation-delay: -1.33s;
+}
+
+.a-structure:nth-child(3) {
+  animation-delay: -2.66s;
+}
+
+.line-left,
+.line-right {
+  position: absolute;
+  width: 12px;
+  /* Slightly thicker */
+  background: #00ff00;
+  box-shadow: 0 0 20px #00ff00,
+      0 0 40px #00ff00,
+      0 0 60px #00ff00;
+  transform-origin: bottom;
+  /* Changed to grow from bottom */
+  bottom: 0;
+  /* Start at bottom */
+}
+
+.line-left {
+  left: calc(30% - 200px);
+  /* Wider stance */
+  transform: rotate(45deg);
+}
+
+.line-right {
+  right: calc(30% - 200px);
+  /* Wider stance */
+  transform: rotate(-45deg);
+}
+
+.reflection {
+  position: absolute;
+  width: 100%;
+  height: 50%;
+  bottom: 0;
+  opacity: 0.4;
+  background: linear-gradient(to top, rgba(0, 255, 0, 0.6), transparent);
+  filter: blur(15px);
+}
+
+@keyframes approach {
+  0% {
+      transform: translateZ(-1000px) scale(0.3);
+      opacity: 0;
+  }
+
+  10% {
+      opacity: 1;
+  }
+
+  80% {
+      opacity: 1;
+  }
+
+  100% {
+      transform: translateZ(200px) scale(1.1);
+      opacity: 0;
+  }
+}
+
+@keyframes heightGrow {
+  0% {
+      height: 0;
+  }
+
+  10% {
+      height: 10vh;
+      /* Much taller bars */
+  }
+
+  100% {
+      height: 70vh;
+  }
+}
+
+.a-structure:nth-child(1) .line-left,
+.a-structure:nth-child(1) .line-right {
+  animation: heightGrow 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.a-structure:nth-child(2) .line-left,
+.a-structure:nth-child(2) .line-right {
+  animation: heightGrow 4s cubic-bezier(0.4, 0, 0.2, 1) infinite -1.33s;
+}
+
+.a-structure:nth-child(3) .line-left,
+.a-structure:nth-child(3) .line-right {
+  animation: heightGrow 4s cubic-bezier(0.4, 0, 0.2, 1) infinite -2.66s;
+}

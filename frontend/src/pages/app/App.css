@@ -1,0 +1,192 @@
+html,
+body {
+  background: var(--dark-surface);
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh; /* Use min-height */
+}
+
+#root {
+  background: var(--dark-surface);
+  min-height: 100vh; /* Ensure root also takes height */
+  display: flex; /* Allow app to flex */
+  flex-direction: column; /* Stack header, content, footer */
+}
+
+:root {
+  /* Keep ALL variables here for consistency */
+  --dark-bg: #080a0b;
+  --dark-surface: #121212;
+  --dark-secondary: #1a1d1f; /* Added for footer example */
+  --primary-green: #00e054;
+  --accent-green: #008c2b;
+  --text-primary: #ffffff;
+  --text-secondary: #ddd;
+  --text-disabled: #999;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --navbar-height: 75px;
+  --bw5: rgba(0, 0, 0, 0.05);
+  --bw10: rgba(0, 0, 0, 0.1);
+  /* Footer accent color example */
+  --accent: var(--primary-green);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Allow app to grow to fill #root */
+}
+
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  flex-grow: 1; /* Allow content area to grow */
+}
+
+/* Demo controls for login/logout simulation */
+.demo-controls {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.demo-controls button {
+  background-color: var(--primary-green);
+  color: var(--dark-bg);
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.demo-controls button:hover {
+  background-color: var(--accent-green);
+}
+
+/* WebKit Browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00ff00, #008800);
+  border-radius: 10px;
+  border: 2px solid #000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00ff00, #009000);
+}
+
+/* ===== REMOVED NAVBAR STYLES HERE ===== */
+
+
+/* Utility classes (if used elsewhere) */
+.dhide { /* Example: Hide on desktop */
+  @media (min-width: 601px) {
+    display: none;
+  }
+}
+
+.mhide { /* Example: Hide on mobile */
+   @media (max-width: 600px) {
+     display: none;
+   }
+}
+
+/* Footer styles */
+.footer {
+  margin-top: 44px; /* Or use auto margin if needed */
+  background-color: var(--dark-secondary); /* Use defined variable */
+  color: var(--text-primary);
+  padding: 3rem 0 0;
+  border-top: 1px solid #3b454f; /* Consider var(--border-color) */
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.footer-section h3 {
+  color: var(--accent);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.footer-section h4 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section li {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.footer-section li:hover {
+  color: var(--accent);
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-links span {
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.social-links span:hover {
+  color: var(--accent);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding: 1.5rem 0;
+  margin-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.brand { /* Footer brand style */
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.accent { /* General accent color */
+  color: var(--primary-green);
+}

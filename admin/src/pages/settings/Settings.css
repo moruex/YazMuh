@@ -1,0 +1,157 @@
+.settings-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+    width: 100%
+}
+
+.checkbox-item {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-bottom: 8px;
+    margin-right: 8px
+}
+
+.save-button {
+    background-color: #1976d2;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 10px 20px;
+    transition: all .4s ease
+}
+
+.save-button:hover {
+    background-color: #1565c0
+}
+
+.save-status {
+    color: #2e7d32;
+    display: inline-block;
+    font-size: 14px;
+    margin-left: 15px
+}
+
+.setting-description {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 4px
+}
+
+.setting-group {
+    max-width: 800px
+}
+
+.setting-item {
+    margin-bottom: 24px
+}
+
+.setting-item select {
+    padding: 5px 10px;
+    background-color: var(--card-bg2);
+    color: var(--text-primary);
+    box-shadow: 0px 4px 8px var(--bw10);
+    border-radius: 4px;
+    border: none
+}
+
+.setting-item input {
+    padding: 5px 0px 5px 10px;
+    background-color: var(--card-bg2);
+    color: var(--text-primary);
+    box-shadow: 0px 4px 8px var(--bw10);
+    border-radius: 4px;
+    border: none
+}
+
+.setting-item label {
+    color: var(--text-primary);
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px
+}
+
+.setting-item select option {
+    color: var(--text-primary)
+}
+
+.settings-content {
+    flex: 1;
+    width: 100%;
+}
+
+.settings-content h2 {
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    margin-top: 0
+}
+
+.settings-header {
+    margin-bottom: 20px
+}
+
+.settings-header h1 {
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0
+}
+
+.settings-tabs {
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 30px
+}
+
+.settings-tabs button {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    padding: 12px 20px;
+    position: relative;
+    transition: all .4s ease
+}
+
+.settings-tabs button.active {
+    color: #1976d2;
+    font-weight: 500
+}
+
+.settings-tabs button.active::after {
+    background-color: #1976d2;
+    bottom: -1px;
+    content: '';
+    height: 2px;
+    left: 0;
+    position: absolute;
+    width: 100%
+}
+
+.settings-tabs button:hover {
+    color: #1976d2
+}
+
+@media (max-width: 768px) {
+    .settings-tabs {
+        flex-wrap: wrap
+    }
+
+    .settings-tabs button {
+        flex: 1 0 40%;
+        margin-bottom: 10px;
+        text-align: center
+    }
+}
