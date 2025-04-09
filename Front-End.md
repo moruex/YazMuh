@@ -1,4 +1,5 @@
-Frontend'i yayınladığınız domain adresi: http://frontend.com
+Admin'i yayınladığınız domain adresi: https://movieq.com.tr
+Frontend'i yayınladığınız domain adresi: https://movieq.com.tr
 
 # Semih Çantal #
 1. Kullanıcı kaydı [User Registration](https://movieq.com.tr/login#)
@@ -23,6 +24,14 @@ Frontend'i yayınladığınız domain adresi: http://frontend.com
 4. Yeni Filmler önerme [Latest Movies Rec](https://movieq.com.tr/movies)
 5. Film testi [Quiz](https://movieq.com.tr/quiz)
 6. Film türleri ekleme [Add Genre](/genres)
+
+# Furkan Sayar #
+1. Yorum silme [Delete Comment](https://movieq.com.tr/movies/1)
+2. Yorum ekleme [Add Comment](https://movieq.com.tr/movies/1)
+3. Yorum düzenleme [Edit Comment](https://movieq.com.tr/movies/1)
+4. Film ekleme [Add Movie](/movies)
+5. Film silme [Delete Movie](/movies)
+6. Film güncelleme [Edit Movie](/movies)
 
 # Abdullah Kural #
 1. Oyuncu ve yönetmen bilgileri ekleme [Actors/Directors](/actors)
