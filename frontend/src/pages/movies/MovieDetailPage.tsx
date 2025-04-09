@@ -207,9 +207,9 @@ const MovieDetailsPage = () => {
     const [currentCommentPage, setCurrentCommentPage] = useState<number>(1);
     const [newCommentText, setNewCommentText] = useState("");
 
-    const [isFavorite, setIsFavorite] = useState(false);
-    const [isWatchlist, setIsWatchlist] = useState(false);
-    const [isWatched, setIsWatched] = useState(false);
+    const [isFavorite, /* setIsFavorite */] = useState(false); // Commented out setter
+    const [/* isWatchlist */, /* setIsWatchlist */] = useState(false); // Commented out state and setter
+    const [/* isWatched */, /* setIsWatched */] = useState(false); // Commented out state and setter
 
     // Use the same sample data including averageUserRating and comment userId/isSpoiler
     const movie: MovieDetailsData = {
@@ -456,7 +456,7 @@ const MovieDetailsPage = () => {
                     <h2>Similar Movies</h2>
                     <div className="md-similar-movies-container">
                         {similarMovies.map(simMovie => (
-                            <MovieCard6 movie={simMovie} index={0} />
+                            <MovieCard6 key={simMovie.id} movie={simMovie} />
                         ))}
                     </div>
                 </div>
