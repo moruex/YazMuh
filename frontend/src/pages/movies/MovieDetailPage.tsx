@@ -6,7 +6,7 @@ import {
 } from 'react-icons/fa';
 import Footer from '@components/app/Footer'; // Assuming Footer path is correct
 import MovieCard6 from './MovieCard6';
-import { useParams } from 'react-router-dom';
+// import { useParams } from 'react-router-dom'; // Remove unused import
 
 // --- Interfaces (Keep updated interfaces) ---
 interface MovieDetailsData {
@@ -209,10 +209,10 @@ const MovieDetailsPage = () => {
     const [currentCommentPage, setCurrentCommentPage] = useState<number>(1);
     const [newCommentText, setNewCommentText] = useState("");
 
-    const [isFavorite, setIsFavorite] = useState(false);
+    const [isFavorite, /* setIsFavorite */] = useState(false); // Comment out unused setter
     // const [isFavorite, setIsFavorite] = useState(false); // Remove duplicate/comment out setter usage later
 
-    const [movie, setMovie] = useState<MovieDetailsData | null>(null);
+    const [movie, /* setMovie */] = useState<MovieDetailsData | null>(null); // Comment out unused setter
     // const [movie, setMovie] = useState<MovieDetailsData | null>(null); // Remove duplicate/comment out setter usage later
 
     const initialComments: Comment[] = [{
