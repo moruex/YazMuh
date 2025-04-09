@@ -2,7 +2,8 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2015",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"]
+    "lib": ["DOM", "DOM.Iterable", "ESNext", "WebWorker"],
+    "skipLibCheck": true
   },
   "include": ["src"]
 }

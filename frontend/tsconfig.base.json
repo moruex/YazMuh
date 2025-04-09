@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2015",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "lib": ["DOM", "DOM.Iterable", "ESNext", "WebWorker"],
     "module": "ESNext",
     "jsx": "react-jsx",
     "esModuleInterop": true,
@@ -16,6 +16,7 @@
     },
     "strict": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "skipLibCheck": true
   }
 }
