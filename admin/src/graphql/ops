@@ -1,0 +1,684 @@
+// src/graphql/operations.ts
+// Contains GraphQL operations for the Admin Panel
+
+import { gql } from '@apollo/client'; // Or your preferred client library
+
+// --- Fragments ---
+
+// Core fields for list views - Includes basic genres needed for table display
+// Ensures ApiMovieCore interface fields are met efficiently
+export const MOVIE_CORE_FIELDS = gql`
+  fragment MovieCoreFields on Movie {
+    id
+    title
+    poster_url
+    release_date
+    avg_rating
+    duration_minutes
+    genres {
+        id
+        name
+    }
+  }
+`;
+export const MOVIE_DETAIL_FIELDS = gql`
+  fragment MovieDetailFields on Movie {
+    id
+    title
+    release_date
+    plot_summary
+    poster_url
+    duration_minutes
+    trailer_url
+    avg_rating
+    created_at
+    updated_at
+    genres {
+      id
+      name
+      is_collection
+    }
+    persons {
+      id
+      role_type
+      character_name
+      person {
+        id
+        name
+        profile_image_url
+      }
+    }
+  }
+`;
+
+// --- Other Fragments (Keep as is or refine based on usage) ---
+
+export const FILE_TYPE_FIELDS = gql`
+  fragment FileTypeFields on FileType {
+    name
+    path
+    isDirectory
+    size
+    lastModified
+    # signedUrl and publicUrl are resolved on demand if requested separately or via field resolver
+  }
+`;
+
+export const PERSON_FIELDS = gql`
+  fragment PersonFields on Person {
+    id
+    name
+    bio
+    birth_date
+    profile_image_url
+    created_at
+    # updated_at # Add if needed
+  }
+`;
+
+export const GENRE_FIELDS = gql`
+  fragment GenreFields on Genre {
+    id
+    name
+    description
+    image_url
+    is_collection
+  }
+`;
+
+export const COMMENT_FIELDS = gql`
+  fragment CommentFields on Comment {
+    id
+    content
+    parent_comment_id
+    likes_count
+    # is_liked_by_me # Specific to logged-in user, usually omitted for admin
+    created_at
+    updated_at
+    user { # Author info
+      id
+      username
+    }
+    movie { # Movie info (can be omitted if fetched in movie context)
+      id
+      title
+    }
+    replies(limit: 5) { # Limit initial replies for performance
+        id
+        content
+        user { id username }
+        created_at
+        # Potentially add likes_count here too if needed
+    }
+  }
+`;
+
+export const USER_FIELDS = gql`
+  fragment UserFields on User {
+    id
+    first_name
+    last_name
+    username
+    email
+    avatar_url
+    bio
+    created_at
+    updated_at
+  }
+`;
+
+export const ADMIN_FIELDS = gql`
+  ${USER_FIELDS} # Dependency for nested user
+  fragment AdminFields on Admin {
+    id
+    username
+    role
+    createdAt
+    updatedAt
+    user {
+      ...UserFields
+    }
+  }
+`;
+
+export const NEWS_FIELDS = gql`
+  fragment NewsFields on News {
+    id
+    title
+    short_content
+    content
+    image_url
+    published_at
+    created_at
+    updated_at
+    author {
+      id
+      username
+    }
+    movies { # Associated movie info (consider using MOVIE_CORE_FIELDS)
+      id
+      title
+      # poster_url # Optional: Add more fields if needed here
+    }
+  }
+`;
+
+export const QUIZ_CHOICE_FIELDS = gql`
+    fragment QuizChoiceFields on QuizChoice {
+        id
+        question_id
+        choice_text
+        image_url
+        created_at
+    }
+`;
+
+export const QUIZ_QUESTION_FIELDS = gql`
+    ${QUIZ_CHOICE_FIELDS} # Dependency
+    fragment QuizQuestionFields on QuizQuestion {
+        id
+        question_text
+        allowed_choices_count
+        created_at
+        choices { # All available choices
+            ...QuizChoiceFields
+        }
+        # user_answers can be fetched separately if needed for specific user context
+    }
+`;
+
+// Optional fragment for user's submitted answers
+export const USER_QUIZ_ANSWER_FIELDS = gql`
+    ${QUIZ_CHOICE_FIELDS}
+    fragment UserQuizAnswerFields on UserQuizAnswer {
+        id
+        answered_at
+        user { id username } # Basic user info
+        question { id question_text } # Basic question info
+        choice { # The choice the user selected
+             ...QuizChoiceFields
+        }
+    }
+`;
+
+// --- Queries ---
+
+export const LIST_FILES = gql`
+  ${FILE_TYPE_FIELDS}
+  query ListFiles($directory: String) {
+    listFiles(directory: $directory) {
+      ...FileTypeFields
+    }
+  }
+`;
+
+// Query to get info for a single item (useful for InfoModal if needed)
+export const GET_FILE_INFO = gql`
+  ${FILE_TYPE_FIELDS}
+  query GetFileInfo($path: String!) {
+    fileInfo(path: $path) {
+      ...FileTypeFields
+    }
+  }
+`;
+
+export const GET_SIGNED_DOWNLOAD_URL = gql`
+  query GetSignedDownloadUrl(
+    $path: String!,
+    $expiresIn: Int,
+    $forceDownload: Boolean
+ ) {
+    getSignedDownloadUrl(path: $path, expiresIn: $expiresIn, forceDownload: $forceDownload) # Returns String
+  }
+`;
+export const GENERATE_PRESIGNED_UPLOAD_URL = gql`
+  mutation GeneratePresignedUploadUrl(
+    $filename: String!,
+    $contentType: String!,
+    $directory: String
+  ) {
+    generatePresignedUploadUrl(
+      filename: $filename,
+      contentType: $contentType,
+      directory: $directory
+    ) {
+      url      # The presigned PUT URL
+      path     # The final path in R2
+    }
+  }
+`;
+
+// Mutation to create a folder
+export const CREATE_FOLDER = gql`
+  ${FILE_TYPE_FIELDS} # Return the created folder info
+  mutation CreateFolder($directory: String, $name: String!) {
+    createFolder(directory: $directory, name: $name) {
+      success
+      message
+      item {
+        ...FileTypeFields
+      }
+    }
+  }
+`;
+
+// Mutation to delete a file or folder
+export const DELETE_ITEM = gql`
+  mutation DeleteItem($path: String!) {
+    deleteItem(path: $path) {
+      success
+      message
+      # item field might be null after deletion
+    }
+  }
+`;
+
+// Mutation to rename/move a file or folder
+export const RENAME_ITEM = gql`
+  ${FILE_TYPE_FIELDS} # Return the renamed item info
+  mutation RenameItem($oldPath: String!, $newPath: String!) {
+    renameItem(oldPath: $oldPath, newPath: $newPath) {
+      success
+      message
+      item {
+        ...FileTypeFields
+      }
+    }
+  }
+`;
+
+export const LOGIN_USER = gql`
+  ${USER_FIELDS} # Include user details on login success
+  mutation LoginUser($input: LoginInput!) {
+    login(input: $input) { # Assuming your mutation is named 'login'
+      token
+      user {
+        ...UserFields
+      }
+    }
+  }
+`;
+
+export const ADMIN_LOGIN = gql`
+    ${ADMIN_FIELDS} # Include admin details on login success
+    mutation AdminLogin($input: AdminLoginInput!) {
+        adminLogin(input: $input) { # Matches backend mutation name
+            token
+            admin {
+                ...AdminFields
+            }
+        }
+    }
+`;
+
+export const GET_CURRENT_ADMIN = gql`
+    ${ADMIN_FIELDS}
+    query GetCurrentAdmin {
+        meAdmin {
+            ...AdminFields
+        }
+    }
+`;
+
+// == Movies ==
+export const GET_MOVIES = gql`
+  ${MOVIE_CORE_FIELDS}
+  query GetMovies(
+    $limit: Int = 10,
+    $offset: Int = 0,
+    $sortBy: String,
+    $sortDirection: String,
+    $genreId: ID,
+    $search: String
+  ) {
+    movies(
+      limit: $limit,
+      offset: $offset,
+      sortBy: $sortBy,
+      sortDirection: $sortDirection,
+      genreId: $genreId,
+      search: $search
+    ) {
+      ...MovieCoreFields
+    }
+    movieCount(genreId: $genreId, search: $search)
+  }
+`;
+
+export const GET_MOVIE = gql`
+  ${MOVIE_DETAIL_FIELDS}
+  query GetMovie($id: ID!) {
+    movie(id: $id) {
+      ...MovieDetailFields
+    }
+  }
+`;
+
+// == Genres ==
+export const GET_GENRES = gql`
+  ${GENRE_FIELDS}
+  query GetGenres($limit: Int, $offset: Int) { # Optional pagination
+    genres(limit: $limit, offset: $offset) {
+      ...GenreFields
+    }
+    # genreCount # Add if schema supports count
+  }
+`;
+
+export const GET_GENRE = gql`
+ ${GENRE_FIELDS}
+ ${MOVIE_CORE_FIELDS} # Dependency for nested movies
+  query GetGenre($id: ID!) {
+    genre(id: $id) {
+      ...GenreFields
+      movies(limit: 10) { # Limit nested movies initially
+        ...MovieCoreFields
+      }
+    }
+  }
+`;
+
+// == Persons ==
+export const GET_PERSONS = gql`
+ ${PERSON_FIELDS}
+ query GetPersons($limit: Int, $offset: Int, $search: String) {
+    persons(limit: $limit, offset: $offset, search: $search) {
+        ...PersonFields
+    }
+    # personCount(search: $search) # Add if schema supports count
+ }
+`;
+
+export const GET_PERSON = gql`
+  ${PERSON_FIELDS}
+  ${MOVIE_CORE_FIELDS} # Dependency for nested movies
+  query GetPerson($id: ID!) {
+    person(id: $id) {
+      ...PersonFields
+      # Fetch roles via the person->movie_roles connection
+      movie_roles(limit: 10) { # Limit initial roles
+        id
+        role_type
+        character_name
+        movie {
+            ...MovieCoreFields # Show core movie info for each role
+        }
+      }
+    }
+  }
+`;
+
+// == Comments ==
+export const GET_COMMENTS = gql`
+  ${COMMENT_FIELDS}
+  query GetComments($limit: Int = 20, $offset: Int = 0, $movieId: ID, $userId: ID, $sortBy: String = "createdAt", $sortDirection: String = "DESC") {
+    # Assuming a 'comments' query with filtering/sorting
+    comments(limit: $limit, offset: $offset, movie_id: $movieId, user_id: $userId, sortBy: $sortBy, sortDirection: $sortDirection) {
+      ...CommentFields
+    }
+    # commentCount(movie_id: $movieId, user_id: $userId) # Add if schema supports count
+  }
+`;
+
+// == News ==
+export const GET_NEWS_LIST = gql`
+  ${NEWS_FIELDS}
+   # Dependency MOVIE_CORE_FIELDS is implicitly handled if used within NEWS_FIELDS
+  query GetNewsList($limit: Int = 10, $offset: Int = 0, $movieId: ID) {
+    newsList(limit: $limit, offset: $offset, movieId: $movieId) {
+        ...NewsFields
+    }
+    # newsCount(movieId: $movieId) # Add if schema supports count
+  }
+`;
+
+export const GET_NEWS = gql`
+  ${NEWS_FIELDS}
+  # Dependency MOVIE_CORE_FIELDS is implicitly handled if used within NEWS_FIELDS
+  query GetNews($id: ID!) {
+    newsArticle(id: $id) {
+        ...NewsFields
+    }
+  }
+`;
+
+// == Quiz Questions ==
+export const GET_QUIZ_QUESTIONS = gql`
+  ${QUIZ_QUESTION_FIELDS}
+  query GetQuizQuestions($limit: Int = 10, $offset: Int = 0) {
+    quizQuestions(limit: $limit, offset: $offset) {
+      ...QuizQuestionFields
+    }
+    # quizQuestionCount # Add if schema supports count
+  }
+`;
+
+// == Users ==
+export const GET_USERS = gql`
+  ${USER_FIELDS}
+  query GetUsers($limit: Int = 10, $offset: Int = 0, $search: String) {
+    users(limit: $limit, offset: $offset, search: $search) {
+      ...UserFields
+    }
+     # userCount(search: $search) # Add if schema supports count
+  }
+`;
+
+export const GET_USER = gql`
+  ${USER_FIELDS}
+  # Add other fragments if needed (e.g., for user lists, comments)
+  # ${COMMENT_FIELDS}
+  query GetUser($id: ID!) {
+    user(id: $id) {
+       ...UserFields
+        # Optionally include related data for admin view:
+        # comments(limit: 10) { ...CommentFields }
+        # lists { id list_type movieCount } # Example: Fetch lists summary
+    }
+  }
+`;
+
+
+// --- Mutations ---
+
+export const FORGOT_PASSWORD = gql`
+  mutation ForgotPassword($input: ForgotPasswordInput!) {
+    forgotPassword(input: $input) {
+      success
+      message
+    }
+  }
+`;
+
+// == Movies ==
+export const CREATE_MOVIE = gql`
+  ${MOVIE_DETAIL_FIELDS}
+  mutation CreateMovie($input: MovieInput!) { # Assumes MovieInput *does* accept names/IDs
+    createMovie(input: $input) {
+      ...MovieDetailFields
+    }
+  }
+`;
+
+export const UPDATE_MOVIE = gql`
+  ${MOVIE_DETAIL_FIELDS}
+  mutation UpdateMovie($id: ID!, $input: MovieUpdateInput!) { # MovieUpdateInput schema is key
+    updateMovie(id: $id, input: $input) {
+      ...MovieDetailFields
+    }
+  }
+`;
+
+export const DELETE_MOVIE = gql`
+  mutation DeleteMovie($id: ID!) {
+    # Removed selection set { success message } because return type is Boolean!
+    deleteMovie(id: $id)
+  }
+`;
+
+// == Genres ==
+// Assumes input type `GenreInput!` exists in schema
+export const CREATE_GENRE = gql`
+  ${GENRE_FIELDS}
+  mutation CreateGenre($input: GenreInput!) {
+    createGenre(input: $input) {
+      ...GenreFields
+    }
+  }
+`;
+
+// Assumes input type `GenreInput!` or `GenreUpdateInput!` exists in schema
+export const UPDATE_GENRE = gql`
+  ${GENRE_FIELDS}
+  mutation UpdateGenre($id: ID!, $input: GenreUpdateInput!) { # Adjust input type if needed
+    updateGenre(id: $id, input: $input) {
+      ...GenreFields
+    }
+  }
+`;
+
+// Assumes deleteGenre returns a payload or boolean
+export const DELETE_GENRE = gql`
+  mutation DeleteGenre($id: ID!) {
+    deleteGenre(id: $id) {
+        success
+        message
+    }
+  }
+`;
+
+// == Persons ==
+// Assumes input type `PersonInput!` exists in schema
+export const CREATE_PERSON = gql`
+  ${PERSON_FIELDS}
+  mutation CreatePerson($input: PersonInput!) {
+    createPerson(input: $input) {
+      ...PersonFields
+    }
+  }
+`;
+
+// Assumes input type `PersonInput!` or `PersonUpdateInput!` exists in schema
+export const UPDATE_PERSON = gql`
+  ${PERSON_FIELDS}
+  mutation UpdatePerson($id: ID!, $input: PersonUpdateInput!) { # Adjust input type if needed
+    updatePerson(id: $id, input: $input) {
+      ...PersonFields
+    }
+  }
+`;
+
+// Assumes deletePerson returns a payload or boolean
+export const DELETE_PERSON = gql`
+  mutation DeletePerson($id: ID!) {
+    deletePerson(id: $id) {
+        success
+        message
+    }
+  }
+`;
+
+// == Comments (Admin typically only deletes) ==
+// Assumes deleteComment returns a payload or boolean
+export const DELETE_COMMENT = gql`
+  mutation DeleteComment($id: ID!) {
+    # Assumes admin permission checked in resolver
+    deleteComment(id: $id) {
+        success
+        message
+    }
+  }
+`;
+
+// == News ==
+// Assumes input type `NewsInput!` exists in schema
+export const CREATE_NEWS = gql`
+  ${NEWS_FIELDS}
+  mutation CreateNews($input: NewsInput!) {
+    createNews(input: $input) {
+        ...NewsFields
+    }
+  }
+`;
+
+// Assumes input type `NewsUpdateInput!` exists in schema
+export const UPDATE_NEWS = gql`
+  ${NEWS_FIELDS}
+  mutation UpdateNews($id: ID!, $input: NewsUpdateInput!) {
+    updateNews(id: $id, input: $input) {
+        ...NewsFields
+    }
+  }
+`;
+
+// Assumes deleteNews returns a payload or boolean
+export const DELETE_NEWS = gql`
+  mutation DeleteNews($id: ID!) {
+    deleteNews(id: $id) {
+        success
+        message
+    }
+  }
+`;
+
+// == Quiz Questions ==
+// Assumes input type `QuizQuestionInput!` exists in schema
+export const CREATE_QUIZ_QUESTION = gql`
+  ${QUIZ_QUESTION_FIELDS}
+  mutation CreateQuizQuestion($input: CreateQuizQuestionInput!) {
+    createQuizQuestion(input: $input) {
+        ...QuizQuestionFields
+    }
+  }
+`;
+
+// == Users ==
+
+// == Admin Self-Update ==
+export const UPDATE_CURRENT_ADMIN_PROFILE = gql`
+  ${ADMIN_FIELDS} # Return the updated admin object
+  mutation UpdateCurrentAdminProfile($input: UpdateAdminSelfInput!) {
+    updateAdminSelf(input: $input) {
+      ...AdminFields
+    }
+  }
+`;
+
+// Assumes input type `UserUpdateInput!` exists (may differ from user's own update)
+export const CREATE_ADMIN = gql`
+    ${ADMIN_FIELDS}
+    mutation CreateAdmin($input: CreateAdminInput!) {
+        createAdmin(input: $input) {
+            ...AdminFields
+        }
+    }
+`;
+
+export const UPDATE_ADMIN = gql`
+    ${ADMIN_FIELDS}
+    mutation UpdateAdmin($id: ID!, $input: UpdateAdminInput!) {
+        updateAdmin(id: $id, input: $input) {
+            ...AdminFields
+        }
+    }
+`;
+
+export const DELETE_ADMIN = gql`
+    mutation DeleteAdmin($id: ID!) {
+        deleteAdmin(id: $id) # Returns Boolean!
+    }
+`;
+
+// == Admin Logout ==
+export const ADMIN_LOGOUT = gql`
+    mutation AdminLogout {
+        adminLogout # Returns Boolean!
+    }
+`;
+
+// == Admin Logout Specific Session ==
+export const ADMIN_LOGOUT_SESSION = gql`
+    mutation AdminLogoutSession($jti: String!) { # Takes JTI as input
+        adminLogoutSession(jti: $jti) # Returns Boolean!
+    }
+`;
