@@ -1,13 +1,12 @@
 Frontend'i yayınladığınız domain adresi: http://frontend.com
 
-# Ali Atabin Frontend #
-1. Kayıt Ol
-2. Giriş Yap
-3. 2FA
-4. .....
-5. .....
-6. ....
-
+# Semih Çantal #
+1. Kullanıcı kaydı [User Registration](https://movieq.com.tr/login#)
+2. Kullanıcı girişi [User Login](https://movieq.com.tr/login)
+3. Kullanıcı avatar yükleme [User Avatar](https://movieq.com.tr/profile)
+4. Film filtreleme [Movie Filtering](https://movieq.com.tr/search?query=one)
+5. Profil düzenleme  [Profile Editing](http://movieq.com.tr/profile)
+6. Şifre sıfırlama  [Reset Password](https://movieq.com.tr/profile)
 
 # Akif Tarık Binici #
 1. Film detayını görme [Movie Details](http://movieq.com.tr/movies/1)
