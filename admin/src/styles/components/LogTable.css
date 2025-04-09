@@ -1,0 +1,180 @@
+.table-container {
+    width: 100%;
+    grid-column: auto / span 1;
+}
+
+.table-container.expanded {
+    grid-column: 1 / -1;
+    z-index: 10;
+}
+
+.log-table {
+    height: 45vh;
+    background-color: var(--card-background);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0px 4px 8px var(--bw10);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.table-container.expanded .log-table {
+    height: auto;
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.log-table h2 {
+    font-size: var(--l-font);
+    font-weight: bold;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+
+.log-action-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    white-space: nowrap;
+}
+
+.log-action-button .button-icon {
+    margin-right: 6px;
+}
+
+.log-action-button:hover {
+    transform: translateY(-1px);
+}
+
+.log-action-button:active {
+    transform: translateY(0);
+}
+
+.expand-button {
+    background: linear-gradient(to bottom, var(--primary-color), var(--primary-dark));
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: var(--s-font);
+    font-weight: 500;
+    transition: all 0.4s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.expand-button:hover {
+    background: linear-gradient(to bottom, var(--primary-light), var(--primary-color));
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.expand-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.button-icon {
+    font-size: 10px;
+}
+
+.ce-button-use {
+    background-color: var(--ce-bg);
+    color: var(--ce-text)
+}
+
+.ce-button:hover {
+    background-color: var(--ce-hover-bg)
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.log-table th,
+.log-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--bw10);
+}
+
+.log-table th {
+    background: var(--card-background);
+    font-weight: bold;
+    color: var(--text-primary);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.log-table th:first-child {
+    border-top-left-radius: 8px;
+}
+
+.log-table th:last-child {
+    border-top-right-radius: 8px;
+}
+
+.log-table tbody tr {
+    transition: all 0.4s ease;
+}
+
+.log-table tbody tr:hover {
+    background: var(--hover-background, #84848427);
+    cursor: pointer;
+}
+
+.log-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.log-table tbody tr td:first-child {
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.more-indicator {
+    padding: 10px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: var(--xs-font);
+    background: linear-gradient(to bottom, transparent, var(--card-background));
+    margin-top: auto;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: left;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+@media (max-width: 1024px) {
+    .table-container {
+        width: 100%;
+        height: 100%;
+        grid-column: 1 / -1;
+    }
+
+    .log-table{
+        width: 100%;
+        height: auto;
+    }
+}

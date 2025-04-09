@@ -1,0 +1,188 @@
+.actors-container {
+    width: 100%;
+    padding: 16px;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.search-bar1 {
+    display: flex;
+    width: 100%;
+    max-width: 400px;
+    align-items: center;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 15px;
+}
+
+.search-bar1 input {
+    border: none;
+    background: transparent;
+    margin-left: 10px;
+    flex-grow: 1;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.type-filter {
+    background-color: var(--card-bg);
+    min-width: 100px;
+    max-width: 150px;
+    margin-left: auto;
+    margin-right: 10px;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.type-filter svg {
+    color: var(--text-primary);
+}
+
+.type-filter .MuiSelect-select {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.add-person-btn {
+    white-space: nowrap;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+
+.people-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.person-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.person-image {
+    height: 250px;
+    width: 100%;
+    object-fit: contain;
+    background-color: var(--bg-secondary);
+}
+
+.person-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.person-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.person-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    flex-grow: 1;
+    margin-right: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.person-info {
+    margin: 8px 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.person-info p {
+    margin: 4px 0;
+}
+
+.person-works {
+    margin-top: 12px;
+}
+
+.works-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.works-chips div{
+    color: var(--text-primary);
+}
+
+.person-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.person-actions button {
+    flex-grow: 1;
+    margin: 0 4px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+}
+
+div.image-preview img {
+    width: 100%;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .search-bar1 {
+        width: 100%;
+        max-width: none;
+        margin-top: 8px;
+    }
+
+    .type-filter {
+        margin-left: 0;
+        width: auto;
+        flex-grow: 1;
+    }
+
+    .add-person-btn {
+        margin-left: auto;
+    }
+
+    .people-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .person-image {
+        height: 180px;
+    }
+
+    .person-works {
+        display: none; /* Hide notable works on mobile */
+    }
+}

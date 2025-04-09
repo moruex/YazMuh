@@ -1,0 +1,10 @@
+.empty-placeholder {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    color: #777;
+    border: 2px dashed #ccc;
+    padding: 40px;
+    border-radius: 10px;
+    user-select: none;
+}

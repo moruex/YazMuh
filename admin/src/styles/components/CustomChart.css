@@ -1,0 +1,62 @@
+.chart-card {
+    background-color: var(--card-background);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px var(--bw10);
+    display: flex;
+    flex-direction: column;
+    width: var(--card-m);
+    height: 45vh;
+    padding: 20px;
+    text-align: center;
+}
+
+body:has(.sidebar.expanded) .chart-card {
+    width: var(--card-e);
+}
+
+.chart-card h2 {
+    font-size: var(--l-font);
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-align: left
+}
+
+.chart-container {
+    flex-grow: 1;
+    height: 100%;
+    width: 100%
+}
+
+.recharts-rectangle.recharts-tooltip-cursor {
+    fill: var(--bw10)
+}
+
+.recharts-tooltip-wrapper.recharts-tooltip-wrapper-left *,
+.recharts-tooltip-wrapper.recharts-tooltip-wrapper-right * {
+    background-color: var(--card-background);
+    color: var(--text-primary)
+}
+
+div.recharts-tooltip-wrapper.recharts-tooltip-wrapper-left div,
+div.recharts-tooltip-wrapper.recharts-tooltip-wrapper-right div {
+    background-color: var(--card-background) !important;
+    border: 1px solid var(--border) !important
+}
+
+g.recharts-layer.recharts-cartesian-axis-tick text {
+    background-color: var(--card-background);
+    fill: var(--text-primary)
+}
+
+path.recharts-rectangle,
+path.recharts-legend-icon {
+    fill: #8884d8
+}
+
+@media (max-width: 768px) {
+    .chart-card {
+        width: 100%;
+        height: 45vh;
+        grid-column: 1 / -1;
+    }
+}

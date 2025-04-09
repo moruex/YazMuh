@@ -1,0 +1,56 @@
+.header {
+    display: flex;
+    background: rgba(255, 255, 255, 0.0);
+    backdrop-filter: blur(10px);
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+    transition: all 0.4s ease;
+}
+
+.header-left,
+.header-center,
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.header-left {
+    margin-right: auto;
+}
+
+.header-right {
+    margin-left: auto;
+}
+
+.header-center {
+    flex: 2;
+    justify-content: center;
+}
+
+.profile-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    cursor: pointer;
+    background: var(--profile-button);
+    color: var(--profile-button-text);
+    transition: all 0.4s ease;
+}
+
+.profile-button:hover {
+    background-color: var(--green-text);
+    color: var(--profile-button-hover-text);
+    transform: scale(0.95);
+}
+
+.profile-avatar-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}

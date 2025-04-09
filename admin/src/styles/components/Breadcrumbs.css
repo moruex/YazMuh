@@ -1,0 +1,38 @@
+.breadcrumb-item.active {
+    color: var(--bct)
+}
+
+.breadcrumb-link {
+    text-decoration: none
+}
+
+.breadcrumb-link:hover {
+    text-decoration: underline
+}
+
+.breadcrumb-separator {
+    color: var(--bct);
+    margin: 0 8px
+}
+
+.breadcrumb-text {
+    color: var(--bct);
+    font-weight: 700
+}
+
+.breadcrumbs-container {
+    margin: 0 10px
+}
+
+.breadcrumbs-list {
+    align-items: center;
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0
+}
+
+.home-link {
+    color: var(--mui-accent-hf);
+    font-weight: 700
+}

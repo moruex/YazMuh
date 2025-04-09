@@ -1,0 +1,164 @@
+.dark-mode-toggle {
+  position: relative;
+  width: 84px;
+  height: 42px;
+  border-radius: 26px;
+  background-color: #e2e8f085;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  overflow: hidden;
+  margin: 0px 20px;
+}
+
+/* @media (max-width: 700px) {
+  .dark-mode-toggle {
+    display: none !important;
+  }
+} */
+
+.dark-mode-toggle.dark {
+  background-color: #1e293b;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), background-color 0.4s ease;
+}
+
+.toggle-thumb.dark {
+  transform: translateX(42px);
+  background-color: #0f172a;
+}
+
+.icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.4s ease;
+}
+
+.sun-icon {
+  color: #f59e0b;
+  opacity: 1;
+}
+
+.moon-icon {
+  color: #60a5fa;
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(-30deg);
+}
+
+.dark .sun-icon {
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(30deg);
+}
+
+.dark .moon-icon {
+  opacity: 1;
+  transform: translate(-50%, -50%) rotate(0);
+}
+
+/* Sun rays */
+.toggle-thumb::before,
+.toggle-thumb::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #f59e0b;
+  border-right-color: #f59e0b;
+  transform: translate(-50%, -50%) rotate(0deg);
+  animation: sunRays 4s linear infinite;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.toggle-thumb::after {
+  width: 46px;
+  height: 46px;
+  border-bottom-color: #f59e0b;
+  border-left-color: #f59e0b;
+  animation: sunRays 4s linear infinite reverse;
+}
+
+.dark-mode-toggle:not(.dark) .toggle-thumb::before,
+.dark-mode-toggle:not(.dark) .toggle-thumb::after {
+  opacity: 1;
+}
+
+@keyframes sunRays {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Background animation */
+.dark-mode-toggle::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(252, 211, 77, 0.2) 0%, transparent 70%);
+  transition: all 0.4s ease;
+}
+
+.dark-mode-toggle.dark::before {
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.2) 0%, transparent 70%);
+  transform: translate(25%, 25%);
+}
+
+/* Subtle stars animation for dark mode */
+@keyframes twinkle {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.dark-mode-toggle.dark::after {
+  content: '✦';
+  position: absolute;
+  top: 20%;
+  left: 25%;
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  animation: twinkle 2s infinite;
+}
+
+.dark-mode-toggle.dark::before {
+  content: '✦';
+  position: absolute;
+  bottom: 15%;
+  right: 20%;
+  font-size: 6px;
+  color: rgba(255, 255, 255, 0.3);
+  animation: twinkle 3s infinite 1s;
+}
+
+/* Hover effect */
+.dark-mode-toggle:hover .toggle-thumb {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode-toggle:active .toggle-thumb {
+  transform: scale(0.95);
+}
+
+.dark-mode-toggle.dark:active .toggle-thumb {
+  transform: translateX(42px) scale(0.95);
+}
