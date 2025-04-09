@@ -1,5 +1,3 @@
-import './MovieCard6.css'
-
 import React from 'react';
 
 const MovieCard6: React.FC<{ movie: any; }> = ({ movie }) => {
