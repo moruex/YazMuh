@@ -1,5 +1,4 @@
 import React from 'react';
-import './MovieCard2.css'
 
 export const MovieCard2: React.FC<{ movie: any; }> = ({ movie }) => {
     return (
