@@ -1,5 +1,4 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './NewsDetailsPage.css';
 import Footer from '@components/app/Footer';
 

@@ -203,15 +203,18 @@ const CommentCard: React.FC<CommentCardProps> = ({
 };
 
 const MovieDetailsPage = () => {
-    const { movieId } = useParams();
+    // const { movieId } = useParams(); // Remove unused movieId
     const [userRating, setUserRating] = useState<number>(0);
     const [hoverRating, setHoverRating] = useState<number>(0);
     const [currentCommentPage, setCurrentCommentPage] = useState<number>(1);
     const [newCommentText, setNewCommentText] = useState("");
 
     const [isFavorite, setIsFavorite] = useState(false);
+    // const [isFavorite, setIsFavorite] = useState(false); // Remove duplicate/comment out setter usage later
 
     const [movie, setMovie] = useState<MovieDetailsData | null>(null);
+    // const [movie, setMovie] = useState<MovieDetailsData | null>(null); // Remove duplicate/comment out setter usage later
+
     const initialComments: Comment[] = [{
         id: 1,
         userId: "CurrentUser",
@@ -459,7 +462,7 @@ const MovieDetailsPage = () => {
                     <h2>Similar Movies</h2>
                     <div className="md-similar-movies-container">
                         {similarMovies.map(simMovie => (
-                            <MovieCard6 movie={simMovie} index={undefined} />
+                            <MovieCard6 key={simMovie.id} movie={simMovie} />
                         ))}
                     </div>
                 </div>

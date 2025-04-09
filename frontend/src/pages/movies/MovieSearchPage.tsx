@@ -366,15 +366,7 @@ const MovieSearchPage = () => {
     const genres = ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary',
         'Drama', 'Family', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller'];
 
-    const years = Array.from({ length: 2025 - 1930 + 1 }, (_, i) => (2025 - i).toString());
-
     const ratings = ['9+', '8+', '7+', '6+', '5+', 'Any'];
-
-    const runtimes = ['< 90 min', '90-120 min', '> 120 min', 'Any'];
-
-    const languages = ['English', 'Spanish', 'French', 'German', 'Japanese', 'Korean', 'Chinese', 'Russian', 'Other'];
-
-    const directors = ['Christopher Nolan', 'Steven Spielberg', 'Martin Scorsese', 'Quentin Tarantino', 'Denis Villeneuve', 'Other'];
 
     const sortOptions = [
         { value: 'title', label: 'Title' },
@@ -771,8 +763,8 @@ const MovieSearchPage = () => {
                             </div>
                         ) : movies.length > 0 ? (
                             <div className="ms-movie-grid">
-                                {movies.map((movie, index) => (
-                                    <MovieCard2 movie={movie} index={index} />
+                                {movies.map((movie) => (
+                                    <MovieCard2 key={movie.id} movie={movie} />
                                 ))}
                             </div>
                         ) : (
