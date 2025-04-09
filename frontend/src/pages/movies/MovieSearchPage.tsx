@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import './MovieSearchPage.css';
 import Footer from '@components/app/Footer';
-import MovieCard2 from './MovieCard2';
+import { MovieCard2 } from './MovieCard2';
 import { Movie } from '@src/types/Movie';
 
 interface FilterOptions {

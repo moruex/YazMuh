@@ -6,6 +6,7 @@ import {
 } from 'react-icons/fa';
 import Footer from '@components/app/Footer'; // Assuming Footer path is correct
 import MovieCard6 from './MovieCard6';
+import { useParams } from 'react-router-dom';
 
 // --- Interfaces (Keep updated interfaces) ---
 interface MovieDetailsData {
@@ -202,19 +203,15 @@ const CommentCard: React.FC<CommentCardProps> = ({
 };
 
 const MovieDetailsPage = () => {
+    const { movieId } = useParams();
     const [userRating, setUserRating] = useState<number>(0);
     const [hoverRating, setHoverRating] = useState<number>(0);
     const [currentCommentPage, setCurrentCommentPage] = useState<number>(1);
     const [newCommentText, setNewCommentText] = useState("");
 
     const [isFavorite, setIsFavorite] = useState(false);
-    const [isWatchlist, setIsWatchlist] = useState(false);
-    const [isWatched, setIsWatched] = useState(false);
 
-    // Use the same sample data including averageUserRating and comment userId/isSpoiler
-    const movie: MovieDetailsData = {
-        id: 1, title: "Captain America: New World", originalTitle: "Captain America: New World", releaseYear: 2024, rating: 8.4, votes: 890, imdbRating: 8.2, imdbVotes: 7292, averageUserRating: 4.5, duration: "115 min", genres: ["Action", "Adventure", "Comedy", "Sci-Fi"], directors: ["Julius Onah"], actors: ["Harrison Ford", "Anthony Mackie", "Liv Tyler", "Tim Blake Nelson", "Carl Lumbly", "Shira Haas"], description: "Former Falcon now Captain America Sam Wilson (Anthony Mackie), in his role as the new superhero, faces a conspiracy that threatens the United States. He teams up with scientist Albertus to track down a mysterious mercenary. The villain's motivations are still unknown to the main character, which makes it difficult to stop him before his actions cause chaos. Sam has to rely on his own surroundings, the new Captain America and his mission: Save the world from evil through his skills of balancing humanity and patriotism.", posterUrl: "https://static.hdrezka.ac/i/2025/2/2/n276dc30a37e3ui87r65q.jpg", trailerUrl: "https://www.youtube.com/embed/MZ5i8_1Za3A"
-    };
+    const [movie, setMovie] = useState<MovieDetailsData | null>(null);
     const initialComments: Comment[] = [{
         id: 1,
         userId: "CurrentUser",
@@ -332,8 +329,14 @@ const MovieDetailsPage = () => {
     const handleRatingHover = (rating: number) => { setHoverRating(rating); };
     const handleRatingLeave = () => { setHoverRating(0); };
     const handleAddToFavorites = () => console.log("Add to Favorites clicked");
-    const handleAddToWatchlist = () => console.log("Add to Watchlist clicked");
-    const handleMarkAsWatched = () => console.log("Mark as Watched clicked");
+    const handleAddToWatchlist = () => {
+        console.log("Add to Watchlist clicked");
+        // Add API call logic here later
+    };
+    const handleMarkAsWatched = () => {
+        console.log("Mark as Watched clicked");
+        // Add API call logic here later
+    };
 
     // --- Pagination Logic (Keep from second version) ---
     const totalPages = Math.ceil(comments.length / commentsPerPage);
@@ -347,20 +350,20 @@ const MovieDetailsPage = () => {
         <div className='md-page'>
             <div className="md-movie-detail-container"> {/* Original container */}
                 <div className="md-movie-header"> {/* Original header */}
-                    <h1 className="md-movie-title">{movie.title}</h1> {/* Original title */}
-                    <p className="md-movie-original-title">{movie.originalTitle} ({movie.releaseYear})</p> {/* Original original title */}
+                    <h1 className="md-movie-title">{movie?.title}</h1> {/* Original title */}
+                    <p className="md-movie-original-title">{movie?.originalTitle} ({movie?.releaseYear})</p> {/* Original original title */}
                 </div>
 
                 <div className="md-movie-content"> {/* Original content layout */}
                     {/* Use md-movie-poster1 if that was the original class */}
                     <div className="md-movie-poster1">
-                        <img src={movie.posterUrl} alt={movie.title} />
+                        <img src={movie?.posterUrl} alt={movie?.title} />
                     </div>
 
                     <div className="md-movie-info"> {/* Original info section */}
                         <div className="md-movie-ratings"> {/* Original ratings container */}
                             {/* New Average User Rating Item - needs new CSS or adapt existing */}
-                            {movie.averageUserRating && (
+                            {movie?.averageUserRating && (
                                 <div className="md-rating-item md-average-user-rating-item"> {/* Add specific class */}
                                     <a className="md-rating-label">Mov<span className="accent">i</span>e<span className="accent">Q</span></a>
                                     <div className="md-rating-value"> {/* Add specific class */}
@@ -372,25 +375,25 @@ const MovieDetailsPage = () => {
                             )}
                             <div className="md-rating-item">
                                 <span className="md-rating-label">IMDb</span>
-                                <div className="md-rating-value">{movie.imdbRating?.toFixed(1)} <span className="md-votes">({movie.imdbVotes})</span></div>
+                                <div className="md-rating-value">{movie?.imdbRating?.toFixed(1)} <span className="md-votes">({movie?.imdbVotes})</span></div>
                             </div>
                             {/* Use original rating item structure */}
                             <div className="md-rating-item">
                                 <span className="md-rating-label">KinoPoisk</span>
-                                <div className="md-rating-value">{movie.rating?.toFixed(1)} <span className="md-votes">({movie.votes})</span></div>
+                                <div className="md-rating-value">{movie?.rating?.toFixed(1)} <span className="md-votes">({movie?.votes})</span></div>
                             </div>
                         </div>
 
                         <div className="md-movie-details"> {/* Original details */}
                             {/* Use original detail row structure */}
                             <div className="md-detail-row"> <span className="md-detail-label">Country:</span> <span className="md-detail-value">USA</span> </div>
-                            <div className="md-detail-row"> <span className="md-detail-label">Genre:</span> <span className="md-detail-value">{movie.genres.join(", ")}</span> </div>
-                            <div className="md-detail-row"> <span className="md-detail-label">Director:</span> <span className="md-detail-value">{movie.directors.join(", ")}</span> </div>
+                            <div className="md-detail-row"> <span className="md-detail-label">Genre:</span> <span className="md-detail-value">{movie?.genres.join(", ")}</span> </div>
+                            <div className="md-detail-row"> <span className="md-detail-label">Director:</span> <span className="md-detail-value">{movie?.directors.join(", ")}</span> </div>
                             {/* <div className="md-detail-row"> <span className="md-detail-label">Starring:</span> <span className="md-detail-value">{movie.actors.join(", ")}</span> </div> */}
                             <div className="md-detail-row">
                                 <span className="md-detail-label">Starring:</span>
                                 <span className="md-detail-value">
-                                    {movie.actors.map((actor, index) => (
+                                    {movie?.actors.map((actor, index) => (
                                         <React.Fragment key={index}>
                                             <a href={`/person/${index + 1}`} className="person-link">
                                                 {actor}
@@ -400,7 +403,7 @@ const MovieDetailsPage = () => {
                                     ))}
                                 </span>
                             </div>
-                            <div className="md-detail-row"> <span className="md-detail-label">Duration:</span> <span className="md-detail-value">{movie.duration}</span> </div>
+                            <div className="md-detail-row"> <span className="md-detail-label">Duration:</span> <span className="md-detail-value">{movie?.duration}</span> </div>
                         </div>
 
                         {/* User's Personal Rating - Use original structure but keep logic */}
@@ -441,14 +444,14 @@ const MovieDetailsPage = () => {
 
                 {/* Keep remaining sections using original classes */}
                 <div className="md-movie-description">
-                    <h2>About the movie "{movie.title}"</h2>
-                    <p>{movie.description}</p>
+                    <h2>About the movie "{movie?.title}"</h2>
+                    <p>{movie?.description}</p>
                 </div>
 
                 <div className="md-movie-trailer">
                     <h2>Movie Trailer</h2>
                     <div className="md-trailer-container">
-                        <iframe src={movie.trailerUrl} title={`${movie.title} - trailer`} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+                        <iframe src={movie?.trailerUrl} title={`${movie?.title} - trailer`} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
                     </div>
                 </div>
 

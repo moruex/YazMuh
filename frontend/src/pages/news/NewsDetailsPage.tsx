@@ -74,8 +74,9 @@ const sampleArticle: NewsArticle = {
   ]
 };
 
-const NewsDetailsPage: React.FC = () => {
-  const { articleId } = useParams<{ articleId: string }>();
+const NewsDetailsPage = () => {
+  // Remove unused articleId
+  // const { articleId } = useParams();
   
   // In a real app, you would fetch the article based on articleId
   // For now, we'll use the sample data

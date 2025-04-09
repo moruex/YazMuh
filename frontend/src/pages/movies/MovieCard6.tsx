@@ -1,8 +1,8 @@
-
+import './MovieCard6.css'
 
 import React from 'react';
 
-const MovieCard6: React.FC<{ movie: any, index: any }> = ({ movie, index }) => {
+const MovieCard6: React.FC<{ movie: any; }> = ({ movie }) => {
     return (
         <div key={movie.id} className="md-similar-movie-card">
             <div className='md-similar-poster-container'>

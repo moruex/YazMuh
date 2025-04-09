@@ -1,4 +1,4 @@
-import { Movie } from "@src/types/Movie";
+// import { Movie } from '@src/types/Movie'; // Remove unused import
 
 // Mock data for movie recommendations
 const movieDatabase = [

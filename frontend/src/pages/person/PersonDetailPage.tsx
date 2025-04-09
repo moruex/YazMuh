@@ -1,6 +1,6 @@
-import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 import './PersonDetailsPage.css';
-import { FaPlus, FaHeart, FaRegHeart } from 'react-icons/fa'; // Keep needed icons
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import Footer from '@components/app/Footer';
 import { Movie } from '@src/types/Movie';
 import MovieCard6 from '../movies/MovieCard6';
@@ -17,18 +17,7 @@ interface PersonDetailsData {
     // Add other relevant fields like death date if applicable
 }
 
-interface Credit { // Represents a movie/show the person is known for
-    id: number;
-    title: string; // Movie or Show title
-    posterUrl: string;
-    year: number;
-    role?: string; // Character name or role (e.g., Director)
-    mediaType: 'movie' | 'tv'; // To differentiate, could be useful later
-}
-
 // --- Mock Data ---
-const MOCK_CURRENT_USER_ID = "user123"; // Placeholder
-
 const samplePerson: PersonDetailsData = {
     id: 1,
     name: "Anthony Mackie",
@@ -111,11 +100,11 @@ const knownForCredits: Movie[] = [
 const PersonDetailsPage = () => {
     const [person] = useState<PersonDetailsData>(samplePerson);
     const [credits] = useState<Movie[]>(knownForCredits);
-    const [isFavorite, setIsFavorite] = useState(false); // Example state for favorite
+    const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
     // --- Handlers ---
     const handleToggleFavorite = () => {
-        setIsFavorite(prev => !prev);
+        setIsFavorite((prev: boolean) => !prev);
         console.log("Toggle Favorite clicked", !isFavorite);
         // Add API call logic here later
     };
@@ -174,8 +163,8 @@ const PersonDetailsPage = () => {
                 <div className="pd-known-for"> {/* Renamed class */}
                     <h2>Known For</h2>
                     <div className="pd-known-for-container"> {/* Renamed class */}
-                        {credits.map(credit => (
-                            <MovieCard6 movie={credit} index={0} />
+                        {credits.map((credit: Movie) => (
+                            <MovieCard6 key={credit.id} movie={credit} />
                         ))}
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Movie } from '@src/types/Movie'; // Import the base Movie type
+// import { Movie } from '@src/types/Movie'; // Remove unused import
 
 import MovieSection from "./MovieSection";
 import Footer from "@components/app/Footer";
@@ -282,9 +282,10 @@ const myMovieDataRaw = [
   // ... add more movies
 ];
 
-// Map the raw data to include the base 'rating' field
-const myMovieData = myMovieDataRaw.map(movie => ({
+// Map the raw data to include the base 'rating' field and convert id
+const myMovieData = myMovieDataRaw.map((movie, index) => ({
   ...movie,
+  id: parseInt(movie.id.replace('m', ''), 10) || index, // Convert string ID to number, fallback to index
   rating: movie.movieQRating ?? movie.imdbRating ?? 0 // Use MovieQ rating, fallback to IMDb, then 0
 }));
 

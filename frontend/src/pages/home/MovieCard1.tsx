@@ -1,4 +1,3 @@
-import React from "react";
 import './MovieCard1.css';
 
 interface MovieCard1Props {
@@ -21,6 +20,10 @@ const MovieCard1 = ({ title, year, posterUrl, rating, genres }: MovieCard1Props)
         <div className="hm-movie-info">
           <h3 className="hm-movie-title">{title}</h3>
           <div className="hm-movie-year">{year}</div>
+          {/* Display genres if available */}
+          {genres && genres.length > 0 && (
+            <div className="hm-movie-genres">{genres.join(', ')}</div>
+          )}
         </div>
       </a>
     </div>
