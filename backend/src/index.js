@@ -1,10 +1,11 @@
 // index.js (Main Server File)
 const express = require('express');
 const cors = require('cors');
-const { ApolloServer } = require('apollo-server-express');
-const jwt = require('jsonwebtoken');
-const { ApolloServerPluginDrainHttpServer } = require('apollo-server-core');
+const { ApolloServer } = require('@apollo/server');
+const { expressMiddleware } = require('@apollo/server/express4');
+const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer');
 const http = require('http');
+const jwt = require('jsonwebtoken');
 // Removed: const { graphqlUploadExpress } = require('graphql-upload');
 const config = require('./config');
 const schema = require('./schema');
@@ -49,54 +50,60 @@ async function startApolloServer() {
 
     // --- CORS Setup ---
     app.use(cors({
-        origin: '*', // Adjust for production
+        origin: '*', // Adjust for production (e.g., specific frontend URL)
         credentials: true,
     }));
 
+    // Ensure body parsing middleware is applied *before* Apollo middleware
+    app.use(express.json()); // Needed for expressMiddleware
 
     // --- Setup Apollo Server ---
     const server = new ApolloServer({
         schema,
-        context: async ({ req }) => {
-            const { tokenPayload, tokenType } = await attachUserContext(req);
-
-            const context = {
-                db,
-                req,
-                user: null,
-                admin: null,
-                tokenPayload: tokenPayload
-            };
-
-            // Populate user or admin based on verified token type
-            if (tokenPayload && tokenType === 'admin' && tokenPayload.adminId) {
-                 context.admin = { id: tokenPayload.adminId, role: tokenPayload.role };
-            } else if (tokenPayload && tokenType === 'user' && tokenPayload.userId) {
-                 context.user = { id: tokenPayload.userId, role: 'USER' }; // Assume role or get from token
-            }
-
-            context.getCurrentActor = () => {
-                if (context.admin) return { type: 'admin', id: context.admin.id, role: context.admin.role };
-                if (context.user) return { type: 'user', id: context.user.id, role: context.user.role };
-                return null;
-            };
-
-            return context;
-        },
         plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
         introspection: config.nodeEnv !== 'production',
-        // uploads: false, // This option might not be needed/valid depending on Apollo Server version
     });
 
     // --- Start the server ---
     await server.start();
 
-    // Apply Apollo GraphQL middleware
-    server.applyMiddleware({ app, path: '/graphql', cors: false }); // Use Express CORS
+    // Apply Apollo GraphQL middleware and context function
+    app.use(
+        '/graphql',
+        express.json(), // Ensure JSON body parsing for GraphQL requests
+        expressMiddleware(server, {
+            context: async ({ req }) => {
+                const { tokenPayload, tokenType } = await attachUserContext(req);
+
+                const context = {
+                    db,
+                    req,
+                    user: null,
+                    admin: null,
+                    tokenPayload: tokenPayload
+                };
+
+                // Populate user or admin based on verified token type
+                if (tokenPayload && tokenType === 'admin' && tokenPayload.adminId) {
+                    context.admin = { id: tokenPayload.adminId, role: tokenPayload.role };
+                } else if (tokenPayload && tokenType === 'user' && tokenPayload.userId) {
+                    context.user = { id: tokenPayload.userId, role: 'USER' }; // Assume role or get from token
+                }
+
+                context.getCurrentActor = () => {
+                    if (context.admin) return { type: 'admin', id: context.admin.id, role: context.admin.role };
+                    if (context.user) return { type: 'user', id: context.user.id, role: context.user.role };
+                    return null;
+                };
+
+                return context;
+            },
+        }),
+    );
 
     // --- Start Listening ---
     await new Promise(resolve => httpServer.listen({ port: config.port }, resolve));
-    console.log(`🚀 Server ready at http://localhost:${config.port}${server.graphqlPath}`);
+    console.log(`🚀 Server ready at http://localhost:${config.port}/graphql`);
     console.log(`🌱 Node Environment: ${config.nodeEnv}`);
     if (!config.r2.endpoint || !config.r2.accessKeyId) {
         console.warn("⚠️ R2 configuration missing or incomplete.");

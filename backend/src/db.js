@@ -16,13 +16,15 @@ const pool = new Pool({
   //   rejectUnauthorized: true,
   //   ca: fs.readFileSync("./ca.pem").toString(),
   // },
-  ssl: false,
+  ssl: {
+    rejectUnauthorized: false // Use this for many cloud providers if not using a specific CA
+  },
   // ssl: {
   //   rejectUnauthorized: false // Add or ensure this line exists and is set to false
   // }
 });
 
-console.log('>>> db.js: Pool created with rejectUnauthorized:', pool.options.ssl?.rejectUnauthorized);
+console.log('>>> db.js: Pool created with SSL configuration:', pool.options.ssl);
 
 pool.on('connect', () => {
   console.log('🐘 Database pool connected');
