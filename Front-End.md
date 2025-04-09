@@ -9,11 +9,17 @@ Frontend'i yayınladığınız domain adresi: http://frontend.com
 6. Şifre sıfırlama  [Reset Password](https://movieq.com.tr/profile)
 
 # Akif Tarık Binici #
-1. Film detayını görme [Movie Details](http://movieq.com.tr/movies/1)
-2. Film puanlama [Rate Movie](http://movieq.com.tr/movies/1)
-3. Dil seçenekleri [Language Options](http://movieq.com.tr/)
-4. İzlenecekler listesi oluşturma [Watchlist](http://movieq.com.tr/profile)
-5. Favori listesi oluşturma  [Favorites](http://movieq.com.tr/profile)
-6. İzlenen filmler listesi oluşturma  [Watched List](http://movieq.com.tr/profile)
+1. Film detayını görme [Movie Details](https://movieq.com.tr/movies/1)
+2. Film puanlama [Rate Movie](https://movieq.com.tr/movies/1)
+3. Dil seçenekleri [Language Options](https://movieq.com.tr/)
+4. İzlenecekler listesi oluşturma [Watchlist](https://movieq.com.tr/profile)
+5. Favori listesi oluşturma  [Favorites](https://movieq.com.tr/profile)
+6. İzlenen filmler listesi oluşturma  [Watched List](https://movieq.com.tr/profile)
 
-   
+# Abdullah Kural #
+1. Oyuncu ve yönetmen bilgileri ekleme [Actors/Directors](/actors)
+2. Film haberleri [News](https://movieq.com.tr/news)
+3. Haber ekleme [Add News](/news)
+4. Haber düzenleme [Edit News](/news)
+5. Haber silme  [Delete News](/news)
+6. Yorum onaylama [Moderate Commends](/commends)   
