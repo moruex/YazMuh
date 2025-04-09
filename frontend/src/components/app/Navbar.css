@@ -1,0 +1,630 @@
+/* --- START OF FILE Navbar.css --- */
+
+/* Navbar variables (can be kept in App.css :root or duplicated here if preferred) */
+:root {
+  --dark-bg: #080a0b;
+  --dark-surface: #121212;
+  --primary-green: #00e054;
+  --accent-green: #008c2b;
+  --text-primary: #ffffff;
+  --text-secondary: #ddd;
+  --text-disabled: #999;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --navbar-height: 75px;
+  /* Adjusted from original multiple definitions */
+}
+
+/* Navbar container styles */
+.navbar {
+  background-color: var(--dark-bg);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: all 0.3s ease;
+  height: var(--navbar-height);
+}
+
+.navbar.scrolled {
+  background-color: rgba(8, 10, 11, 0.95);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Added for better spacing */
+  height: 100%;
+  padding: 0 16px;
+}
+
+/* Logo styles */
+.navbar-brand {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  flex-shrink: 0;
+  /* Prevent shrinking */
+  margin-right: 16px;
+  /* Add some space */
+}
+
+.navbar-brand .accent {
+  /* More specific selector */
+  color: var(--primary-green);
+}
+
+/* Search styles */
+.search-container {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 10px 15px;
+  max-width: 250px;
+  /* Removed margin-left/right: auto - handled by justify-content and flex-grow */
+}
+
+.search-icon {
+  color: var(--text-secondary);
+  margin-right: 8px;
+  width: 20px;
+  /* Slightly smaller */
+  height: 20px;
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  width: 100%;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* Nav & Auth Wrapper styles */
+/* This wrapper will contain both nav links and auth actions */
+.nav-auth-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  /* Pushes this whole section to the right */
+}
+
+/* Nav links styles */
+.nav-links {
+  display: flex;
+  list-style: none;
+  margin: 0 16px 0 0;
+  /* Add margin to separate from auth */
+  padding: 0;
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  position: relative;
+  white-space: nowrap;
+  /* Prevent wrapping */
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 50%;
+  /* Center the underline */
+  transform: translateX(-50%);
+  /* Center the underline */
+  background-color: var(--primary-green);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 80%;
+  /* Make underline slightly smaller than text */
+}
+
+.auth-link {
+  /* Specific style for logged-in links */
+  color: var(--primary-green);
+}
+
+.auth-link:hover {
+  color: var(--accent-green);
+}
+
+/* Auth actions styles */
+.auth-actions {
+  display: flex;
+  /* Keep auth items in a row if needed */
+  align-items: center;
+  /* Removed margin-left: 16px; Spacing handled by .nav-links margin */
+}
+
+.sign-in-button {
+  color: var(--primary-green);
+  border: 2px solid var(--primary-green);
+  text-decoration: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  /* Prevent wrapping */
+}
+
+/* Removed .sign-in-button.mobile - style directly in media query if needed */
+
+.sign-in-button:hover {
+  background-color: rgba(0, 224, 84, 0.1);
+  color: #fff;
+  /* Brighter text on hover */
+}
+
+/* Renamed class for clarity */
+.profile-link {
+  display: flex;
+  /* Ensure link takes up avatar size */
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-profile-avatar {
+  /* Renamed from profile-avatar1 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Reduce size */
+  width: 32px;
+  height: 32px;
+  background-color: var(--accent-green);
+  color: var(--text-primary);
+  font-size: 13px;
+  /* Slightly smaller font */
+  font-weight: bold;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--primary-green);
+  /* Thinner border */
+  box-shadow: 0 1px 4px rgba(0, 230, 118, 0.2);
+  /* Adjust shadow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nav-profile-avatar:hover {
+  box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+}
+
+.nav-profile-avatar:active {
+  transform: scale(0.98);
+}
+
+.nav-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Mobile menu toggle */
+.menu-toggle {
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  margin-left: 12px;
+}
+
+.dhide {
+  display: none !important;
+}
+
+.menu-toggle svg {
+  color: #fff;
+}
+
+/* Language Dropdown Styles */
+.language-dropdown-container {
+  position: relative;
+  /* Needed for absolute positioning of the dropdown */
+  margin-left: 12px;
+  /* Spacing from other nav items */
+}
+
+.language-dropdown-button {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  /* Match nav-link padding */
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.language-dropdown-button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.language-dropdown-button .flag-icon {
+  margin-right: 8px;
+  /* Slightly more space */
+  line-height: 1;
+  /* Increase dimensions */
+  width: 28px;
+  height: 21px;
+  object-fit: contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.language-dropdown-button .dropdown-arrow {
+  margin-left: 4px;
+  transition: transform 0.2s ease;
+}
+
+.language-dropdown-button .dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.language-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  /* Position below the button */
+  right: 0;
+  /* Align to the right */
+  background-color: var(--dark-surface);
+  /* Slightly different background */
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  list-style: none;
+  margin: 5px 0 0;
+  padding: 8px 0;
+  min-width: 150px;
+  /* Ensure enough width */
+  z-index: 110;
+  /* Above navbar content */
+  animation: fadeIn 0.2s ease-out;
+  /* Simple fade-in animation */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  /* Prevent wrapping */
+}
+
+.language-option:hover {
+  background-color: rgba(0, 224, 84, 0.1);
+  /* Use primary green highlight */
+  color: var(--text-primary);
+}
+
+.language-option .flag-icon {
+  margin-right: 12px;
+  /* Slightly more space */
+  line-height: 1;
+  /* Increase dimensions */
+  width: 28px;
+  height: 21px;
+  object-fit: contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* --- Responsive Styles --- */
+@media (max-width: 960px) {
+  .dhide {
+    display: inline-flex !important;
+  }
+
+  .menu-toggle {
+    display: block;
+    /* Ensure it's visible */
+    margin-left: auto;
+    /* Push it to the right after search */
+    /* Ensure sufficient padding/size for tapping */
+    padding: 10px;
+  }
+
+  .menu-toggle svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .navbar-container {
+    padding: 0 12px;
+    /* Ensure container items align correctly */
+    justify-content: flex-start;
+    /* Align items to the start */
+  }
+
+  .search-form {
+    order: 2;
+    /* Place search after logo */
+    flex-grow: 1;
+    /* Allow form to take space */
+    margin-left: 12px;
+    /* Space from logo */
+    margin-right: 12px;
+    /* Space before toggle */
+  }
+
+  .search-container {
+    max-width: none;
+    /* Remove max width */
+
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .menu-toggle {
+    order: 3;
+    /* Place toggle last */
+    margin-left: 0;
+  }
+
+  /* Hide brand on very small screens if needed */
+  /* @media (max-width: 400px) {
+      .navbar-brand {
+        display: none;
+      }
+      .search-form {
+        margin-left: 0;
+      }
+    } */
+
+  .nav-auth-wrapper {
+    position: absolute;
+    /* Take out of flow */
+    top: var(--navbar-height);
+    /* Position below navbar */
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: var(--dark-bg);
+    /* Same as navbar */
+    flex-direction: column;
+    align-items: stretch;
+    /* Stretch items to full width */
+    padding: 0;
+    max-height: 0;
+    /* Collapsed by default */
+    overflow: hidden;
+    /* transition: max-height 0.3s ease-out, padding 0.3s ease-out; */
+    /* Add padding transition */
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* Add shadow for dropdown */
+    z-index: 99;
+    /* Below navbar but above content */
+  }
+
+  .nav-auth-wrapper.open {
+    max-height: 600px;
+    /* Or enough height for content */
+    padding: 16px 0;
+    /* Add padding when open */
+  }
+
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    /* Reset margin */
+    padding: 0 16px;
+    /* Add horizontal padding */
+    align-items: flex-start;
+    /* Align text left */
+  }
+
+  .nav-links li {
+    width: 100%;
+    /* Make list items full width */
+    margin-bottom: 0;
+    /* Remove bottom margin, use padding on link */
+  }
+
+  .nav-link {
+    display: block;
+    padding: 14px 0;
+    /* Slightly more vertical padding */
+    width: 100%;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .nav-links li:last-child .nav-link {
+    border-bottom: none;
+    /* Remove border from last nav link */
+  }
+
+  .nav-link::after {
+    /* Optional: Adjust or remove underline for mobile */
+    display: none;
+  }
+
+  .auth-actions {
+    margin: 0;
+    padding: 20px 16px;
+    /* More padding */
+    border-top: none;
+    margin-top: 0;
+    background-color: transparent;
+    /* Remove separate bg */
+  }
+
+  .sign-in-button {
+    display: block;
+    text-align: center;
+    flex: 1;
+    /* padding: 14px 16px; Adjust padding */
+    background-color: var(--primary-green);
+    color: var(--dark-bg);
+    border: none;
+    font-weight: 600;
+    /* Slightly bolder */
+    border-radius: 6px;
+    font-size: 1rem;
+    /* Match base font size */
+  }
+
+  .sign-in-button:hover {
+    background-color: var(--accent-green);
+    color: var(--text-primary);
+  }
+
+  .profile-link {
+    justify-content: flex-start;
+    /* Align profile pic left */
+  }
+
+  .search-container {
+    /* Optional: Adjust search width if needed */
+    max-width: 180px;
+    margin-left: 10px;
+    /* Add some space from logo */
+    margin-right: auto;
+    /* Push toggle to the right */
+  }
+
+  /* Adjust language dropdown position in mobile menu */
+  .language-dropdown-container {
+    margin-left: 0;
+    width: 100%;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .language-dropdown-button {
+    justify-content: flex-start;
+    /* Align items left */
+    width: 100%;
+    padding: 14px 0;
+    font-weight: 500;
+    /* Match nav link weight */
+    color: var(--text-secondary);
+  }
+
+  .language-dropdown-button:hover {
+    background-color: transparent;
+    /* No hover bg on button itself */
+    color: var(--text-primary);
+  }
+
+  .language-dropdown-button .flag-icon {
+    margin-right: 12px;
+    /* Consistent margin */
+  }
+
+  .language-dropdown-button .dropdown-arrow {
+    margin-left: auto;
+    /* Push arrow to the right */
+    transition: transform 0.2s ease;
+  }
+
+  .language-dropdown-button .dropdown-arrow.open {
+    transform: rotate(180deg);
+  }
+
+  .language-dropdown-menu {
+    position: static;
+    border: none;
+    box-shadow: none;
+    background: rgba(0, 0, 0, 0.1);
+    /* Slight background indent */
+    margin: 0;
+    padding: 0 0 0 10px;
+    min-width: unset;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+
+  .language-dropdown-container .language-dropdown-button[aria-expanded="true"]+.language-dropdown-menu {
+    max-height: 300px;
+    /* Allow space for options */
+  }
+
+  .language-option {
+    padding: 12px 0;
+    /* Adjust padding */
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+    /* Separator */
+  }
+
+  .language-option:last-child {
+    border-bottom: none;
+  }
+
+  .language-option:hover {
+    color: #fff;
+  }
+}
+
+
+@media (max-width: 600px) {
+
+  /* Hide brand on small screens if desired */
+  .navbar-brand {
+    display: none;
+  }
+
+  .search-container {
+    margin-left: 0;
+    /* No brand, so no margin needed */
+    max-width: none;
+    /* Allow search to take more space */
+    flex-grow: 1;
+    /* Let it fill available space */
+    margin-right: 12px;
+    /* Space before toggle */
+  }
+
+  .navbar-container {
+    padding: 0 10px;
+    /* Further reduce padding */
+  }
+}
+
+/* --- END OF FILE Navbar.css --- */
