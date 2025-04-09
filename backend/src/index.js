@@ -48,25 +48,11 @@ async function startApolloServer() {
         return { tokenPayload, tokenType };
     };
 
-    // --- Set up very permissive CORS for testing ---
-    app.use((req, res, next) => {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-        
-        // Handle preflight requests
-        if (req.method === 'OPTIONS') {
-            return res.status(200).end();
-        }
-        next();
-    });
-
-    // --- Also keep the standard CORS middleware ---
+    // --- CORS Setup ---
+    // Apply CORS before Apollo middleware
     app.use(cors({
-        origin: '*',
+        origin: '*', // Adjust for production (e.g., specific frontend URL)
         credentials: true,
-        methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
-        allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
     }));
 
     // Ensure body parsing middleware is applied *before* Apollo middleware

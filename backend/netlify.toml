@@ -1,0 +1,18 @@
+# netlify.toml
+
+# Build settings
+[build]
+  # Command to install dependencies
+  command = "npm install"
+  # Directory where your serverless function (index.js) is located
+  functions = "src"
+  # Specify Node.js version (use a recent LTS version compatible with your dependencies)
+  environment = { NODE_VERSION = "18" }
+
+# Redirect rule to map the /graphql endpoint to our serverless function.
+# Netlify automatically names the function based on the filename (index.js -> index).
+[[redirects]]
+  from = "/graphql/*"  # Match the base path and anything after it
+  to = "/.netlify/functions/index" # Path to the deployed function
+  status = 200        # Use 200 for a rewrite (internal redirect)
+  # force = true      # Uncomment if you need to ensure this rule overrides any static file at /graphql 
