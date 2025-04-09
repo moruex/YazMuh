@@ -456,7 +456,7 @@ const MovieDetailsPage = () => {
                     <h2>Similar Movies</h2>
                     <div className="md-similar-movies-container">
                         {similarMovies.map(simMovie => (
-                            <MovieCard6 movie={simMovie} index={undefined} />
+                            <MovieCard6 movie={simMovie} index={0} />
                         ))}
                     </div>
                 </div>
