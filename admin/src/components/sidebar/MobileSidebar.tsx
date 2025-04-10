@@ -3,8 +3,8 @@ import * as React from 'react';
 import logo from "@assets/logo2.svg";
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import { SidebarItem } from './SidebarItem';
-import { LucideSquareDashedBottomCode, Film, Users, UserCog, Newspaper, MessageSquare, BarChart, Bell, Settings, List, LucideNotebookText, MessageCircleQuestionIcon, Server, VenetianMask } from 'lucide-react';
-import { AdminRole, ApiAdmin } from '@interfaces/index';
+import { LucideSquareDashedBottomCode, Film, Users, UserCog, Newspaper, MessageSquare, Settings, List, LucideNotebookText, MessageCircleQuestionIcon, Server, VenetianMask } from 'lucide-react';
+import { AdminRole } from '@interfaces/index';
 
 
 interface MobileSidebarProps {
@@ -56,7 +56,6 @@ export default function MobileSidebar({
         <SidebarItem to='/news' icon={<Newspaper size={20} />} text="News" expanded={false} />
         <SidebarItem to='/quiz' icon={<MessageCircleQuestionIcon size={20} />} text="Quiz" expanded={false} />
         <SidebarItem to='/comments' icon={<MessageSquare size={20} />} text="Comments" expanded={false} />
-        {/* <SidebarItem to='/analytics' icon={<BarChart size={20} />} text="Analytics" expanded={false} /> */}
         <SidebarItem to='/users' icon={<Users size={20} />} text="Users" expanded={false} />
         
         {isSuperAdmin && (

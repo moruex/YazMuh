@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import logo from "@assets/logo2.svg";
 
-import { VenetianMask, MessageCircleQuestionIcon, UserCog, Settings, ChevronFirst, ChevronLast, LucideSquareDashedBottomCode, Film, List, Users, BarChart, Bell, MessageSquare, Newspaper, LucideNotebookText, Server } from "lucide-react";
+import { VenetianMask, MessageCircleQuestionIcon, UserCog, Settings, ChevronFirst, ChevronLast, LucideSquareDashedBottomCode, Film, List, Users, MessageSquare, Newspaper, LucideNotebookText, Server } from "lucide-react";
 import { SidebarItem } from "./SidebarItem";
 import { AdminRole } from '@interfaces/index';
 

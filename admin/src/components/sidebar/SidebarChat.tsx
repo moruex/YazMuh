@@ -1,14 +1,24 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 import { MoreHorizontal, Share, Download, Edit, Trash, MessageCircle } from "lucide-react";
 
-export function SidebarChat({ title, expanded, onClick, onShare, onDownload, onRename, onDelete }) {
+interface SidebarChatProps {
+    title: string;
+    expanded: boolean;
+    onClick: () => void;
+    onShare: () => void;
+    onDownload: () => void;
+    onRename: () => void;
+    onDelete: () => void;
+}
+
+export function SidebarChat({ title, expanded, onClick, onShare, onDownload, onRename, onDelete }: SidebarChatProps) {
     const [menuOpen, setMenuOpen] = useState(false);
-    const menuRef = useRef(null);
+    const menuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        function handleClickOutside(event) {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
+        function handleClickOutside(event: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setMenuOpen(false);
             }
         }
