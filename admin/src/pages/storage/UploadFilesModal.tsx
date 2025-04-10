@@ -1,7 +1,7 @@
 // --- START OF FILE UploadFilesModal.tsx ---
 
 import React, { ChangeEvent, useState, useEffect, useCallback } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Grid, Card, CardMedia, CardActions, IconButton, Tooltip, LinearProgress, Alert, AlertTitle } from '@mui/material'; // Added Alert for better errors
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Grid, Card, CardMedia, IconButton, Tooltip, LinearProgress, Alert } from '@mui/material'; // Removed CardActions, AlertTitle
 import { Delete as DeleteIcon, FileUpload as FileUploadIcon, InsertDriveFile as InsertDriveFileIcon, Image as ImageIcon, PictureAsPdf as PictureAsPdfIcon, TextSnippet as TextSnippetIcon, Code as CodeIcon, Close, CheckCircle, Error as ErrorIcon, HourglassEmpty } from '@mui/icons-material'; // Added status icons, Hourglass for pending
 import '@styles/components/UploadFilesModal.css'; // Ensure this CSS file exists and is linked
 import { getPresignedUrlForUpload } from './utils';
@@ -27,7 +27,6 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose, on
     const [filesToUpload, setFilesToUpload] = useState<FileWithStatus[]>([]);
     const [filePreviewUrls, setFilePreviewUrls] = useState<{ [key: number]: string }>({});
     const [isDragging, setIsDragging] = useState(false);
-    const [dragCounter, setDragCounter] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
 
     // Generate previews
@@ -97,7 +96,6 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose, on
 
     const handleDeleteFile = (index: number) => {
         const fileKey = index;
-        const fileToRemove = filesToUpload[index];
         setFilesToUpload(prev => prev.filter((_, i) => i !== index));
 
         if (filePreviewUrls[fileKey]) {
@@ -196,7 +194,6 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose, on
 
     const handleUpload = async () => {
         setIsUploading(true);
-        let allSuccessful = true;
         const filesToProcess = filesToUpload.filter(f => f.status === 'pending' || f.status === 'error'); // Include errors for retry
 
         // Could use Promise.all for parallel uploads, but sequential is simpler for now
@@ -207,7 +204,6 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose, on
             if (originalIndex !== -1) {
                 const success = await uploadSingleFile(currentItem, originalIndex);
                 if (!success) {
-                    allSuccessful = false;
                     // Optional: Stop on first error?
                     // break;
                 }
@@ -243,7 +239,6 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose, on
         setFilesToUpload([]);
         setFilePreviewUrls({});
         setIsUploading(false);
-        setDragCounter(0);
         setIsDragging(false);
     }, [filePreviewUrls]);
 
@@ -257,10 +252,10 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose, on
     };
 
     // Drag and Drop Handlers (keep as they are)
-    const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); if (isUploading) return; setDragCounter(prev => prev + 1); if (e.dataTransfer.items && e.dataTransfer.items.length > 0) setIsDragging(true); };
-    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); if (isUploading) return; setDragCounter(prev => { const newCount = prev - 1; if (newCount <= 0) setIsDragging(false); return Math.max(0, newCount); }); };
+    const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); if (isUploading) return; setIsDragging(true); };
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); if (isUploading) return; setIsDragging(false); };
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); if (isUploading) return; if (!isDragging) setIsDragging(true); };
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); if (isUploading) return; setIsDragging(false); setDragCounter(0); if (e.dataTransfer.files && e.dataTransfer.files.length > 0) { addFiles(Array.from(e.dataTransfer.files)); } };
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); if (isUploading) return; setIsDragging(false); if (e.dataTransfer.files && e.dataTransfer.files.length > 0) { addFiles(Array.from(e.dataTransfer.files)); } };
 
     // Helper Functions (keep as they are)
     const formatFileSize = (bytes: number) => { if (bytes === 0) return '0 Bytes'; const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']; const i = Math.floor(Math.log(bytes) / Math.log(k)); return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]; };

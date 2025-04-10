@@ -42,8 +42,8 @@ export const RecommendationsPage: React.FC = () => {
     // State for API Errors
     const [mutationError, setMutationError] = useState<string | null>(null);
 
-    // State for removed movies
-    const [removedMovies, setRemovedMovies] = useState<Record<number, string[]>>({});
+    // State for removed movies (unused for now, keep if needed later)
+    // const [removedMovies, setRemovedMovies] = useState<Record<number, string[]>>({});
 
     // --- Data Fetching ---
     const { data, loading: loadingSections, error: queryError, refetch } = useQuery<{ recommendations: ApiRecommendationSection[] }>(
@@ -75,7 +75,7 @@ export const RecommendationsPage: React.FC = () => {
 
     const [removeMovieMutation, { loading: removingMovie }] = useMutation(REMOVE_MOVIE_FROM_SECTION, {
          onError: (err) => handleMutationError(err, 'remove movie'),
-         onCompleted: (removedData) => {
+         onCompleted: (/* removedData */) => { // removedData is unused
              setMutationError(null);
              // If removing selected movies, clear selection
              if (deleteActionContext?.type === 'single' && deleteActionContext.movie) {
@@ -89,7 +89,7 @@ export const RecommendationsPage: React.FC = () => {
          // awaitRefetchQueries: true,
     });
 
-    const isMutating = addingMovie || removingMovie;
+    // const isMutating = addingMovie || removingMovie; // Unused variable
 
     // --- Handlers ---
 
@@ -111,7 +111,7 @@ export const RecommendationsPage: React.FC = () => {
         try {
             // Calculate starting display order (simple approach: max + 1)
             const section = sections.find(s => s.id === sectionId);
-            const maxOrder = section ? Math.max(-1, ...section.movies.map((m, index) => index)) : -1; // Use index as order proxy if display_order isn't fetched reliably
+            const maxOrder = section ? Math.max(-1, ...section.movies.map((/* m, */ index) => index)) : -1; // Use index as order proxy, m is unused
 
             // Run mutations sequentially or in parallel (parallel might overwhelm backend/network)
             for (let i = 0; i < moviesToAdd.length; i++) {

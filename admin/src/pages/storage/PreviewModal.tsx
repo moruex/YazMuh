@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, CircularProgress, Typography, Box, TextField, Tooltip, Link } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, CircularProgress, Typography, Box, TextField /*, Tooltip, Link */ } from '@mui/material'; // Removed Tooltip, Link
 import { copyToClipboardLog } from '@utils/utils'; // Adjust import path
 import { Link as LinkIcon } from 'lucide-react'; // Renamed to avoid conflict
-import { Close, CopyAll } from '@mui/icons-material';
+import { Close /*, CopyAll */ } from '@mui/icons-material'; // Removed CopyAll
 import { FileItem } from './interface'; // Adjust import path
 import { getSignedUrlForDownload } from './utils'; // Import the specific util for temporary links
 import { addNotification } from '@utils/utils'; // Import notification util

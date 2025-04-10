@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useQuery, useMutation, ApolloError } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { debounce } from 'lodash';
 import {
   Button,

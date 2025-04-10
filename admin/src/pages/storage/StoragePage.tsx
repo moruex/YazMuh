@@ -7,7 +7,6 @@ import PreviewModal from '@pages/storage/PreviewModal';
 import InfoModal from '@pages/storage/InfoModal';
 import RenameModal from '@pages/storage/RenameModal';
 import CreateFolderModal from '@pages/storage/CreateFolderModal';
-import UploadFilesModal from '@pages/storage/UploadFilesModal';
 import { addNotification, copyToClipboard, copyToClipboardLog } from '@utils/utils';
 import DeleteConfirmation from '@components/modals/DeleteConfirmation';
 import { FileItem } from './interface';
@@ -21,9 +20,7 @@ import {
 import { AuthContext } from '@pages/app/App';
 import { AdminRole, ApiAdmin } from '@interfaces/index';
 import { IconButton } from '@mui/material';
-import { FileTable } from './FileTable';
-import { FileBreadcrumbs } from './FileBreadcrumbs';
-import { UploadFilesModal as UploadFilesModalComponent } from './UploadFilesModal';
+import UploadFilesModal from './UploadFilesModal';
 
 // --- Helper Functions ---
 const formatFileSize = (bytes: number | null): string => {
@@ -94,7 +91,7 @@ export const StoragePage: React.FC = () => {
         if (!admin) return;
         setIsLoading(true);
         try {
-            const files = await listFilesGraphQL(currentPath || '');
+            const files = await listFilesGraphQL(currentPath || null);
             setItems(files);
         } catch (error) {
             setItems([]);
@@ -434,7 +431,7 @@ export const StoragePage: React.FC = () => {
 
                 {/* Modals */}
                 {modalState.upload && (
-                    <UploadFilesModalComponent
+                    <UploadFilesModal
                         isOpen={true}
                         onClose={() => toggleModal('upload', false)}
                         onUploadComplete={loadFiles}

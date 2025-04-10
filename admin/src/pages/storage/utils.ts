@@ -1,6 +1,6 @@
 // src/pages/storage/utils.ts
 import { addNotification } from '@utils/utils'; // Keep notification util
-import { FileUser, FileItem } from './interface'; // Use the updated FileItem
+import { /* FileUser, */ FileItem } from './interface'; // Use the updated FileItem, removed FileUser
 import {
     LIST_FILES,
     CREATE_FOLDER,
@@ -10,7 +10,7 @@ import {
     GET_SIGNED_DOWNLOAD_URL,
     GET_FILE_INFO // Optional: if needed for InfoModal pre-fetch
 } from '@graphql/index'; // Adjust path if needed
-import { AdminRole } from '@interfaces/index';
+// import { AdminRole } from '@interfaces/index'; // Removed AdminRole
 import client from '@graphql/apolloClient';
 
 // --- GraphQL API Functions ---

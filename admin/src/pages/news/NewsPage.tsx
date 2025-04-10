@@ -1,6 +1,6 @@
 // src/pages/Admin/NewsPage.tsx
 
-import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, ApolloError } from '@apollo/client';
 import { debounce } from 'lodash';
 import {
@@ -14,8 +14,6 @@ import type { ApiNews, NewsInputData } from '../../interfaces'; // Adjust path
 import { NewsTable } from './NewsTable';
 import { AddEditNewsModal } from './AddEditNewsModal';
 import { ViewNewsModal } from './ViewNewsModal';
-import { ApiAdmin } from '@interfaces/index';
-import { AuthContext } from '@pages/app/App';
 import { Search } from 'lucide-react';
 
 // Define types for query data and variables
@@ -48,10 +46,6 @@ export const NewsPage = () => {
     const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
         open: false, message: '', severity: 'success'
     });
-
-    // --- Auth Context ---
-    // Explicitly type the context value if possible, using ApiAdmin from interfaces
-    // const auth = useContext<{ admin: ApiAdmin | null }>(AuthContext as any); // Unused variable
 
     // --- Apollo Query ---
     const queryVariables = useMemo(() => ({

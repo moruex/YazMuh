@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Grid, Paper, Typography, CircularProgress, Alert } from '@mui/material';
+import { Button, Grid, /* Paper, */ Typography, CircularProgress, Alert } from '@mui/material';
 import { Edit, Trash2 } from 'lucide-react';
 import { AddEditQuestionModal } from '@pages/quiz/AddEditQuestionModal';
 import { useQuery, useMutation } from '@apollo/client';

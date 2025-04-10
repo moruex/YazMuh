@@ -21,7 +21,7 @@ const RenameModal: React.FC<RenameModalProps> = ({ isOpen, onClose, onRename, se
     const [error, setError] = useState('');
 
     const handleRenameModal = () => {
-        const trimmedValue = newName.trim();
+        const trimmedValue = newName?.trim();
         if (!trimmedValue) {
             setError('Filename cannot be empty.');
             return;
@@ -30,10 +30,13 @@ const RenameModal: React.FC<RenameModalProps> = ({ isOpen, onClose, onRename, se
         const originalFilename = path.basename(selectedItem?.name ?? '');
         if (trimmedValue === originalFilename) {
             onClose(); // No change
-        } else {
-            onRename(trimmedValue);
+            return; // Exit early
         }
+        
+        onRename(trimmedValue);
         setNewName('');
+        setError('');
+        // onClose will likely be called by the parent after onRename completes
     };
 
     return (
@@ -46,9 +49,14 @@ const RenameModal: React.FC<RenameModalProps> = ({ isOpen, onClose, onRename, se
                 <TextField
                     sx={{ mt: 2}}
                     placeholder={selectedItem?.name}
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
+                    value={newName || ''}
+                    onChange={(e) => {
+                        setNewName(e.target.value);
+                        if (error) setError('');
+                    }}
                     fullWidth
+                    error={!!error}
+                    helperText={error}
                 />
             </DialogContent>
             <DialogActions className='dialog-actions'>
@@ -59,6 +67,7 @@ const RenameModal: React.FC<RenameModalProps> = ({ isOpen, onClose, onRename, se
                     onClick={handleRenameModal}
                     variant="contained"
                     color="primary"
+                    disabled={!newName?.trim() || newName.trim() === path.basename(selectedItem?.name ?? '')}
                     >
                     Rename
                 </Button>

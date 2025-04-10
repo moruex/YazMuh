@@ -1,6 +1,6 @@
 // src/pages/UsersPage.tsx
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Edit, Trash2, Search, Plus } from 'lucide-react';
+import React, { useState, useRef, Ref } from 'react';
+import { Edit, Trash2, Search } from 'lucide-react';
 import './Users.css'; // Keep your existing styles
 import { Button, CircularProgress, Box, Alert } from '@mui/material';
 import { Add } from '@mui/icons-material';
@@ -153,7 +153,7 @@ export const UsersPage: React.FC = () => {
           fields: {
             users(existingUserRefs = [], { readField }) {
               return existingUserRefs.filter(
-                userRef => userId !== readField('id', userRef)
+                (userRef: Ref<unknown>) => userId !== readField('id', userRef)
               );
             },
             // Decrement count

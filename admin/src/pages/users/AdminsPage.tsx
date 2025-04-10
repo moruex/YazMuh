@@ -1,6 +1,6 @@
 // src/pages/AdminsPage.tsx
-import React, { useState, useRef } from 'react';
-import { Edit, Trash2, Search, Info, Plus } from 'lucide-react';
+import React, { useState, useRef, Ref } from 'react';
+import { Edit, Trash2, Search, Info } from 'lucide-react';
 import './Users.css'; // Reuse the same CSS file if styles are similar
 
 import { Button, CircularProgress, Box, Alert } from '@mui/material';
@@ -140,7 +140,7 @@ export const AdminsPage: React.FC = () => {
         cache.modify({
           fields: {
             admins(existingRefs = [], { readField }) {
-              return existingRefs.filter(ref => adminId !== readField('id', ref));
+              return existingRefs.filter((ref: Ref<unknown>) => adminId !== readField('id', ref));
             },
             adminCount(existingCount = 0) {
               return Math.max(0, existingCount - 1);

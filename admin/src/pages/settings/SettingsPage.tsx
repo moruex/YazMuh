@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AlertColor } from '@mui/material';
 
 import { toast } from 'react-toastify';
 
@@ -32,9 +33,7 @@ export const SettingsPage: React.FC<SettingsProps> = () => {
   const [apiRateLimit, setApiRateLimit] = useState<number>(1000);
   const [logLevel, setLogLevel] = useState<string>('info');
 
-  const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' as AlertColor });
-
-  const addNotification = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+  const addNotification = (message: string, type: AlertColor) => {
     toast[type](message, { autoClose: 3000 });
   };
 
