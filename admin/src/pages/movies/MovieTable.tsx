@@ -137,7 +137,7 @@ export const MovieTable = memo(({
 }: MovieTableProps) => {
   const isEmpty = !isLoading && movies.length === 0 && totalCount === 0;
 
-  const handleChangePage = useCallback((event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+  const handleChangePage = useCallback((_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     onPageChange(newPage);
   }, [onPageChange]);
 

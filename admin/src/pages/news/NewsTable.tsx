@@ -1,11 +1,17 @@
 // src/components/News/NewsTable.tsx
 
 import React from 'react';
-import { Edit, Trash2 } from "lucide-react"; // Use Eye for View
+import { Edit, Trash2, Eye } from "lucide-react"; // Add Eye
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    IconButton, Tooltip,
+    // IconButton, // Unused
+    Tooltip,
+    TablePagination, // Add TablePagination
+    Box, // Add Box
+    Typography, // Add Typography
+    Skeleton, // Add Skeleton
 } from '@mui/material';
+import { Image as ImageIcon } from '@mui/icons-material'; // Add ImageIcon
 // Use interface matching GraphQL schema
 import type { ApiNews } from '../../interfaces';
 

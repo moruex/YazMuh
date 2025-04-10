@@ -51,7 +51,7 @@ export const NewsPage = () => {
 
     // --- Auth Context ---
     // Explicitly type the context value if possible, using ApiAdmin from interfaces
-    const auth = useContext<{ admin: ApiAdmin | null }>(AuthContext as any); // Cast to any if context type isn't perfectly defined/exported
+    // const auth = useContext<{ admin: ApiAdmin | null }>(AuthContext as any); // Unused variable
 
     // --- Apollo Query ---
     const queryVariables = useMemo(() => ({
@@ -96,7 +96,7 @@ export const NewsPage = () => {
         setSearchTerm(event.target.value);
     };
 
-    const handlePageChange = (event: unknown, newPage: number) => {
+    const handlePageChange = (_event: unknown, newPage: number) => {
         setPage(newPage);
     };
 
@@ -130,12 +130,14 @@ export const NewsPage = () => {
         // setTimeout(() => setCurrentNews(null), 150);
     };
 
+    /* // Unused function
     const handleCloseSnackbar = (reason?: string) => {
         if (reason === 'clickaway') {
             return;
         }
         setSnackbar({ ...snackbar, open: false });
     };
+    */
 
     // Submit Handler for Add/Edit
     const handleSubmit = async (formData: NewsInputData) => {

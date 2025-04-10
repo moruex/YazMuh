@@ -177,7 +177,7 @@ export const ActorsPage: React.FC = () => {
     }
   };
 
-  const handlePageChange = (/* event: React.MouseEvent<HTMLButtonElement> | null, */ newPage: number) => {
+  const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage);
   };
 

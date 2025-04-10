@@ -4,9 +4,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EmptyPlaceholder from '@components/EmptyPlaceholder';
 import { Close } from '@mui/icons-material';
 import type { ApiQuizQuestion, ApiQuizChoiceInput, ApiCreateQuizQuestionInput, ApiUpdateQuizQuestionInput } from '@interfaces/quiz.interfaces';
-import { useMutation, useQuery } from '@apollo/client';
-import { ADD_QUESTION, UPDATE_QUESTION } from '@graphql/mutations/quiz.mutations';
-import { Checkbox, FormControlLabel, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 
 const defaultNewCard: ApiQuizChoiceInput = { choice_text: '', image_url: '' };
 
@@ -104,7 +101,7 @@ export const AddEditQuestionModal: React.FC<AddEditQuestionModalProps> = ({
             allowed_choices_count: formData.allowed_choices_count,
             choices: formData.choices.map(c => ({
                 choice_text: c.choice_text,
-                image_url: c.image_url || null
+                image_url: c.image_url || undefined
             }))
         };
 

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button,
-    Grid, IconButton, CircularProgress, Box, Typography, Autocomplete // For movie selection
+    Grid, IconButton, CircularProgress, Box, Typography,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 // Use interfaces matching GraphQL schema

@@ -3,16 +3,9 @@ import { useQuery, useMutation, ApolloError } from '@apollo/client';
 import { debounce } from 'lodash';
 import {
   Button,
-  TextField,
-  InputAdornment,
-  CircularProgress,
   ToggleButtonGroup,
   ToggleButton,
-  Paper,
-  Typography,
   Alert,
-  Box,
-  Snackbar,
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 
@@ -47,19 +40,18 @@ export const GenresPage = () => {
   const [currentGenre, setCurrentGenre] = useState<ApiGenreCore | null>(null);
 
   const [mutationLoading, setMutationLoading] = useState(false);
-  const [mutationError, setMutationError] = useState<ApolloError | null>(null);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
-    open: false, message: '', severity: 'success'
-  });
 
-  const queryVariables = useMemo(() => ({
-    limit: rowsPerPage,
-    offset: page * rowsPerPage,
-    search: debouncedSearchTerm.trim() || null,
-    isCollection: filterType === 'collections' ? true : filterType === 'genres' ? false : null,
-  }), [rowsPerPage, page, debouncedSearchTerm, filterType]);
+  const queryVariables = useMemo(() => {
+    const trimmedSearch = debouncedSearchTerm.trim();
+    return {
+      limit: rowsPerPage,
+      offset: page * rowsPerPage,
+      search: trimmedSearch ? trimmedSearch : undefined,
+      isCollection: filterType === 'collections' ? true : filterType === 'genres' ? false : null,
+    };
+  }, [rowsPerPage, page, debouncedSearchTerm, filterType]);
 
-  const { data, loading: queryLoading, error: queryError, refetch } = useQuery<
+  const { data, loading: queryLoading, error: queryError } = useQuery<
     GenresQueryData,
     GenresQueryVars
   >(GET_GENRES, {
@@ -92,7 +84,7 @@ export const GenresPage = () => {
   };
 
   const handleFilterChange = (
-    event: React.MouseEvent<HTMLElement>,
+    _event: React.MouseEvent<HTMLElement>,
     newFilter: FilterType | null,
   ) => {
     if (newFilter !== null) {
@@ -101,7 +93,7 @@ export const GenresPage = () => {
     }
   };
 
-  const handlePageChange = (event: unknown, newPage: number) => {
+  const handlePageChange = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -113,13 +105,11 @@ export const GenresPage = () => {
   const handleOpenAddModal = () => {
     setCurrentGenre(null);
     setOpenAddModal(true);
-    setMutationError(null);
   };
 
   const handleOpenEditModal = (genre: ApiGenreCore) => {
     setCurrentGenre(genre);
     setOpenEditModal(true);
-    setMutationError(null);
   };
 
   const handleCloseModals = () => {
@@ -129,26 +119,32 @@ export const GenresPage = () => {
 
   const handleSubmit = async (formData: GenreInputData) => {
     setMutationLoading(true);
-    setMutationError(null);
+    const mode = openAddModal ? 'add' : openEditModal ? 'edit' : undefined;
+
     try {
       if (mode === 'add') {
         await createGenre({
           variables: { input: formData },
           refetchQueries: [{ query: GET_GENRES, variables: queryVariables }],
         });
-        setSnackbar({ open: true, message: 'Genre created successfully!', severity: 'success' });
+        console.log('Genre created successfully!');
       } else if (mode === 'edit' && currentGenre) {
         await updateGenre({
           variables: { id: currentGenre.id, input: formData },
           refetchQueries: [{ query: GET_GENRES, variables: queryVariables }],
         });
-        setSnackbar({ open: true, message: 'Genre updated successfully!', severity: 'success' });
+        console.log('Genre updated successfully!');
       }
       handleCloseModals();
     } catch (err) {
       console.error("Mutation error:", err);
-      setMutationError(err as ApolloError);
-      setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' });
+      let errorMessage = 'An unknown error occurred during mutation.';
+      if (err instanceof Error) {
+        errorMessage = `Error: ${err.message}`;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      }
+      alert(errorMessage);
     } finally {
       setMutationLoading(false);
     }
@@ -160,17 +156,21 @@ export const GenresPage = () => {
     }
 
     setMutationLoading(true);
-    setMutationError(null);
     try {
       await deleteGenre({
         variables: { id },
         refetchQueries: [{ query: GET_GENRES, variables: queryVariables }],
       });
-      setSnackbar({ open: true, message: 'Genre deleted successfully!', severity: 'success' });
+      console.log('Genre deleted successfully!');
     } catch (err) {
       console.error("Delete error:", err);
-      setMutationError(err as ApolloError);
-      setSnackbar({ open: true, message: `Error deleting genre: ${err.message}`, severity: 'error' });
+      let errorMessage = 'An unknown error occurred during deletion.';
+      if (err instanceof Error) {
+        errorMessage = `Error deleting genre: ${err.message}`;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      }
+      alert(errorMessage);
     } finally {
       setMutationLoading(false);
     }

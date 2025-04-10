@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useContext, useCallback } from 'rea
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useMutation, useApolloClient, ApolloError } from '@apollo/client'; // Import ApolloError
 import { toast } from 'react-toastify';
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+// import { Visibility, VisibilityOff } from "@mui/icons-material"; // Unused imports
 
 import lightBgVideo from '@assets/back1m.mp4';
 import darkBgVideo from '@assets/back2m.mp4';
@@ -11,7 +11,7 @@ import lightBgImage from '@assets/back1.png';
 import darkBgImage from '@assets/back2.png';
 
 import { ADMIN_LOGIN, FORGOT_PASSWORD } from '@graphql/index';
-import { AdminLoginInput } from "@interfaces/index";
+import { AdminLoginInput, AdminLoginPayload } from "@interfaces/index"; // Import AdminLoginPayload
 import { AuthContext } from '@pages/app/App';
 
 import "@pages/login/Login.css";
@@ -27,6 +27,7 @@ export const LoginPage = () => {
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const [forgotUsername, setForgotUsername] = useState('');
     const [videoLoaded, setVideoLoaded] = useState(false);
+    const [currentTheme, setCurrentTheme] = useState('light'); // State for the current theme
     const videoRef = useRef<HTMLVideoElement>(null);
 
     const navigate = useNavigate();
@@ -39,39 +40,74 @@ export const LoginPage = () => {
      const locationState = location.state as { from?: Location };
      const from = locationState?.from?.pathname || '/dashboard';
 
-    // Set up video source based on theme and handle loading state
+    // Get theme from HTML attribute and update state
+    useEffect(() => {
+        const updateTheme = () => {
+            const themeAttr = document.documentElement.getAttribute('data-theme') || 'light';
+            setCurrentTheme(themeAttr);
+        };
+
+        updateTheme(); // Initial check
+
+        // Observe changes to the data-theme attribute
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                    updateTheme();
+                }
+            });
+        });
+
+        observer.observe(document.documentElement, { attributes: true });
+
+        return () => observer.disconnect(); // Cleanup observer on unmount
+    }, []);
+
+    // Set up video source based on theme state and handle loading state
     useEffect(() => {
         const videoElement = videoRef.current;
         if (!videoElement) return;
 
-        const currentSource = theme === 'dark' ? darkBgVideo : lightBgVideo;
+        const currentSource = currentTheme === 'dark' ? darkBgVideo : lightBgVideo;
 
-        // Check if the source needs to be changed
-        if (videoElement.currentSrc !== currentSource) {
-            // videoElement.src = currentSource;
-            setVideoLoaded(false); // Reset loaded state when source changes
+        // Check if the source needs to be changed or video needs loading
+        if (videoElement.src !== currentSource || !videoLoaded) {
+            // Check if src needs update before loading
+            if (videoElement.src !== currentSource) {
+                videoElement.src = currentSource;
+                setVideoLoaded(false); // Reset loaded state when source changes
+            }
 
-            const handleLoadedData = () => setVideoLoaded(true);
-            // videoElement.addEventListener('loadeddata', handleLoadedData);
+            const handleLoadedData = () => {
+                if (!videoLoaded) { // Prevent setting state if already loaded
+                    setVideoLoaded(true);
+                    // Attempt to play after loading
+                    videoElement.play().catch(error => {
+                        console.warn("Video autoplay prevented:", error);
+                        // Consider showing a manual play button if autoplay fails
+                    });
+                }
+            };
 
-            // Start loading the video
-            // videoElement.load(); // Important to reload if src changed
+            // Add event listener if not already loaded
+            if (!videoLoaded) {
+                videoElement.addEventListener('loadeddata', handleLoadedData);
+            }
 
-            // Play when ready (needed after manual load/src change)
-            // videoElement.play().catch(error => {
-            //      // Autoplay might be blocked, user interaction might be needed
-            //      console.warn("Video autoplay prevented:", error);
-            //      // Maybe show a play button overlay
-            // });
+            // If src changed, load it
+            if (videoElement.src === currentSource && videoElement.currentSrc !== currentSource) {
+                videoElement.load();
+            } else if (videoElement.readyState >= 3 && !videoLoaded) {
+                 // If ready state is already sufficient and source is correct, trigger load manually
+                 handleLoadedData();
+            }
 
+            // Cleanup function
             return () => {
                 videoElement.removeEventListener('loadeddata', handleLoadedData);
             };
-        } else if (!videoLoaded && videoElement.readyState >= 3) {
-            // If source is the same but video wasn't marked loaded, mark it now if ready
-            setVideoLoaded(true);
         }
-    }, [theme, videoLoaded]); // Add videoLoaded dependency
+    }, [currentTheme, videoLoaded]); // Depend on currentTheme and videoLoaded
 
 
     const [adminLogin, { loading: loginLoading, error: loginError }] = useMutation<
@@ -195,7 +231,7 @@ export const LoginPage = () => {
         }
     }, [forgotUsername, forgotPassword]); // Dependencies
 
-    const bgImage = theme === 'dark' ? darkBgImage : lightBgImage;
+    const bgImage = currentTheme === 'dark' ? darkBgImage : lightBgImage;
 
     // If authentication check is still running and we might be logged in, show loading
     if (!authCheckComplete && localStorage.getItem('jwt_token')) {
@@ -225,7 +261,7 @@ export const LoginPage = () => {
                     muted
                     loop
                     playsInline
-                    key={theme} // Re-trigger loading when theme changes
+                    // key={currentTheme} // Remove key, useEffect handles source changes
                     // src is set in useEffect
                 >
                     Your browser does not support the video tag.

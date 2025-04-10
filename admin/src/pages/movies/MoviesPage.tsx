@@ -14,7 +14,7 @@ import {
   GET_MOVIE,
   UPDATE_MOVIE,
 } from "@graphql/index";
-import { Movie, MovieInputData, ApiMovieCore, ApiMovieDetail, RoleType, ApiPersonCore } from "@interfaces/index";
+import { Movie, MovieInputData, ApiMovieCore, ApiMovieDetail, ApiPersonCore } from "@interfaces/index";
 import { ApolloError } from '@apollo/client';
 
 // --- Notification System ---
