@@ -12,7 +12,7 @@ import {
   CircularProgress, // For loading state
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import type { GqlPerson, PersonSubmitInput } from '@src/types/person.types'; // Adjust import path
+import type { ApiPersonCore as GqlPerson, PersonInput as PersonSubmitInput } from '@interfaces/person.interfaces'; // Corrected import path and names
 
 // Helper to format Date object to 'YYYY-MM-DD' or return empty string
 const formatDateForInput = (date: Date | string | null | undefined): string => {

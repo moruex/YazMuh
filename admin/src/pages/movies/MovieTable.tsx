@@ -1,6 +1,6 @@
 // MovieTable.tsx
 import React, { useState, useCallback, memo } from "react";
-import { Movie } from "@interfaces/interfaces";
+import { Movie } from "@interfaces/movie.interfaces";
 import { Edit, Info, Trash2 } from "lucide-react";
 import { CircularProgress, Typography, Box, TablePagination } from "@mui/material";
 

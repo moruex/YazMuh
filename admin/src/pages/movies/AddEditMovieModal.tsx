@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import { Close, Add } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
-import { Movie } from '@interfaces/interfaces'; // Use the unified frontend interface
+import { Movie } from '@interfaces/movie.interfaces'; // Corrected import path
 
 interface AddEditMovieModalProps {
     mode: 'add' | 'edit';

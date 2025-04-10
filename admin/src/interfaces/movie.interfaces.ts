@@ -1,6 +1,6 @@
 // src/interfaces/movie.interfaces.ts
 import type { ApiGenreCore } from './genre.interfaces';
-import type { ApiMoviePerson } from './person.interfaces';
+import type { ApiPersonCore } from './person.interfaces';
 
 /** Represents the Movie structure used primarily in frontend components. */
 export interface Movie {
@@ -64,5 +64,5 @@ export interface ApiMovieDetail {
     created_at: string; // Or DateTime scalar
     updated_at: string; // Or DateTime scalar
     genres?: ApiGenreCore[];
-    persons?: ApiMoviePerson[];
+    persons?: ApiPersonCore[];
 }

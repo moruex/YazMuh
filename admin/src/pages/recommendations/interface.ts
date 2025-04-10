@@ -1,4 +1,4 @@
-import { Movie } from "@pages/movies/interface";
+import { Movie } from "@interfaces/movie.interfaces";
 
 export interface Category {
     id: number;

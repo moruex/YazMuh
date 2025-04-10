@@ -1,5 +1,3 @@
-import { Category, Movie, News } from "@utils/interfaces";
-
 export const mockDataTeam = [
   {
     id: 1,
@@ -1281,3 +1279,5 @@ export const mockGeographyData = [
     value: 171135,
   },
 ];
+
+export const data = []

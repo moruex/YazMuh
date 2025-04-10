@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Close } from "@mui/icons-material";
 import { Box, Dialog, DialogTitle, IconButton, DialogContent, Typography, Rating, Chip, DialogActions, Button, Grid } from "@mui/material";
-import { Movie } from "@interfaces/interfaces"; // Use unified frontend interface
+import { Movie } from "@interfaces/movie.interfaces"; // Corrected import path
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 interface ViewMovieModalProps {

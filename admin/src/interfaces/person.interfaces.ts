@@ -1,5 +1,4 @@
 // src/interfaces/person.interfaces.ts
-import type { RoleType } from './common.interfaces';
 
 /** Core fields representing a Person from the API. */
 export interface ApiPersonCore {
