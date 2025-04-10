@@ -176,10 +176,10 @@ const resolvers = {
   Query: {
     movie: async (_, { id }, { db, loaders }) => {
        if (loaders?.movieLoader) return loaders.movieLoader.load(id);
-      const result = await db.query('SELECT * FROM movies WHERE id = $1', [id]);
+      const result = await context.db.query('SELECT * FROM movies WHERE id = $1', [id]);
       return result.rows[0] || null;
     },
-    movies: async (_, { limit = 10, offset = 0, sortBy = 'release_date', sortDirection = 'DESC', genreId, search }, { db }) => {
+    movies: async (_, { limit = 10, offset = 0, sortBy = 'release_date', sortDirection = 'DESC', genreId, search }, context) => {
       // Validate sortBy and sortDirection
       const allowedSortBy = ['title', 'release_date', 'avg_rating', 'created_at', 'updated_at', 'duration_minutes'];
       const safeSortBy = allowedSortBy.includes(sortBy) ? sortBy : 'release_date';
@@ -209,10 +209,10 @@ const resolvers = {
       query += ` LIMIT $1 OFFSET $2`; // Use $1 and $2 for limit/offset
 
       // Execute
-      const result = await db.query(query, queryParams);
+      const result = await context.db.query(query, queryParams);
       return result.rows;
     },
-    movieCount: async (_, { genreId, search }, { db }) => {
+    movieCount: async (_, { genreId, search }, context) => {
         // ... (Movie count logic remains the same) ...
         let queryParams = [];
         let paramCounter = 1;
@@ -230,23 +230,23 @@ const resolvers = {
         }
         if (joinClauses.length > 0) query += ' ' + joinClauses.join(' ');
         if (whereConditions.length > 0) query += ' WHERE ' + whereConditions.join(' AND ');
-        const result = await db.query(query, queryParams);
+        const result = await context.db.query(query, queryParams);
         return parseInt(result.rows[0].count, 10);
     },
 
     // <<< Recommendation Section Queries >>>
-    recommendationSections: async (_, { onlyActive = true }, { db }) => {
+    recommendationSections: async (_, { onlyActive = true }, context) => {
         let query = 'SELECT * FROM recommendation_sections';
         const values = [];
         if (onlyActive) {
             query += ' WHERE is_active = TRUE';
         }
         query += ' ORDER BY display_order ASC, title ASC';
-        const result = await db.query(query, values);
+        const result = await context.db.query(query, values);
         return result.rows;
     },
-    recommendationSection: async (_, { id }, { db }) => {
-        const result = await db.query('SELECT * FROM recommendation_sections WHERE id = $1', [id]);
+    recommendationSection: async (_, { id }, context) => {
+        const result = await context.db.query('SELECT * FROM recommendation_sections WHERE id = $1', [id]);
         return result.rows[0] || null;
     }
   },
@@ -261,7 +261,7 @@ const resolvers = {
             VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             RETURNING *`;
         const values = [title, release_date, plot_summary, poster_url, duration_minutes, trailer_url];
-        const result = await db.query(query, values);
+        const result = await context.db.query(query, values);
         return result.rows[0];
     },
     updateMovie: async (_, { id, input }, context) => {
@@ -276,20 +276,20 @@ const resolvers = {
         if (input.duration_minutes !== undefined) { setClauses.push(`duration_minutes = $${paramCounter++}`); values.push(input.duration_minutes); }
         if (input.trailer_url !== undefined) { setClauses.push(`trailer_url = $${paramCounter++}`); values.push(input.trailer_url); }
         if (setClauses.length === 0) {
-            const existing = await db.query('SELECT * FROM movies WHERE id = $1', [id]);
+            const existing = await context.db.query('SELECT * FROM movies WHERE id = $1', [id]);
             if (existing.rows.length === 0) throw new GraphQLError(`Movie with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
             return existing.rows[0];
         }
         values.push(id); // Add ID for WHERE clause (trigger handles updated_at)
         const query = `UPDATE movies SET ${setClauses.join(', ')} WHERE id = $${paramCounter} RETURNING *`;
-        const result = await db.query(query, values);
+        const result = await context.db.query(query, values);
         if (result.rows.length === 0) throw new GraphQLError(`Movie with ID ${id} not found or update failed.`, { extensions: { code: 'BAD_USER_INPUT' } });
         return result.rows[0];
     },
     deleteMovie: async (_, { id }, context) => {
         ensureAdminRole(context.admin, 'ADMIN'); // Example: Require higher role for deletion
         // CASCADE should handle related data in join tables
-        const result = await db.query('DELETE FROM movies WHERE id = $1 RETURNING id', [id]);
+        const result = await context.db.query('DELETE FROM movies WHERE id = $1 RETURNING id', [id]);
         if (result.rowCount === 0) {
             throw new GraphQLError(`Movie with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
         }
@@ -309,7 +309,7 @@ const resolvers = {
                 VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 RETURNING *`;
             const values = [title, dbSectionType, description, display_order, is_active];
-            const result = await db.query(query, values);
+            const result = await context.db.query(query, values);
             return result.rows[0];
         } catch (err) {
              console.error("Error creating recommendation section:", err);
@@ -335,7 +335,7 @@ const resolvers = {
         if (input.is_active !== undefined) { setClauses.push(`is_active = $${paramCounter++}`); values.push(input.is_active); }
 
         if (setClauses.length === 0) {
-            const existing = await db.query('SELECT * FROM recommendation_sections WHERE id = $1', [id]);
+            const existing = await context.db.query('SELECT * FROM recommendation_sections WHERE id = $1', [id]);
              if (!existing.rows[0]) throw new GraphQLError(`Recommendation section with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
              return existing.rows[0]; // Return existing if no changes
         }
@@ -344,7 +344,7 @@ const resolvers = {
         const query = `UPDATE recommendation_sections SET ${setClauses.join(', ')} WHERE id = $${paramCounter} RETURNING *`;
 
         try {
-            const result = await db.query(query, values);
+            const result = await context.db.query(query, values);
             if (result.rows.length === 0) throw new GraphQLError(`Recommendation section with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
             return result.rows[0];
         } catch (err) {
@@ -357,7 +357,7 @@ const resolvers = {
     deleteRecommendationSection: async (_, { id }, context) => {
         ensureAdminRole(context.admin, 'ADMIN');
         // CASCADE constraint on recommendation_section_movies handles movie links
-        const result = await db.query('DELETE FROM recommendation_sections WHERE id = $1 RETURNING id', [id]);
+        const result = await context.db.query('DELETE FROM recommendation_sections WHERE id = $1 RETURNING id', [id]);
         if (result.rowCount === 0) {
             throw new GraphQLError(`Recommendation section with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
         }
@@ -366,15 +366,15 @@ const resolvers = {
     addMovieToSection: async (_, { sectionId, movieId, displayOrder }, context) => {
         ensureAdminRole(context.admin, 'CONTENT_MODERATOR');
         // Check if section and movie exist
-        const sectionExists = await db.query('SELECT id FROM recommendation_sections WHERE id = $1', [sectionId]);
+        const sectionExists = await context.db.query('SELECT id FROM recommendation_sections WHERE id = $1', [sectionId]);
         if (!sectionExists.rows[0]) throw new GraphQLError(`Recommendation section with ID ${sectionId} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
-        const movieExists = await db.query('SELECT id FROM movies WHERE id = $1', [movieId]);
+        const movieExists = await context.db.query('SELECT id FROM movies WHERE id = $1', [movieId]);
         if (!movieExists.rows[0]) throw new GraphQLError(`Movie with ID ${movieId} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
 
         let order = displayOrder;
         // If displayOrder is not provided, calculate the next available order
         if (order === undefined || order === null) {
-            const maxOrderResult = await db.query('SELECT MAX(display_order) as max_order FROM recommendation_section_movies WHERE section_id = $1', [sectionId]);
+            const maxOrderResult = await context.db.query('SELECT MAX(display_order) as max_order FROM recommendation_section_movies WHERE section_id = $1', [sectionId]);
             order = (maxOrderResult.rows[0]?.max_order ?? -1) + 1;
         }
 
@@ -384,21 +384,21 @@ const resolvers = {
                 VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
                 ON CONFLICT (section_id, movie_id) DO UPDATE SET display_order = EXCLUDED.display_order -- Update order if exists
                 RETURNING section_id`; // Return section_id to refetch parent
-            await db.query(query, [sectionId, movieId, order]);
+            await context.db.query(query, [sectionId, movieId, order]);
         } catch (err) {
              console.error("Error adding movie to section:", err);
              throw new Error('Failed to add movie to recommendation section.');
         }
 
         // Refetch the parent section
-        const updatedSection = await db.query('SELECT * FROM recommendation_sections WHERE id = $1', [sectionId]);
+        const updatedSection = await context.db.query('SELECT * FROM recommendation_sections WHERE id = $1', [sectionId]);
         return updatedSection.rows[0]; // Assume it still exists
     },
     removeMovieFromSection: async (_, { sectionId, movieId }, context) => {
         ensureAdminRole(context.admin, 'CONTENT_MODERATOR');
-        await db.query('DELETE FROM recommendation_section_movies WHERE section_id = $1 AND movie_id = $2', [sectionId, movieId]);
+        await context.db.query('DELETE FROM recommendation_section_movies WHERE section_id = $1 AND movie_id = $2', [sectionId, movieId]);
         // Refetch the parent section
-        const updatedSection = await db.query('SELECT * FROM recommendation_sections WHERE id = $1', [sectionId]);
+        const updatedSection = await context.db.query('SELECT * FROM recommendation_sections WHERE id = $1', [sectionId]);
          if (!updatedSection.rows[0]) throw new GraphQLError(`Recommendation section with ID ${sectionId} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
         return updatedSection.rows[0];
     },
@@ -406,23 +406,23 @@ const resolvers = {
         ensureAdminRole(context.admin, 'CONTENT_MODERATOR');
         // This is more complex - requires a transaction to potentially remove old movies
         // and update/insert new ones with specific orders.
-        await db.query('BEGIN');
+        await context.db.query('BEGIN');
         try {
             // 1. Optional: Remove movies not in the input list (or handle orphans differently)
             // Get current movie IDs in the section
-            const currentMoviesResult = await db.query('SELECT movie_id FROM recommendation_section_movies WHERE section_id = $1', [sectionId]);
+            const currentMoviesResult = await context.db.query('SELECT movie_id FROM recommendation_section_movies WHERE section_id = $1', [sectionId]);
             const currentMovieIds = currentMoviesResult.rows.map(r => r.movie_id.toString());
             const inputMovieIds = movies.map(m => m.movie_id.toString());
             const moviesToRemove = currentMovieIds.filter(id => !inputMovieIds.includes(id));
 
             if (moviesToRemove.length > 0) {
                  // Convert back to numbers if DB expects integers
-                await db.query('DELETE FROM recommendation_section_movies WHERE section_id = $1 AND movie_id = ANY($2::int[])', [sectionId, moviesToRemove]);
+                await context.db.query('DELETE FROM recommendation_section_movies WHERE section_id = $1 AND movie_id = ANY($2::int[])', [sectionId, moviesToRemove]);
             }
 
             // 2. Upsert the movies from the input list with new orders
             for (const movieInput of movies) {
-                await db.query(`
+                await context.db.query(`
                     INSERT INTO recommendation_section_movies (section_id, movie_id, display_order, added_at)
                     VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
                     ON CONFLICT (section_id, movie_id) DO UPDATE
@@ -430,15 +430,15 @@ const resolvers = {
                     [sectionId, movieInput.movie_id, movieInput.display_order]
                 );
             }
-            await db.query('COMMIT');
+            await context.db.query('COMMIT');
         } catch (err) {
-            await db.query('ROLLBACK');
+            await context.db.query('ROLLBACK');
             console.error("Error updating section movies:", err);
             throw new Error('Failed to update movies in recommendation section.');
         }
 
         // Refetch the updated section
-        const updatedSection = await db.query('SELECT * FROM recommendation_sections WHERE id = $1', [sectionId]);
+        const updatedSection = await context.db.query('SELECT * FROM recommendation_sections WHERE id = $1', [sectionId]);
         if (!updatedSection.rows[0]) throw new GraphQLError(`Recommendation section with ID ${sectionId} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
         return updatedSection.rows[0];
     }
@@ -447,18 +447,22 @@ const resolvers = {
   // --- Field Resolvers ---
   Movie: {
     // ... (genres, persons, comments, news resolvers remain the same) ...
-    genres: async (movie, _, { db, loaders }) => {
+    genres: async (movie, _, context) => {
       // Use DataLoader if implemented
-      const result = await db.query('SELECT g.* FROM genres g JOIN movie_genres mg ON g.id = mg.genre_id WHERE mg.movie_id = $1 ORDER BY g.name', [movie.id]);
+      const result = await context.db.query('SELECT g.* FROM genres g JOIN movie_genres mg ON g.id = mg.genre_id WHERE mg.movie_id = $1 ORDER BY g.name', [movie.id]);
       return result.rows;
     },
-    comments: async (movie, _, { db }) => {
+    persons: async (movie, _, context) => {
+      const result = await context.db.query('SELECT * FROM movie_persons WHERE movie_id = $1 ORDER BY display_order ASC', [movie.id]);
+      return result.rows; // Resolved further by MoviePerson resolvers
+    },
+    comments: async (movie, _, context) => {
       // Fetch only top-level comments for a movie? Or all?
-      const result = await db.query('SELECT * FROM comments WHERE movie_id = $1 AND parent_comment_id IS NULL ORDER BY created_at DESC', [movie.id]);
+      const result = await context.db.query('SELECT * FROM comments WHERE movie_id = $1 AND parent_comment_id IS NULL ORDER BY created_at DESC', [movie.id]);
       return result.rows; // Resolved further by Comment resolvers (including replies)
     },
-    news: async (movie, _, { db }) => {
-      const result = await db.query('SELECT n.* FROM news n JOIN news_movies nm ON n.id = nm.news_id WHERE nm.movie_id = $1 ORDER BY n.published_at DESC', [movie.id]);
+    news: async (movie, _, context) => {
+      const result = await context.db.query('SELECT n.* FROM news n JOIN news_movies nm ON n.id = nm.news_id WHERE nm.movie_id = $1 ORDER BY n.published_at DESC', [movie.id]);
       return result.rows;
     },
   },
@@ -466,7 +470,7 @@ const resolvers = {
   MoviePerson: {
     person: async (moviePerson, _, { db, loaders }) => {
        if (loaders?.personLoader) return loaders.personLoader.load(moviePerson.person_id);
-      const result = await db.query('SELECT * FROM persons WHERE id = $1', [moviePerson.person_id]);
+      const result = await context.db.query('SELECT * FROM persons WHERE id = $1', [moviePerson.person_id]);
       return result.rows[0];
     },
     role_type: (moviePerson) => mapRoleTypeToGraphQL(moviePerson.role_type),
@@ -478,7 +482,7 @@ const resolvers = {
     // Map section_type if DB value differs from GQL enum name
      section_type: (section) => section.section_type, // Assumes direct mapping works
 
-     movies: async (section, { limit = 10, offset = 0 }, { db, loaders }) => {
+     movies: async (section, { limit = 10, offset = 0 }, context) => {
          // Fetch movies linked to this section, ordered by their display order within the section
          const query = `
              SELECT m.*
@@ -487,11 +491,11 @@ const resolvers = {
              ORDER BY rsm.display_order ASC, rsm.added_at DESC
              LIMIT $2 OFFSET $3`;
          const values = [section.id, limit, offset];
-         const result = await db.query(query, values);
+         const result = await context.db.query(query, values);
          return result.rows;
      },
-     movieCount: async (section, _, { db }) => {
-        const result = await db.query('SELECT COUNT(*) FROM recommendation_section_movies WHERE section_id = $1', [section.id]);
+     movieCount: async (section, _, context) => {
+        const result = await context.db.query('SELECT COUNT(*) FROM recommendation_section_movies WHERE section_id = $1', [section.id]);
         return parseInt(result.rows[0].count, 10);
      }
   }

@@ -72,12 +72,12 @@ const typeDefs = gql`
 // --- Resolvers ---
 const resolvers = {
   Query: {
-    newsArticle: async (_, { id }, { db }) => {
-      const result = await db.query('SELECT * FROM news WHERE id = $1', [id]);
+    newsArticle: async (_, { id }, context) => {
+      const result = await context.db.query('SELECT * FROM news WHERE id = $1', [id]);
       return result.rows[0] || null;
     },
     // Updated newsList resolver
-    newsList: async (_, { limit = 10, offset = 0, movieId, search }, { db }) => {
+    newsList: async (_, { limit = 10, offset = 0, movieId, search }, context) => {
         let query = 'SELECT DISTINCT n.* FROM news n';
         const params = [];
         let paramIdx = 1;
@@ -101,11 +101,11 @@ const resolvers = {
         query += ` ORDER BY n.published_at DESC NULLS LAST, n.created_at DESC LIMIT $${paramIdx++} OFFSET $${paramIdx++}`; // Added fallback sort and NULLS LAST
         params.push(limit, offset);
 
-        const result = await db.query(query, params);
+        const result = await context.db.query(query, params);
         return result.rows;
     },
     // Added newsCount resolver
-    newsCount: async (_, { movieId, search }, { db }) => {
+    newsCount: async (_, { movieId, search }, context) => {
         let query = 'SELECT COUNT(DISTINCT n.id) FROM news n';
         const params = [];
         let paramIdx = 1;
@@ -126,7 +126,7 @@ const resolvers = {
         if(joinClauses.length > 0) query += ` ${joinClauses.filter((v, i, a) => a.indexOf(v) === i).join(' ')}`;
         if(whereClauses.length > 0) query += ` WHERE ${whereClauses.join(' AND ')}`;
 
-        const result = await db.query(query, params);
+        const result = await context.db.query(query, params);
         return parseInt(result.rows[0].count, 10);
     },
   },
@@ -237,7 +237,8 @@ const resolvers = {
        }
     },
 
-    deleteNews: async (_, { id }, { user, db }) => {
+    deleteNews: async (_, { id }, { admin, db }) => {
+       ensureAdmin(admin);
        await db.query('BEGIN');
        try {
            // Delete links first (important if no DB cascade constraint)
@@ -258,14 +259,14 @@ const resolvers = {
 
   // --- Field Resolvers for News ---
   News: {
-    author: async (news, _, { db }) => {
+    author: async (news, _, context) => {
         if (!news.author_id) return null; // Handle news items potentially not having an author
         // Select only necessary, non-sensitive fields
-        const result = await db.query('SELECT id, username, first_name, last_name, avatar_url FROM users WHERE id = $1', [news.author_id]);
+        const result = await context.db.query('SELECT id, username, first_name, last_name, avatar_url FROM users WHERE id = $1', [news.author_id]);
         return result.rows[0] || null; // Return null if author user record deleted
     },
-    movies: async (news, _, { db }) => {
-        const result = await db.query(
+    movies: async (news, _, context) => {
+        const result = await context.db.query(
             // Select necessary fields from movies
             `SELECT m.id, m.title, m.poster_url FROM movies m JOIN news_movies nm ON m.id = nm.movie_id WHERE nm.news_id = $1`,
              [news.id]

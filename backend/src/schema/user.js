@@ -221,7 +221,7 @@ const resolvers = {
         }
         query += ` ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
         values.push(limit, offset);
-        const result = await db.query(query, values);
+        const result = await context.db.query(query, values);
         return result.rows; // Already excluded password hash
     },
     userCount: async (_, { search }, context) => {
@@ -232,7 +232,7 @@ const resolvers = {
             query += ' WHERE lower(username) LIKE lower($1) OR lower(email) LIKE lower($1)';
             values.push(`%${search}%`);
         }
-        const result = await db.query(query, values);
+        const result = await context.db.query(query, values);
         return parseInt(result.rows[0].count, 10);
     },
     userList: async (_, { userId, listType }, { db }) => {

@@ -45,12 +45,12 @@ const typeDefs = gql`
 // --- Resolvers ---
 const resolvers = {
   Query: {
-    person: async (_, { id }, { db }) => {
+    person: async (_, { id }, context) => {
       // ... (existing implementation)
-      const result = await db.query('SELECT * FROM persons WHERE id = $1', [id]);
+      const result = await context.db.query('SELECT * FROM persons WHERE id = $1', [id]);
       return result.rows[0] || null;
     },
-    persons: async (_, { limit = 20, offset = 0, search }, { db }) => {
+    persons: async (_, { limit = 20, offset = 0, search }, context) => {
       // ... (existing implementation)
       let query = 'SELECT * FROM persons';
       const queryParams = [];
@@ -64,11 +64,11 @@ const resolvers = {
       query += ` ORDER BY name LIMIT $${paramCounter++} OFFSET $${paramCounter++}`;
       queryParams.push(limit, offset);
 
-      const result = await db.query(query, queryParams);
+      const result = await context.db.query(query, queryParams);
       return result.rows;
     },
     // --- ADD RESOLVER FOR personCount ---
-    personCount: async (_, { search }, { db }) => {
+    personCount: async (_, { search }, context) => {
         let query = 'SELECT COUNT(*) FROM persons';
         const queryParams = [];
         let paramCounter = 1;
@@ -77,7 +77,7 @@ const resolvers = {
             query += ` WHERE name ILIKE $${paramCounter++}`;
             queryParams.push(`%${search}%`);
         }
-        const result = await db.query(query, queryParams);
+        const result = await context.db.query(query, queryParams);
         return parseInt(result.rows[0].count, 10); // Ensure it returns a number
     }
   },
@@ -137,8 +137,8 @@ const resolvers = {
   },
   Person: {
     // ... (movie_roles resolver)
-    movie_roles: async (person, _, { db }) => {
-        const result = await db.query(
+    movie_roles: async (person, _, context) => {
+        const result = await context.db.query(
             'SELECT * FROM movie_persons WHERE person_id = $1',
              [person.id]
           );

@@ -170,7 +170,7 @@ const typeDefs = gql`
 // --- Resolvers ---
 const resolvers = {
     Query: {
-        comments: async (_, { movie_id = null, limit = 20, offset = 0, include_censored = false, search = null }, { db }) => { // Default movie_id to null
+        comments: async (_, { movie_id = null, limit = 20, offset = 0, include_censored = false, search = null }, context) => { // Default movie_id to null
             // Base query
             let query = `
               SELECT c.*
@@ -207,7 +207,7 @@ const resolvers = {
 
             console.log("Executing GLOBAL comment query:", query, values); // Log for debugging
             try {
-                const result = await db.query(query, values);
+                const result = await context.db.query(query, values);
                 return result.rows;
             } catch (err) {
                 console.error("Error fetching comments:", err)
@@ -215,8 +215,8 @@ const resolvers = {
             }
         },
         // Fetch a single comment
-        comment: async (_, { id }, { db }) => {
-            const result = await db.query('SELECT * FROM comments WHERE id = $1', [id]);
+        comment: async (_, { id }, context) => {
+            const result = await context.db.query('SELECT * FROM comments WHERE id = $1', [id]);
             if (!result.rows[0]) {
                 throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
@@ -225,7 +225,7 @@ const resolvers = {
             return result.rows[0];
         },
         // Fetch censorship reasons
-        censorshipReasons: async (_, { activeOnly = true }, { db }) => {
+        censorshipReasons: async (_, { activeOnly = true }, context) => {
             let query = 'SELECT reason_code, description, is_active FROM censorship_reasons';
             const values = [];
             if (activeOnly) {
@@ -233,14 +233,14 @@ const resolvers = {
                 values.push(true);
             }
             query += ' ORDER BY reason_code ASC';
-            const result = await db.query(query, values);
+            const result = await context.db.query(query, values);
             return result.rows;
         }
     },
 
     Mutation: {
         // --- User Mutations ---
-        createComment: async (_, { input }, { user, db }) => {
+        createComment: async (_, { input }, { user, db: contextDb }) => {
             ensureLoggedIn(user); // Use imported helper
             const { movie_id, content, parent_comment_id } = input;
 
@@ -248,12 +248,12 @@ const resolvers = {
                 throw new GraphQLError('Comment content cannot be empty.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
             // Check movie exists
-            const movieExists = await db.query('SELECT id FROM movies WHERE id = $1', [movie_id]);
+            const movieExists = await contextDb.query('SELECT id FROM movies WHERE id = $1', [movie_id]);
             if (movieExists.rows.length === 0) throw new GraphQLError('Movie not found.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             // Check parent comment exists if provided (and belongs to the same movie)
             if (parent_comment_id) {
-                const parentExists = await db.query('SELECT id FROM comments WHERE id = $1 AND movie_id = $2', [parent_comment_id, movie_id]);
+                const parentExists = await contextDb.query('SELECT id FROM comments WHERE id = $1 AND movie_id = $2', [parent_comment_id, movie_id]);
                 if (parentExists.rows.length === 0) throw new GraphQLError('Parent comment not found or does not belong to this movie.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
 
@@ -265,7 +265,7 @@ const resolvers = {
             const values = [user.id, movie_id, content, parent_comment_id];
 
             try {
-                const result = await db.query(query, values);
+                const result = await contextDb.query(query, values);
                 // TODO: Publish subscription event if using subscriptions
                 return result.rows[0];
             } catch (err) {
@@ -274,18 +274,18 @@ const resolvers = {
             }
         },
 
-        likeComment: async (_, { id }, { user, db }) => {
+        likeComment: async (_, { id }, { user, db: contextDb }) => {
             ensureLoggedIn(user);
-            const commentExists = await db.query('SELECT id FROM comments WHERE id = $1', [id]);
+            const commentExists = await contextDb.query('SELECT id FROM comments WHERE id = $1', [id]);
             if (commentExists.rows.length === 0) throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             try {
-                await db.query(
+                await contextDb.query(
                     'INSERT INTO comment_likes (user_id, comment_id, created_at) VALUES ($1, $2, CURRENT_TIMESTAMP) ON CONFLICT (user_id, comment_id) DO NOTHING',
                     [user.id, id]
                 );
                 // Refetch comment to return updated state (triggers handle count)
-                const updatedComment = await db.query('SELECT * FROM comments WHERE id = $1', [id]);
+                const updatedComment = await contextDb.query('SELECT * FROM comments WHERE id = $1', [id]);
                 return updatedComment.rows[0];
             } catch (err) {
                 console.error("Error liking comment:", err);
@@ -293,18 +293,18 @@ const resolvers = {
             }
         },
 
-        unlikeComment: async (_, { id }, { user, db }) => {
+        unlikeComment: async (_, { id }, { user, db: contextDb }) => {
             ensureLoggedIn(user);
-            const commentExists = await db.query('SELECT id FROM comments WHERE id = $1', [id]);
+            const commentExists = await contextDb.query('SELECT id FROM comments WHERE id = $1', [id]);
             if (commentExists.rows.length === 0) throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             try {
-                await db.query(
+                await contextDb.query(
                     'DELETE FROM comment_likes WHERE user_id = $1 AND comment_id = $2',
                     [user.id, id]
                 );
                 // Refetch comment
-                const updatedComment = await db.query('SELECT * FROM comments WHERE id = $1', [id]);
+                const updatedComment = await contextDb.query('SELECT * FROM comments WHERE id = $1', [id]);
                 return updatedComment.rows[0];
             } catch (err) {
                 console.error("Error unliking comment:", err);
@@ -561,22 +561,22 @@ const resolvers = {
     // --- Field Resolvers for Comment ---
     Comment: {
         // Resolve related User object
-        user: async (comment, _, { db, loaders }) => {
+        user: async (comment, _, { db: contextDb, loaders }) => {
             if (loaders?.userLoader) return loaders.userLoader.load(comment.user_id);
             // Fallback query (exclude sensitive fields)
-            const result = await db.query('SELECT id, username, avatar_url FROM users WHERE id = $1', [comment.user_id]);
+            const result = await contextDb.query('SELECT id, username, avatar_url FROM users WHERE id = $1', [comment.user_id]);
             return result.rows[0];
         },
         // Resolve related Movie object
-        movie: async (comment, _, { db, loaders }) => {
+        movie: async (comment, _, { db: contextDb, loaders }) => {
             if (loaders?.movieLoader) return loaders.movieLoader.load(comment.movie_id);
             // Fallback query
-            const result = await db.query('SELECT id, title, poster_url FROM movies WHERE id = $1', [comment.movie_id]);
+            const result = await contextDb.query('SELECT id, title, poster_url FROM movies WHERE id = $1', [comment.movie_id]);
             return result.rows[0];
         },
         // Resolve direct replies to this comment
-        replies: async (comment, _, { db }) => {
-            const result = await db.query(
+        replies: async (comment, _, context) => {
+            const result = await context.db.query(
                 // Fetch non-censored replies by default
                 'SELECT * FROM comments WHERE parent_comment_id = $1 AND is_currently_censored = FALSE ORDER BY created_at ASC',
                 [comment.id]
@@ -587,9 +587,9 @@ const resolvers = {
         likes_count: (comment) => comment.likes_count, // No need for extra query
 
         // Check if the current logged-in user liked this comment
-        is_liked_by_me: async (comment, _, { user, db }) => {
+        is_liked_by_me: async (comment, _, { user, db: contextDb }) => {
             if (!user || !user.id) return false; // Not logged in
-            const result = await db.query(
+            const result = await contextDb.query(
                 'SELECT 1 FROM comment_likes WHERE comment_id = $1 AND user_id = $2 LIMIT 1',
                 [comment.id, user.id]
             );
@@ -597,10 +597,10 @@ const resolvers = {
         },
 
         // Optional: Resolve censorship details on demand
-        // censorship_details: async (comment, _, { db }) => {
+        // censorship_details: async (comment, _, context) => {
         //    if (!comment.is_currently_censored) return null;
         //    // Fetch the latest log entry for this comment
-        //    const logResult = await db.query(`
+        //    const logResult = await context.db.query(`
         //        SELECT cl.*, r.description as reason_description, a.username as admin_username
         //        FROM comment_censorship_log cl
         //        JOIN censorship_reasons r ON cl.reason_code = r.reason_code

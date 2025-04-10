@@ -58,12 +58,12 @@ const typeDefs = gql`
 // --- Resolvers ---
 const resolvers = {
   Query: {
-    genre: async (_, { id }, { db }) => {
-      const result = await db.query('SELECT * FROM genres WHERE id = $1', [id]);
+    genre: async (_, { id }, context) => {
+      const result = await context.db.query('SELECT * FROM genres WHERE id = $1', [id]);
       return result.rows[0] || null;
     },
     // Updated genres resolver with filtering and pagination
-    genres: async (_, { limit, offset, search, isCollection }, { db }) => {
+    genres: async (_, { limit, offset, search, isCollection }, context) => {
       let query = 'SELECT * FROM genres';
       const values = [];
       const conditions = [];
@@ -98,11 +98,11 @@ const resolvers = {
       }
 
       // console.log("Executing Genres Query:", query, values); // Debugging
-      const result = await db.query(query, values);
+      const result = await context.db.query(query, values);
       return result.rows;
     },
     // Resolver for genreCount
-    genreCount: async (_, { search, isCollection }, { db }) => {
+    genreCount: async (_, { search, isCollection }, context) => {
         let query = 'SELECT COUNT(*) FROM genres';
         const values = [];
         const conditions = [];
@@ -124,7 +124,7 @@ const resolvers = {
         }
 
         // console.log("Executing Genre Count Query:", query, values); // Debugging
-        const result = await db.query(query, values);
+        const result = await context.db.query(query, values);
         return parseInt(result.rows[0].count, 10); // Ensure it's an integer
     },
   },
@@ -197,17 +197,17 @@ const resolvers = {
   // --- Field Resolvers for Genre ---
   Genre: {
     // Resolve the 'movies' field for a Genre
-    movies: async (genre, _, { db }) => {
+    movies: async (genre, _, context) => {
       // Add LIMIT if needed for performance in specific views
-      const result = await db.query(
+      const result = await context.db.query(
         `SELECT m.* FROM movies m JOIN movie_genres mg ON m.id = mg.movie_id WHERE mg.genre_id = $1`,
         [genre.id]
       );
       return result.rows;
     },
      // Optional: Resolve movieCount dynamically if not stored on genre table
-     movieCount: async (genre, _, { db }) => {
-        const result = await db.query('SELECT COUNT(*) FROM movie_genres WHERE genre_id = $1', [genre.id]);
+     movieCount: async (genre, _, context) => {
+        const result = await context.db.query('SELECT COUNT(*) FROM movie_genres WHERE genre_id = $1', [genre.id]);
         return parseInt(result.rows[0].count, 10);
      }
   },

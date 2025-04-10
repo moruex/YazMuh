@@ -83,12 +83,12 @@ const typeDefs = gql`
 // Resolvers (Simplified Quiz Structure)
 const resolvers = {
   Query: {
-    quizQuestions: async (_, { limit = 10, offset = 0 }, { db }) => {
-      const { rows } = await db.query('SELECT * FROM quiz_questions ORDER BY created_at DESC LIMIT $1 OFFSET $2', [limit, offset]);
+    quizQuestions: async (_, { limit = 10, offset = 0 }, context) => {
+      const { rows } = await context.db.query('SELECT * FROM quiz_questions ORDER BY created_at DESC LIMIT $1 OFFSET $2', [limit, offset]);
       return rows;
     },
-    quizQuestion: async (_, { id }, { db }) => {
-        const { rows } = await db.query('SELECT * FROM quiz_questions WHERE id = $1', [id]);
+    quizQuestion: async (_, { id }, context) => {
+        const { rows } = await context.db.query('SELECT * FROM quiz_questions WHERE id = $1', [id]);
         return rows[0] || null;
     },
     myQuizAnswers: async (_, { questionId }, { user, db }) => {
@@ -201,7 +201,7 @@ const resolvers = {
 
   // Field Resolvers
   QuizQuestion: {
-    choices: async (question, _, { db }) => (await db.query('SELECT * FROM quiz_choices WHERE question_id = $1 ORDER BY created_at ASC', [question.id])).rows,
+    choices: async (question, _, context) => (await context.db.query('SELECT * FROM quiz_choices WHERE question_id = $1 ORDER BY created_at ASC', [question.id])).rows,
     // correct_choices resolver removed
     user_answers: async (question, _, { user, db }) => {
          if (!user) return [];
