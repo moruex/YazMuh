@@ -1,8 +1,8 @@
 // MovieTable.tsx
-import React, { useState, useCallback, memo } from "react";
+import React, { useCallback, memo } from "react";
 import { Movie } from "@interfaces/movie.interfaces";
 import { Edit, Info, Trash2 } from "lucide-react";
-import { CircularProgress, Typography, Box, TablePagination } from "@mui/material";
+import { CircularProgress, Typography, TablePagination } from "@mui/material";
 
 interface MovieTableProps {
   movies: Movie[];
@@ -137,7 +137,7 @@ export const MovieTable = memo(({
 }: MovieTableProps) => {
   const isEmpty = !isLoading && movies.length === 0 && totalCount === 0;
 
-  const handleChangePage = useCallback((event: unknown, newPage: number) => {
+  const handleChangePage = useCallback((event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     onPageChange(newPage);
   }, [onPageChange]);
 

@@ -147,10 +147,10 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     return (
         <>
-            {!isLoginPage && (
+            {!isLoginPage && admin && admin.role && (
                 <>
-                    <Sidebar responsive={responsive} setResponsive={setResponsive} adminRole={admin?.role} />
-                    <MobileSidebar clicked={drawerOpen} setClicked={setDrawerOpen} adminRole={admin?.role} />
+                    <Sidebar responsive={responsive} setResponsive={setResponsive} adminRole={admin.role} />
+                    <MobileSidebar clicked={drawerOpen} setClicked={setDrawerOpen} adminRole={admin.role} />
                     {drawerOpen && <div className="sidebar-overlay active" onClick={closeDrawer}></div>}
                 </>
             )}

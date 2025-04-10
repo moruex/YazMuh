@@ -42,7 +42,7 @@ const transformApiMovie = (apiMovie: ApiMovieCore): Movie => ({
 
 // Transform API Detail data to frontend Movie interface
 const transformDetailApiMovie = (apiMovie: ApiMovieDetail): Movie => {
-  const getPersonNamesByRole = (persons: ApiPersonCore[] | undefined | null, role: RoleType): string[] => {
+  const getPersonNamesByRole = (persons: ApiPersonCore[] | undefined | null): string[] => {
     if (!Array.isArray(persons)) return [];
     return persons
       .map(p => p.name);
@@ -54,8 +54,8 @@ const transformDetailApiMovie = (apiMovie: ApiMovieDetail): Movie => {
     trailerUrl: apiMovie.trailer_url,
     description: apiMovie.plot_summary || 'No description available.',
     shortDescription: apiMovie.plot_summary ? `${apiMovie.plot_summary.substring(0, 120)}...` : '',
-    directors: getPersonNamesByRole(apiMovie.persons, RoleType.DIRECTOR),
-    actors: getPersonNamesByRole(apiMovie.persons, RoleType.ACTOR),
+    directors: getPersonNamesByRole(apiMovie.persons),
+    actors: getPersonNamesByRole(apiMovie.persons),
   };
 };
 
@@ -99,7 +99,7 @@ export const MoviesPage = () => {
   }), [pagination.rowsPerPage, pagination.page, searchTerm]);
 
   // --- GraphQL Queries ---
-  const { loading: listLoading, error: listError, data: listData, refetch } = useQuery(GET_MOVIES, {
+  const { loading: listLoading, data: listData, refetch } = useQuery(GET_MOVIES, {
     variables: queryVariables,
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network",
@@ -109,7 +109,7 @@ export const MoviesPage = () => {
     }
   });
 
-  const [getMovieDetail, { loading: detailLoading, error: detailError }] = useLazyQuery(GET_MOVIE, {
+  const [getMovieDetail, { loading: detailLoading }] = useLazyQuery(GET_MOVIE, {
     fetchPolicy: "network-only",
     onCompleted: (data) => {
       if (data?.movie) {

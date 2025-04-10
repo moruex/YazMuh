@@ -11,6 +11,8 @@ import {
   Paper,
   Typography,
   Alert,
+  Box,
+  Snackbar,
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 
@@ -21,6 +23,17 @@ import type { ApiGenreCore, GenreInputData } from '@interfaces/index';
 import { Search } from 'lucide-react';
 
 type FilterType = 'all' | 'genres' | 'collections';
+
+// Typings for GraphQL results (replace with generated types if possible)
+interface GenresQueryData {
+  genres: ApiGenreCore[];
+  genreCount: number;
+}
+interface GenresQueryVars {
+  limit: number;
+  offset: number;
+  search?: string;
+}
 
 export const GenresPage = () => {
   const [page, setPage] = useState(0);

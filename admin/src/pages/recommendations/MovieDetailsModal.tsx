@@ -1,7 +1,7 @@
 // --- START OF FILE MovieDetailsModal.tsx ---
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, CardMedia, Box, MobileStepper, CircularProgress, Alert } from '@mui/material';
-import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, CardMedia, Box, MobileStepper, Chip, Rating, IconButton } from '@mui/material';
+import { KeyboardArrowLeft, KeyboardArrowRight, Close } from '@mui/icons-material';
 // Use API types
 import type { ApiMovieCore } from '@interfaces/movie.interfaces';
 import type { ApiRecommendationSection } from '@interfaces/recommendation.interfaces';

@@ -42,7 +42,7 @@ export const CommentsTable = ({
   // Calculate total number of pages
   const pageCount = rowsPerPage > 0 ? Math.ceil(effectiveTotalCount / rowsPerPage) : 0;
   // Check if any data is currently displayed or available
-  const isDataPresent = comments.length > 0;
+  const isEmpty = !isLoading && comments.length === 0 && totalCount === 0;
 
   // Calculate the range of items being shown (e.g., "1-10")
   const showingFrom = effectiveTotalCount === 0 ? 0 : page * rowsPerPage + 1;

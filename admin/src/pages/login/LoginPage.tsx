@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useContext, useCallback } from 'rea
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useMutation, useApolloClient, ApolloError } from '@apollo/client'; // Import ApolloError
 import { toast } from 'react-toastify';
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 import lightBgVideo from '@assets/back1m.mp4';
 import darkBgVideo from '@assets/back2m.mp4';
@@ -10,8 +11,10 @@ import lightBgImage from '@assets/back1.png';
 import darkBgImage from '@assets/back2.png';
 
 import { ADMIN_LOGIN, FORGOT_PASSWORD } from '@graphql/index';
-import { AdminLoginInput, AdminLoginPayload, ApiAdmin } from '@interfaces/index'; // Import ApiAdmin
+import { AdminLoginInput } from "@interfaces/index";
 import { AuthContext } from '@pages/app/App';
+
+import "@pages/login/Login.css";
 
 // Define the expected shape of the adminLogin mutation result
 interface AdminLoginMutationResult {
@@ -23,7 +26,6 @@ export const LoginPage = () => {
     const [password, setPassword] = useState('');
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const [forgotUsername, setForgotUsername] = useState('');
-    const [theme, setTheme] = useState('light'); // Assuming theme logic is handled elsewhere or add it back
     const [videoLoaded, setVideoLoaded] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -77,10 +79,10 @@ export const LoginPage = () => {
         { input: AdminLoginInput }
     >(ADMIN_LOGIN);
 
-    const [forgotPassword, { loading: forgotLoading, error: forgotError }] = useMutation<
-        { forgotPassword: { success: boolean; message: string } },
-        { input: { username: string } }
-    >(FORGOT_PASSWORD);
+    const [forgotPassword, { loading: forgotLoading }] = useMutation(
+        FORGOT_PASSWORD,
+        { fetchPolicy: "no-cache" } // Don't cache login attempts
+    );
 
     // Redirect if already authenticated *after* auth check is complete
     useEffect(() => {

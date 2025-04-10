@@ -43,7 +43,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
     const displayLimit = loadedMovies[category.id] || 10;
     const moviesToShow = category.movies.slice(0, displayLimit);
     const currentSelected = selectedMovies[category.id] || [];
-    const allSelected = areAllSelected(category.id);
 
     return (
         // Keep existing outer container structure and class names

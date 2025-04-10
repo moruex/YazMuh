@@ -4,8 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo, useContext } from 're
 import { useQuery, useMutation, ApolloError } from '@apollo/client';
 import { debounce } from 'lodash';
 import {
-    Box, Button, TextField, InputAdornment, CircularProgress,
-    Paper, Typography, Alert, Snackbar // Added Snackbar
+    Box, Button, Alert
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 
@@ -53,7 +52,6 @@ export const NewsPage = () => {
     // --- Auth Context ---
     // Explicitly type the context value if possible, using ApiAdmin from interfaces
     const auth = useContext<{ admin: ApiAdmin | null }>(AuthContext as any); // Cast to any if context type isn't perfectly defined/exported
-    const admin = auth?.admin; // Get admin object (might be null initially)
 
     // --- Apollo Query ---
     const queryVariables = useMemo(() => ({
@@ -132,7 +130,7 @@ export const NewsPage = () => {
         // setTimeout(() => setCurrentNews(null), 150);
     };
 
-    const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    const handleCloseSnackbar = (reason?: string) => {
         if (reason === 'clickaway') {
             return;
         }
@@ -208,8 +206,6 @@ export const NewsPage = () => {
             setMutationLoading(false);
         }
     };
-
-    const isLoading = queryLoading || mutationLoading; // Combined loading state for disabling UI elements
 
     return (
         <Box sx={{ p: 2 }}>

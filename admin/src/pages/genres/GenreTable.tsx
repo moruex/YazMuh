@@ -1,4 +1,3 @@
-import { Trash2, Edit, Image as ImageIcon, CheckCircle, XCircle, SquareLibrary, Clapperboard } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -13,6 +12,13 @@ import {
   Skeleton,
   Tooltip,
 } from '@mui/material';
+import {
+  Trash2,
+  Edit,
+  Image as ImageIcon,
+  SquareLibrary,
+  Clapperboard,
+} from 'lucide-react';
 import type { ApiGenreCore } from '../../interfaces';
 
 interface GenreTableProps {

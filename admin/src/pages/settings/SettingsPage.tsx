@@ -12,7 +12,6 @@ export const SettingsPage: React.FC<SettingsProps> = () => {
   // Content Settings State
   const [recommendationAlgorithm, setRecommendationAlgorithm] = useState<string>('hybrid');
   const [autoPublishContent, setAutoPublishContent] = useState<boolean>(false);
-  const [contentModeration, setContentModeration] = useState<string>('hybrid');
   const [defaultMovieRating, setDefaultMovieRating] = useState<string>('PG-13');
 
   // Security Settings State
@@ -32,6 +31,8 @@ export const SettingsPage: React.FC<SettingsProps> = () => {
   // Extra Settings State
   const [apiRateLimit, setApiRateLimit] = useState<number>(1000);
   const [logLevel, setLogLevel] = useState<string>('info');
+
+  const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' as AlertColor });
 
   const addNotification = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
     toast[type](message, { autoClose: 3000 });

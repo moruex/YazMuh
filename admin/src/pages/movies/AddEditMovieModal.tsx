@@ -1,7 +1,7 @@
 // AddEditMovieModal.tsx
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button,
-    Chip, IconButton, Rating, Stack, Grid, InputAdornment, Box, Typography, CircularProgress
+    Chip, IconButton, Rating, Grid, InputAdornment, Box, Typography, CircularProgress
 } from '@mui/material';
 import { Close, Add } from '@mui/icons-material';
 import { useEffect, useState } from 'react';

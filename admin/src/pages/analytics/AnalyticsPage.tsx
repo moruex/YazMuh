@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useMemo } from 'react';
+// import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { StatCard } from '@components/StatCard';
 import { Activity, Calendar, Eye, Film, MessageSquare, Star, Users } from 'lucide-react';
@@ -53,6 +54,8 @@ export const AnalyticsPage = () => {
     }, []);
 
     // Memoize chart data to avoid recalculating on every render
+    // Remove unused mostLikedData
+    /*
     const mostLikedData = useMemo(() => ({
         labels: mostLikedFilms.map(film => film.title),
         datasets: [{
@@ -61,7 +64,10 @@ export const AnalyticsPage = () => {
             backgroundColor: 'rgba(75, 192, 192, 0.5)',
         }],
     }), [mostLikedFilms]);
+    */
 
+    // Remove unused mostRatedData
+    /*
     const mostRatedData = useMemo(() => ({
         labels: mostRatedFilms.map(film => film.title),
         datasets: [{
@@ -70,7 +76,10 @@ export const AnalyticsPage = () => {
             backgroundColor: 'rgba(153, 102, 255, 0.5)',
         }],
     }), [mostRatedFilms]);
+    */
 
+    // Remove unused mostViewedData
+    /*
     const mostViewedData = useMemo(() => ({
         labels: mostViewedFilms.map(film => film.title),
         datasets: [{
@@ -79,6 +88,7 @@ export const AnalyticsPage = () => {
             backgroundColor: 'rgba(37, 81, 255, 0.62)',
         }],
     }), [mostViewedFilms]);
+    */
 
     return (
         <div className="analytics-container">

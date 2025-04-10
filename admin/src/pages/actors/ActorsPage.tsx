@@ -3,7 +3,6 @@ import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, ApolloError } from "@apollo/client";
 import {
   Button,
-  TextField, // Use TextField for search input
   CircularProgress,
   Box, // For layout
   Typography, // For messages
@@ -20,6 +19,7 @@ import { AddEditActorsModal } from "./AddEditActorsModal";
 import { ApiPersonCore } from "@interfaces/index";
 import { PersonInput } from "@interfaces/person.interfaces";
 import { Search } from "lucide-react";
+import { debounce } from 'lodash'; // Re-add debounce import
 
 // Helper to format date string for display
 const formatDisplayDate = (dateString: string | null | undefined): string => {
@@ -177,7 +177,7 @@ export const ActorsPage: React.FC = () => {
     }
   };
 
-  const handlePageChange = (newPage: number) => {
+  const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage);
   };
 

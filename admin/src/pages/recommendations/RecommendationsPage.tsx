@@ -1,5 +1,5 @@
 // --- START OF FILE RecommendationsPage.tsx ---
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, ApolloError } from '@apollo/client';
 import { Box, CircularProgress, Alert } from '@mui/material'; // Import necessary MUI components
 
@@ -41,6 +41,9 @@ export const RecommendationsPage: React.FC = () => {
 
     // State for API Errors
     const [mutationError, setMutationError] = useState<string | null>(null);
+
+    // State for removed movies
+    const [removedMovies, setRemovedMovies] = useState<Record<number, string[]>>({});
 
     // --- Data Fetching ---
     const { data, loading: loadingSections, error: queryError, refetch } = useQuery<{ recommendations: ApiRecommendationSection[] }>(

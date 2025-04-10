@@ -10,7 +10,7 @@ import CreateFolderModal from '@pages/storage/CreateFolderModal';
 import UploadFilesModal from '@pages/storage/UploadFilesModal';
 import { addNotification, copyToClipboard, copyToClipboardLog } from '@utils/utils';
 import DeleteConfirmation from '@components/modals/DeleteConfirmation';
-import { FileItem, FileUser } from './interface';
+import { FileItem } from './interface';
 import {
     listFilesGraphQL,
     createFolderGraphQL,
@@ -20,7 +20,11 @@ import {
 } from './utils';
 import { AuthContext } from '@pages/app/App';
 import { AdminRole, ApiAdmin } from '@interfaces/index';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, CircularProgress, Typography, Box, TextField } from '@mui/material';
+import { IconButton } from '@mui/material';
+import { FileTable } from './FileTable';
+import { FileBreadcrumbs } from './FileBreadcrumbs';
+import { UploadFilesModal as UploadFilesModalComponent } from './UploadFilesModal';
+
 // --- Helper Functions ---
 const formatFileSize = (bytes: number | null): string => {
     if (bytes === null || bytes === undefined) return '-';
@@ -430,7 +434,7 @@ export const StoragePage: React.FC = () => {
 
                 {/* Modals */}
                 {modalState.upload && (
-                    <UploadFilesModal
+                    <UploadFilesModalComponent
                         isOpen={true}
                         onClose={() => toggleModal('upload', false)}
                         onUploadComplete={loadFiles}

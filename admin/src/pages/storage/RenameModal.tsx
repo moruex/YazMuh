@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
+import path from 'path';
 
 interface FileItem {
     name: string;
@@ -17,9 +18,21 @@ interface RenameModalProps {
 
 const RenameModal: React.FC<RenameModalProps> = ({ isOpen, onClose, onRename, selectedItem }) => {
     const [newName, setNewName] = useState(selectedItem?.name);
+    const [error, setError] = useState('');
 
     const handleRenameModal = () => {
-        onRename(newName);
+        const trimmedValue = newName.trim();
+        if (!trimmedValue) {
+            setError('Filename cannot be empty.');
+            return;
+        }
+        // Handle path.basename for undefined case
+        const originalFilename = path.basename(selectedItem?.name ?? '');
+        if (trimmedValue === originalFilename) {
+            onClose(); // No change
+        } else {
+            onRename(trimmedValue);
+        }
         setNewName('');
     };
 

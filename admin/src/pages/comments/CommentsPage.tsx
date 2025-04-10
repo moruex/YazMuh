@@ -1,7 +1,7 @@
 // src/pages/comments/CommentsPage.tsx
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, CircularProgress, Box, Alert, debounce, Tooltip, Checkbox, FormControlLabel, TextField, InputAdornment } from '@mui/material';
+import { Button, CircularProgress, Box, Alert, debounce, Checkbox, FormControlLabel, TextField, InputAdornment } from '@mui/material';
 import { Search, MessageSquarePlus } from 'lucide-react'; // Icons needed
 import { useQuery, useMutation, ApolloError } from '@apollo/client';
 

@@ -17,7 +17,7 @@ import {
 import { Close, Save, Logout } from '@mui/icons-material';
 import { AuthContext } from '@pages/app/App';
 import { UPDATE_CURRENT_ADMIN_PROFILE } from '@graphql/index';
-import { ApiAdmin } from '@interfaces/index';
+import { ApiAdmin, AdminUpdateInput, AdminPasswordInput } from '@interfaces/index';
 
 interface ProfileModalProps {
   isOpen: boolean;
