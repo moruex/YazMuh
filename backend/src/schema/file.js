@@ -1,6 +1,6 @@
 // src/schema/file.js
 // const { gql, UserInputError, AuthenticationError, ForbiddenError } = require('apollo-server-express');
-const { gql } = require('@apollo/server');
+const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql');
 const { S3Client, PutObjectCommand, ListObjectsV2Command, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand, HeadObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');

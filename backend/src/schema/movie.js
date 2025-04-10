@@ -1,5 +1,6 @@
 // src/schema/movie.js
-const { gql } = require('@apollo/server');
+// const { gql } = require('@apollo/server');
+const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql');
 const { _ensureAdminRole } = require('./admin'); // Assuming helper is exported or defined here
 

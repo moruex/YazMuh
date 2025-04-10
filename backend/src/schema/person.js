@@ -1,5 +1,6 @@
 // src/schema/person.js
-const { gql } = require('@apollo/server');
+// const { gql } = require('@apollo/server');
+const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql'); // Import GraphQLError for standard errors
 
 // --- Helper Functions ---

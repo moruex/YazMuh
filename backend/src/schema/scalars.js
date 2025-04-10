@@ -1,7 +1,8 @@
 // src/schema/scalars.js
 const { GraphQLScalarType, Kind } = require('graphql');
 const { GraphQLDateTime, GraphQLDate } = require('graphql-scalars');
-const { gql } = require('@apollo/server');
+// const { gql } = require('@apollo/server');
+const gql = require('graphql-tag');
 
 const typeDefs = gql`
   scalar Date # Corresponds to GraphQLDate from graphql-scalars

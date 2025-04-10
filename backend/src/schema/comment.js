@@ -1,5 +1,6 @@
 // src/schema/comment.js
-const { gql } = require('@apollo/server');
+// const { gql } = require('@apollo/server');
+const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql');
 
 // --- Helper Functions ---

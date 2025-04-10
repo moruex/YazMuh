@@ -1,6 +1,6 @@
 // src/schema/news.js
 // const { gql, AuthenticationError, ForbiddenError } = require('apollo-server-express');
-const { gql } = require('@apollo/server');
+const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql'); // Import GraphQLError
 
 // Helpers (assuming admin context is set up)

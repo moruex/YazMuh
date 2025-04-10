@@ -1,5 +1,6 @@
 // src/schema/user.js
-const { gql } = require('@apollo/server');
+// const { gql } = require('@apollo/server');
+const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');

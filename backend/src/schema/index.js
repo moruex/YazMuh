@@ -1,6 +1,6 @@
 // src/schema/index.js
-// const { gql } = require('apollo-server-express');
-const { gql } = require('@apollo/server');
+// const { gql } = require('@apollo/server');
+const gql = require('graphql-tag');
 const { merge } = require('lodash');
 const { makeExecutableSchema } = require('@graphql-tools/schema');
 

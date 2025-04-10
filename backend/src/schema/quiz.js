@@ -1,6 +1,6 @@
 // src/schema/quiz.js
 // const { gql, AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-express');
-const { gql } = require('@apollo/server');
+const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql');
 // Remove admin helper if not used directly, assume admin check is done via context if needed
 // const { _ensureAdminRole } = require('./admin');
