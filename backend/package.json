@@ -34,6 +34,7 @@
     "lodash": "^4.17.21",
     "pg": "^8.11.3",
     "pg-connection-string": "^2.6.2",
+    "serverless-http": "^3.2.0",
     "stream-to-buffer": "^0.1.0",
     "uuid": "^11.1.0"
   },

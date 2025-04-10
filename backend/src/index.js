@@ -6,10 +6,13 @@ const { expressMiddleware } = require('@apollo/server/express4'); // Correct imp
 const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer'); // Correct import
 const http = require('http');
 const jwt = require('jsonwebtoken');
+const serverless = require('serverless-http'); // Add this import
 // Removed: const { graphqlUploadExpress } = require('graphql-upload');
 const config = require('./config');
 const schema = require('./schema');
 const { db } = require('./db');
+
+let serverlessHandler = null; // Store the handler
 
 async function startApolloServer() {
     const app = express();
@@ -102,18 +105,57 @@ async function startApolloServer() {
         }),
     );
 
-    // --- Start Listening ---
-    await new Promise(resolve => httpServer.listen({ port: config.port }, resolve));
-    console.log(`🚀 Server ready at http://localhost:${config.port}/graphql`);
-    console.log(`🌱 Node Environment: ${config.nodeEnv}`);
-    if (!config.r2.endpoint || !config.r2.accessKeyId) {
-        console.warn("⚠️ R2 configuration missing or incomplete.");
-    } else {
-        console.log(`☁️  R2 Bucket: ${config.r2.bucketName}`);
-    }
+    return app; // Return the app instance
 }
 
-startApolloServer().catch(error => {
-    console.error('❌ Failed to start server:', error);
-    process.exit(1);
-});
+// Remove the direct call to start the server
+// startApolloServer().catch(error => {
+//     console.error('❌ Failed to start server:', error);
+//     process.exit(1);
+// });
+
+// Initialize the serverless handler asynchronously
+const initializeHandler = async () => {
+    if (serverlessHandler) {
+        return serverlessHandler;
+    }
+
+    try {
+        console.log("🚀 Initializing Apollo Server for serverless function...");
+        const app = await startApolloServer();
+        console.log("✅ Apollo Server initialized.");
+        serverlessHandler = serverless(app);
+        console.log("✅ Serverless handler created.");
+        return serverlessHandler;
+    } catch (error) {
+        console.error('❌ Failed to initialize serverless handler:', error);
+        // Throw the error so Netlify knows initialization failed
+        throw new Error(`Handler initialization failed: ${error.message}`);
+    }
+};
+
+
+// Export the handler for Netlify
+exports.handler = async (event, context) => {
+    try {
+        const handler = await initializeHandler();
+        // Log incoming event for debugging (optional)
+        // console.log('Incoming event:', JSON.stringify(event));
+        // console.log('Context:', JSON.stringify(context));
+
+        // Add a small delay if needed for cold starts, although usually not necessary
+        // await new Promise(resolve => setTimeout(resolve, 50));
+
+        const result = await handler(event, context);
+        // Log outgoing result for debugging (optional)
+        // console.log('Outgoing result:', JSON.stringify(result));
+        return result;
+    } catch (error) {
+        console.error('❌ Error executing handler:', error);
+        // Return a standard server error response
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: 'Internal Server Error during handler execution', details: error.message }),
+        };
+    }
+};
