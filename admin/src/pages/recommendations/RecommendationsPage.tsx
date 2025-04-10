@@ -73,7 +73,7 @@ export const RecommendationsPage: React.FC = () => {
         // awaitRefetchQueries: true, // Ensure refetch completes before proceeding if needed
     });
 
-    const [removeMovieMutation, { loading: removingMovie }] = useMutation(REMOVE_MOVIE_FROM_SECTION, {
+    const [removeMovieMutation, { /* loading: removingMovie */ }] = useMutation(REMOVE_MOVIE_FROM_SECTION, {
          onError: (err) => handleMutationError(err, 'remove movie'),
          onCompleted: (/* removedData */) => { // removedData is unused
              setMutationError(null);
@@ -111,7 +111,9 @@ export const RecommendationsPage: React.FC = () => {
         try {
             // Calculate starting display order (simple approach: max + 1)
             const section = sections.find(s => s.id === sectionId);
-            const maxOrder = section ? Math.max(-1, ...section.movies.map((/* m, */ index) => index)) : -1; // Use index as order proxy, m is unused
+            // Ensure map explicitly returns numbers
+            const movieIndices = section ? section.movies.map((_, index: number) => index) : [];
+            const maxOrder = movieIndices.length > 0 ? Math.max(...movieIndices) : -1;
 
             // Run mutations sequentially or in parallel (parallel might overwhelm backend/network)
             for (let i = 0; i < moviesToAdd.length; i++) {

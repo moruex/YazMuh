@@ -15,11 +15,11 @@ import client from '@graphql/apolloClient';
 
 // --- GraphQL API Functions ---
 
-export const listFilesGraphQL = async (directory: string): Promise<FileItem[]> => {
+export const listFilesGraphQL = async (directory: string | null): Promise<FileItem[]> => {
     try {
         const { data, errors } = await client.query<{ listFiles: FileItem[] }>({
             query: LIST_FILES,
-            variables: { directory: directory || null }, // Send null if empty string
+            variables: { directory: directory }, // Pass directly, null is handled by GQL variable type
             fetchPolicy: 'network-only', // Ensure fresh data
         });
 

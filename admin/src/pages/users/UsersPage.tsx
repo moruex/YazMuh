@@ -1,10 +1,10 @@
 // src/pages/UsersPage.tsx
-import React, { useState, useRef, Ref } from 'react';
+import React, { useState, useRef } from 'react';
 import { Edit, Trash2, Search } from 'lucide-react';
 import './Users.css'; // Keep your existing styles
 import { Button, CircularProgress, Box, Alert } from '@mui/material';
 import { Add } from '@mui/icons-material';
-import { useQuery, useMutation, ApolloError } from '@apollo/client';
+import { useQuery, useMutation, ApolloError, Reference } from '@apollo/client';
 
 // Import the actual mutations and queries
 import { AddEditUserModal } from './AddEditUserModal';
@@ -153,7 +153,7 @@ export const UsersPage: React.FC = () => {
           fields: {
             users(existingUserRefs = [], { readField }) {
               return existingUserRefs.filter(
-                (userRef: Ref<unknown>) => userId !== readField('id', userRef)
+                (userRef: Reference) => userId !== readField('id', userRef)
               );
             },
             // Decrement count

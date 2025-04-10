@@ -101,7 +101,7 @@ export const AddEditQuestionModal: React.FC<AddEditQuestionModalProps> = ({
             allowed_choices_count: formData.allowed_choices_count,
             choices: formData.choices.map(c => ({
                 choice_text: c.choice_text,
-                image_url: c.image_url || undefined
+                image_url: c.image_url || null
             }))
         };
 

@@ -1,11 +1,11 @@
 // src/pages/AdminsPage.tsx
-import React, { useState, useRef, Ref } from 'react';
+import React, { useState, useRef } from 'react';
 import { Edit, Trash2, Search, Info } from 'lucide-react';
 import './Users.css'; // Reuse the same CSS file if styles are similar
 
 import { Button, CircularProgress, Box, Alert } from '@mui/material';
 import { Add } from '@mui/icons-material';
-import { useQuery, useMutation, ApolloError } from '@apollo/client';
+import { useQuery, useMutation, ApolloError, Reference } from '@apollo/client';
 import { AdminRole } from '@interfaces/index';
 import { CREATE_ADMIN, DELETE_ADMIN, GET_ADMIN_COUNT, GET_ADMINS, UPDATE_ADMIN } from '@graphql/index';
 import { AddEditAdminModal } from './AddEditAminModal';
@@ -140,7 +140,7 @@ export const AdminsPage: React.FC = () => {
         cache.modify({
           fields: {
             admins(existingRefs = [], { readField }) {
-              return existingRefs.filter((ref: Ref<unknown>) => adminId !== readField('id', ref));
+              return existingRefs.filter((ref: Reference) => adminId !== readField('id', ref));
             },
             adminCount(existingCount = 0) {
               return Math.max(0, existingCount - 1);

@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
 import path from 'path';
+import { FileItem } from './interface'; // Import shared interface
 
+/* // Remove local definition
 interface FileItem {
     name: string;
     isDirectory: boolean;
     size: number;
     lastModified: string;
 }
+*/
 
 interface RenameModalProps {
     isOpen: boolean;
