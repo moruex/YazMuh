@@ -99,10 +99,13 @@ export const AddEditQuestionModal: React.FC<AddEditQuestionModalProps> = ({
         const submissionData = {
             question_text: formData.question_text,
             allowed_choices_count: formData.allowed_choices_count,
-            choices: formData.choices.map(c => ({
-                choice_text: c.choice_text,
-                image_url: c.image_url || undefined
-            }))
+            choices: formData.choices.map(c => {
+                const imageUrlValue = c.image_url ? c.image_url : undefined;
+                return {
+                    choice_text: c.choice_text,
+                    image_url: imageUrlValue
+                };
+            })
         };
 
         onSubmit(submissionData, questionToEdit?.id);
