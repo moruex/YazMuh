@@ -1,10 +1,9 @@
 // index.js (Main Server File)
 const express = require('express');
 const cors = require('cors');
-const { ApolloServer } = require('@apollo/server');
-const { expressMiddleware } = require('@apollo/server/express4');
-const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer');
-const http = require('http');
+const { ApolloServer } = require('@apollo/server'); // Correct import
+const { expressMiddleware } = require('@apollo/server/express4'); // Correct import
+const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer'); // Correct importconst http = require('http');
 const jwt = require('jsonwebtoken');
 // Removed: const { graphqlUploadExpress } = require('graphql-upload');
 const config = require('./config');
