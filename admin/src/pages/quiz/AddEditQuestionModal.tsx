@@ -103,7 +103,7 @@ export const AddEditQuestionModal: React.FC<AddEditQuestionModalProps> = ({
                 const imageUrlValue = c.image_url ? c.image_url : undefined;
                 return {
                     choice_text: c.choice_text,
-                    image_url: imageUrlValue
+                    image_url: imageUrlValue as (string | undefined)
                 };
             })
         };

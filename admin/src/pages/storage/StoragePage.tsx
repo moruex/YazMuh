@@ -91,7 +91,8 @@ export const StoragePage: React.FC = () => {
         if (!admin) return;
         setIsLoading(true);
         try {
-            const files = await listFilesGraphQL(currentPath || null);
+            const directoryArg = currentPath === '' ? null : currentPath;
+            const files = await listFilesGraphQL(directoryArg);
             setItems(files);
         } catch (error) {
             setItems([]);
