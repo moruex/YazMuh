@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useContext } from 'react';
 import { Folder, File, Upload, Edit, Trash2, Plus, Search, Download, ArrowUp, Info, Link as LinkIcon, Image as ImageIcon, RefreshCcw } from 'lucide-react';
-import path from 'path-browserify';
+import * as path from 'path-browserify';
 
 // Import Modals and Utils
 import PreviewModal from '@pages/storage/PreviewModal';
