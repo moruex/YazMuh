@@ -177,7 +177,7 @@ export const ActorsPage: React.FC = () => {
     }
   };
 
-  const handlePageChange = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+  const handlePageChange = (/* event: React.MouseEvent<HTMLButtonElement> | null, */ newPage: number) => {
     setPage(newPage);
   };
 
@@ -198,8 +198,8 @@ export const ActorsPage: React.FC = () => {
           <Search size={18} />
           <input
             type="text"
-            placeholder="Search movies..."
-            onChange={debouncedSetSearch}
+            placeholder="Search actors..."
+            onChange={(event) => debouncedSetSearch(event.target.value)} // Pass value from event
           />
         </div>
         <div style={{flex: 1}}></div>

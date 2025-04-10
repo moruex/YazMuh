@@ -23,16 +23,6 @@ export const REGISTER_USER = gql`
   }
 `;
 
-/** Login a user. Returns token and user object. */
-export const LOGIN_USER = gql`
-  ${AUTH_PAYLOAD_FIELDS}
-  mutation LoginUser($input: LoginInput!) {
-    loginUser(input: $input) {
-      ...AuthPayloadFields
-    }
-  }
-`;
-
 /** Update the currently logged-in user's profile. */
 export const UPDATE_LOGGED_IN_USER = gql`
   ${USER_FIELDS}

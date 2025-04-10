@@ -17,7 +17,7 @@ import {
 import { Close, Save, Logout } from '@mui/icons-material';
 import { AuthContext } from '@pages/app/App';
 import { UPDATE_CURRENT_ADMIN_PROFILE } from '@graphql/index';
-import { ApiAdmin, AdminUpdateInput, AdminPasswordInput } from '@interfaces/index';
+import { ApiAdmin /* AdminUpdateInput, AdminPasswordInput */ } from '@interfaces/index';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -43,7 +43,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
-  const [updateProfile, { loading, error }] = useMutation<
+  const [updateProfile, { loading /* error */ }] = useMutation<
     UpdateAdminSelfData,
     UpdateAdminSelfVars
   >(UPDATE_CURRENT_ADMIN_PROFILE);

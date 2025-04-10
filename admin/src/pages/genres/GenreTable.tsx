@@ -6,8 +6,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  IconButton,
-  Typography,
   TablePagination,
   Skeleton,
   Tooltip,

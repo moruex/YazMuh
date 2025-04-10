@@ -1,5 +1,5 @@
 // import React, { useEffect, useState, useMemo } from 'react';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState /* useMemo */ } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { StatCard } from '@components/StatCard';
 import { Activity, Calendar, Eye, Film, MessageSquare, Star, Users } from 'lucide-react';

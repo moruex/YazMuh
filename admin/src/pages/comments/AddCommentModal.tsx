@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button,
-  CircularProgress, IconButton, Alert, MenuItem
+  CircularProgress, IconButton, Alert /* MenuItem */
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { useMutation, ApolloError } from '@apollo/client';
@@ -14,11 +14,11 @@ interface AddCommentModalProps {
   onClose: () => void;
   // Pass current query variables to refetch correctly
   currentQueryVars: {
-      // movieId: string;
+      movieId?: string | null; // Add optional movieId
       limit: number;
       offset: number;
       includeCensored: boolean;
-      search: string;
+      search: string | null | undefined; // Allow null/undefined search
   }
 }
 
