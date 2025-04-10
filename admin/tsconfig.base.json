@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "lib": [
+      "DOM", 
+      "DOM.Iterable", 
+      "ESNext", 
+      "WebWorker"
+   ],
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "moduleResolution": "bundler",
+    "paths": { 
+      "@components/*": ["src/components/*"], 
+      "@pages/*": ["src/pages/*"], 
+      "@utils/*": ["src/utils/*"], 
+      "@graphql/*": ["src/graphql/*"], 
+      "@interfaces/*": ["src/interfaces/*"], 
+      "@styles/*": ["src/styles/*"], 
+      "@assets/*": ["src/assets/*"], 
+      "@data/*": ["src/data/*"], 
+      "@src/*": ["src/*"]
+    },
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true
+  }
+}

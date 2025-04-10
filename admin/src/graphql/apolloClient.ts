@@ -5,7 +5,7 @@ import { setContext } from '@apollo/client/link/context';
 // HTTP connection to your GraphQL API
 const httpLink = createHttpLink({
   // uri: 'YOUR_GRAPHQL_ENDPOINT', // Replace with your API endpoint URL
-  uri: 'http://localhost:4000/graphql', // Example using Vite env var
+  uri: 'https://movieq-backend.netlify.app/graphql', // Example using Vite env var
 });
 
 // Middleware link to set the Authorization header dynamically
