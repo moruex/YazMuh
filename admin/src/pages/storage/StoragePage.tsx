@@ -352,7 +352,7 @@ export const StoragePage: React.FC = () => {
                                             <div className='item-name-container'>
                                                 {item.isDirectory ?
                                                     <Folder size={18} /> :
-                                                    getFileIcon(item.name, item.publicUrl)
+                                                    getFileIcon(item.name, item.publicUrl || null)
                                                 }
                                                 <span>{item.name}</span>
                                             </div>

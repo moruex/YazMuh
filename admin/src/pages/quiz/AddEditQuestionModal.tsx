@@ -214,7 +214,7 @@ export const AddEditQuestionModal: React.FC<AddEditQuestionModalProps> = ({
                                         <div className="quiz-lcard">
                                             <img
                                                 className="quiz-card-image"
-                                                src={card.image_url}
+                                                src={card?.image_url || ''}
                                                 alt={card.choice_text}
                                             />
                                             <div className="quiz-lcard-choice">
