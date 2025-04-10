@@ -2,14 +2,7 @@
 // const { gql } = require('@apollo/server');
 const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql');
-
-// --- Helper Functions ---
-const _ensureAdmin = (adminUser) => {
-  if (!adminUser) {
-    throw new GraphQLError('Admin authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
-  }
-  // Add role check if needed
-};
+const { ensureAdmin } = require('../utils/authHelpers'); // Import helper
 
 // --- GraphQL Definitions ---
 const typeDefs = gql`
@@ -137,7 +130,7 @@ const resolvers = {
   },
   Mutation: {
     createGenre: async (_, { input }, { admin, db }) => {
-      _ensureAdmin(admin);
+      ensureAdmin(admin);
       const { name, description, image_url, is_collection } = input;
       // Explicitly default is_collection if not provided or null
       const isCollectionValue = is_collection === true;
@@ -158,7 +151,7 @@ const resolvers = {
     },
 
     updateGenre: async (_, { id, input }, { admin, db }) => {
-      _ensureAdmin(admin);
+      ensureAdmin(admin);
       const updates = [];
       const values = [];
       let paramCounter = 1;
@@ -186,7 +179,7 @@ const resolvers = {
     },
 
     deleteGenre: async (_, { id }, { admin, db }) => {
-      _ensureAdmin(admin);
+      ensureAdmin(admin);
        // BEFORE deleting, check if any movies are using this genre
       const movieCheck = await db.query('SELECT 1 FROM movie_genres WHERE genre_id = $1 LIMIT 1', [id]);
       if (movieCheck.rowCount > 0) {

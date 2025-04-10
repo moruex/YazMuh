@@ -2,6 +2,8 @@
 // const { gql } = require('@apollo/server');
 const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql');
+// Import helpers from the new utility file
+const { ensureLoggedIn, ensureAdminRole } = require('../utils/authHelpers');
 
 // --- Helper Functions ---
 // Assume these are defined in a shared utility or passed via context setup
@@ -9,11 +11,11 @@ const { GraphQLError } = require('graphql');
 // const { _ensureLoggedIn, _ensureAdminRole } = require('../utils/authHelpers');
 
 // Placeholder if not imported/shared:
-const _ensureLoggedIn = (user) => {
-    if (!user) {
-        throw new GraphQLError('You must be logged in to comment.', { extensions: { code: 'UNAUTHENTICATED' } });
-    }
-};
+// const _ensureLoggedIn = (user) => {
+//     if (!user) {
+//         throw new GraphQLError('You must be logged in to comment.', { extensions: { code: 'UNAUTHENTICATED' } });
+//     }
+// };
 
 const _ensureAdminRole = (context, requiredRole = 'CONTENT_MODERATOR') => {
     if (!context.admin || !context.admin.id) {
@@ -239,7 +241,7 @@ const resolvers = {
     Mutation: {
         // --- User Mutations ---
         createComment: async (_, { input }, { user, db }) => {
-            _ensureLoggedIn(user); // Ensure user is logged in
+            ensureLoggedIn(user); // Use imported helper
             const { movie_id, content, parent_comment_id } = input;
 
             if (!content.trim()) {
@@ -273,7 +275,7 @@ const resolvers = {
         },
 
         likeComment: async (_, { id }, { user, db }) => {
-            _ensureLoggedIn(user);
+            ensureLoggedIn(user);
             const commentExists = await db.query('SELECT id FROM comments WHERE id = $1', [id]);
             if (commentExists.rows.length === 0) throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
 
@@ -292,7 +294,7 @@ const resolvers = {
         },
 
         unlikeComment: async (_, { id }, { user, db }) => {
-            _ensureLoggedIn(user);
+            ensureLoggedIn(user);
             const commentExists = await db.query('SELECT id FROM comments WHERE id = $1', [id]);
             if (commentExists.rows.length === 0) throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
 
@@ -312,8 +314,7 @@ const resolvers = {
 
         // --- User OR Admin Mutations ---
         updateComment: async (_, { id, input }, context) => {
-            // This mutation can be performed by the comment owner OR an admin
-            const { user, db, admin } = context;
+            ensureLoggedIn(context.getCurrentActor()); // Use imported helper
             const { content } = input;
 
             if (!content.trim()) {
@@ -321,7 +322,7 @@ const resolvers = {
             }
 
             // 1. Fetch the comment to check ownership/existence
-            const commentResult = await db.query('SELECT user_id FROM comments WHERE id = $1', [id]);
+            const commentResult = await context.db.query('SELECT user_id FROM comments WHERE id = $1', [id]);
             if (commentResult.rows.length === 0) {
                 throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
@@ -331,14 +332,14 @@ const resolvers = {
             let canUpdate = false;
             let actingAdmin = null;
             // Check if logged-in user is the owner
-            if (user && user.id === commentOwnerId) {
+            if (context.getCurrentActor().id === commentOwnerId) {
                 canUpdate = true;
             }
             // If not the owner, check if an admin is acting
-            else if (admin && admin.id) {
+            else if (context.admin && context.admin.id) {
                 try {
                     // Ensure admin has sufficient role (e.g., CONTENT_MODERATOR)
-                    actingAdmin = _ensureAdminRole(context, 'CONTENT_MODERATOR');
+                    actingAdmin = ensureAdminRole(context.admin, 'CONTENT_MODERATOR');
                     canUpdate = true;
                     console.log(`Admin ${actingAdmin.id} authorized to update comment ${id}`);
                 } catch (authError) {
@@ -359,8 +360,8 @@ const resolvers = {
                 WHERE id = $2
                 RETURNING *`;
                 const values = [content, id];
-                const result = await db.query(query, values);
-                console.log(`Comment ${id} updated by ${user ? `user ${user.id}` : `admin ${actingAdmin?.id}`}`);
+                const result = await context.db.query(query, values);
+                console.log(`Comment ${id} updated by ${context.getCurrentActor() ? `user ${context.getCurrentActor().id}` : `admin ${actingAdmin?.id}`}`);
                 return result.rows[0];
             } catch (err) {
                 console.error("Error updating comment:", err);
@@ -369,45 +370,20 @@ const resolvers = {
         },
 
         deleteComment: async (_, { id }, context) => {
-            // This mutation can be performed by the comment owner OR an admin
-            const { user, db, admin } = context;
-
-            // 1. Fetch the comment to check ownership/existence
-            const commentResult = await db.query('SELECT user_id FROM comments WHERE id = $1', [id]);
-            if (commentResult.rows.length === 0) {
-                // Return true if already deleted (idempotency), or throw if it must exist
-                console.warn(`Attempted to delete non-existent comment ID: ${id}`);
-                return true; // Or throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
+            ensureLoggedIn(context.getCurrentActor()); // Use imported helper
+            const { rows: comments } = await context.db.query('SELECT user_id FROM comments WHERE id = $1', [id]);
+            if (comments.length === 0) {
+                throw new GraphQLError('Comment not found.', { extensions: { code: 'NOT_FOUND' } });
             }
-            const commentOwnerId = commentResult.rows[0].user_id;
-
-            // 2. Authorization Check (similar to updateComment)
-            let canDelete = false;
-            let actingAdmin = null;
-            if (user && user.id === commentOwnerId) {
-                canDelete = true;
-            } else if (admin && admin.id) {
-                try {
-                    // Admins might need higher privileges for deletion? Or same as update.
-                    actingAdmin = _ensureAdminRole(context, 'CONTENT_MODERATOR'); // Or 'ADMIN'
-                    canDelete = true;
-                    console.log(`Admin ${actingAdmin.id} authorized to delete comment ${id}`);
-                } catch (authError) {
-                    if (!canDelete) throw authError;
-                }
-            }
-
-            if (!canDelete) {
-                throw new GraphQLError('You do not have permission to delete this comment.', { extensions: { code: 'FORBIDDEN' } });
-            }
+            _ensureAdminOrOwner(context.getCurrentActor(), comments[0].user_id); // Using local helper
 
             // 3. Perform Deletion
             // Assuming ON DELETE CASCADE handles comment_likes and comment_censorship_log.
             // If not, delete from those tables first within a transaction.
             try {
-                const result = await db.query('DELETE FROM comments WHERE id = $1 RETURNING id', [id]);
+                const result = await context.db.query('DELETE FROM comments WHERE id = $1 RETURNING id', [id]);
                 if (result.rowCount > 0) {
-                    console.log(`Comment ${id} deleted by ${user ? `user ${user.id}` : `admin ${actingAdmin?.id}`}`);
+                    console.log(`Comment ${id} deleted by ${context.getCurrentActor() ? `user ${context.getCurrentActor().id}` : `admin ${context.admin?.id}`}`);
                     return true;
                 } else {
                     // Should not happen if existence check passed unless race condition
@@ -423,9 +399,8 @@ const resolvers = {
         },
 
         // --- Admin-Only Mutations ---
-        // --- Admin-Only Mutations ---
         censorComment: async (_, { id, input }, context) => {
-            const actingAdmin = _ensureAdminRole(context, 'CONTENT_MODERATOR');
+            const actingAdmin = ensureAdminRole(context.admin, 'CONTENT_MODERATOR');
             const { db } = context; // Assuming 'db' is the pg.Pool instance
             const { reason_code, admin_notes } = input;
 
@@ -486,7 +461,7 @@ const resolvers = {
         },
 
         uncensorComment: async (_, { id }, context) => {
-            const actingAdmin = _ensureAdminRole(context, 'CONTENT_MODERATOR');
+            const actingAdmin = ensureAdminRole(context.admin, 'CONTENT_MODERATOR');
             const { db } = context; // Assuming 'db' is the pg.Pool instance
 
             // Check if comment exists and is actually censored (can use pool directly for read)
@@ -539,7 +514,7 @@ const resolvers = {
 
         // --- NEW: Admin Add Comment Resolver ---
         adminAddComment: async (_, { input }, context) => {
-            const actingAdmin = _ensureAdminRole(context, 'CONTENT_MODERATOR'); // Or 'ADMIN'
+            const actingAdmin = ensureAdminRole(context.admin, 'ADMIN'); // Example: ADMIN role to add comment as admin
             const { db } = context;
             const { movie_id, content, parent_comment_id } = input;
 

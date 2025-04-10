@@ -2,11 +2,7 @@
 // const { gql, AuthenticationError, ForbiddenError } = require('apollo-server-express');
 const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql'); // Import GraphQLError
-
-// Helpers (assuming admin context is set up)
-const _ensureAdmin = (adminUser) => {
-  if (!adminUser) throw new GraphQLError('Admin authentication required.', { extensions: { code: 'UNAUTHENTICATED'} });
-};
+const { ensureAdmin } = require('../utils/authHelpers'); // Import helper
 
 // --- GraphQL Definitions ---
 const typeDefs = gql`
@@ -138,7 +134,7 @@ const resolvers = {
   Mutation: {
     createNews: async (_, { input }, { admin, db }) => {
       
-      _ensureAdmin(admin);
+      ensureAdmin(admin);
 
       const { title, short_content, content, image_url, published_at, movie_ids } = input;
 
@@ -177,7 +173,7 @@ const resolvers = {
 
     updateNews: async (_, { id, input }, { admin, db }) => {
       
-      _ensureAdmin(admin);
+      ensureAdmin(admin);
 
        const setClauses = [];
        const values = [];

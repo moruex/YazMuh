@@ -4,6 +4,8 @@ const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+// Import helpers from the new utility file
+const { ensureLoggedIn, ensureAdminRole } = require('../utils/authHelpers');
 // Assuming config is accessible or passed appropriately
 // const config = require('../config');
 
@@ -12,49 +14,6 @@ const config = {
     jwtSecret: process.env.JWT_SECRET || 'YOUR_REALLY_SECRET_KEY_PLEASE_CHANGE',
     jwtExpiration: process.env.JWT_EXPIRATION || '1d'
 };
-
-// --- Helper Functions ---
-const _ensureLoggedIn = (user) => {
-    if (!user) {
-        throw new GraphQLError('You must be logged in to perform this action.', {
-            extensions: {
-                code: 'UNAUTHENTICATED',
-            },
-        });
-    }
-};
-
-// --- Admin Helper Functions (Copied from admin.js - REFACOR to shared util recommended) ---
-const _ensureAdminLoggedIn = (context) => {
-  if (!context.admin || !context.admin.id) {
-    throw new GraphQLError('Admin authentication required. Please log in.', {
-        extensions: {
-            code: 'UNAUTHENTICATED',
-        },
-    });
-  }
-};
-
-const _ensureAdminRole = (context, requiredRole = 'ADMIN') => {
-  _ensureAdminLoggedIn(context); // First, ensure logged in as admin
-
-  const adminUser = context.admin; // Contains { id, role }
-  // Define hierarchy within this file or import from shared config
-  const rolesHierarchy = { CONTENT_MODERATOR: 1, ADMIN: 2, SUPER_ADMIN: 3 };
-  const userLevel = rolesHierarchy[adminUser.role] || 0;
-  const requiredLevel = rolesHierarchy[requiredRole] || 0;
-
-  if (userLevel < requiredLevel) {
-    console.warn(`Authorization failed: Admin ${adminUser.id} (Role: ${adminUser.role}) attempted user management action requiring ${requiredRole}.`);
-    throw new GraphQLError(`Insufficient privileges. Requires ${requiredRole} role or higher to manage users.`, {
-        extensions: {
-            code: 'FORBIDDEN',
-        },
-    });
-  }
-};
-// --- End Admin Helper Functions ---
-
 
 // --- GraphQL Definitions ---
 const typeDefs = gql`
@@ -250,9 +209,8 @@ const resolvers = {
         const { password_hash, ...publicUser } = result.rows[0];
         return publicUser;
     },
-     users: async (_, { limit = 20, offset = 0, search }, { db }) => {
-        // Requires admin check? Decide based on app requirements.
-        // Let's assume listing users is okay for now, or add _ensureAdminRole(context);
+     users: async (_, { limit = 20, offset = 0, search }, context) => {
+        // ensureAdminRole(context.admin, 'ADMIN'); // Example: Restrict listing users to admins
         let query = 'SELECT id, first_name, last_name, username, email, avatar_url, bio, created_at, updated_at FROM users'; // Explicitly exclude password_hash
         const values = [];
         let paramIndex = 1;
@@ -266,9 +224,8 @@ const resolvers = {
         const result = await db.query(query, values);
         return result.rows; // Already excluded password hash
     },
-    userCount: async (_, { search }, { db }) => {
-        // Requires admin check?
-        // Let's assume counting users is okay for now, or add _ensureAdminRole(context);
+    userCount: async (_, { search }, context) => {
+        // ensureAdminRole(context.admin, 'ADMIN'); // Example: Restrict counting users to admins
         let query = 'SELECT COUNT(*) FROM users';
         const values = [];
         if (search) {
@@ -413,7 +370,7 @@ const resolvers = {
     },
 
     updateUser: async (_, { input }, { user, db }) => {
-      _ensureLoggedIn(user); // User must be logged in (from context)
+      ensureLoggedIn(user); // Use imported helper
 
       const updates = [];
       const values = [];
@@ -491,7 +448,7 @@ const resolvers = {
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
                 },
-            }); // Should be caught by _ensureLoggedIn
+            }); // Should be caught by ensureLoggedIn
 
             const { password_hash, ...updatedUser } = result.rows[0];
             return updatedUser;
@@ -506,8 +463,7 @@ const resolvers = {
     },
 
     rateMovie: async (_, { input }, { user, db }) => {
-        // ... (Resolver remains largely the same, ensure trigger handles avg_rating) ...
-        _ensureLoggedIn(user);
+        ensureLoggedIn(user); // Use imported helper
         const { movie_id, rating } = input;
         if (rating < 1 || rating > 10) {
             throw new UserInputError('Rating must be between 1 and 10.');
@@ -529,8 +485,7 @@ const resolvers = {
     },
 
     deleteRating: async (_, { movie_id }, { user, db }) => {
-        // ... (Resolver remains the same, trigger handles avg_rating) ...
-        _ensureLoggedIn(user);
+        ensureLoggedIn(user); // Use imported helper
         const result = await db.query(
             'DELETE FROM user_ratings WHERE user_id = $1 AND movie_id = $2 RETURNING id',
             [user.id, movie_id]
@@ -540,8 +495,7 @@ const resolvers = {
     },
 
     addMovieToList: async (_, { movie_id, listType }, { user, db }) => {
-        // ... (Resolver remains largely the same) ...
-        _ensureLoggedIn(user);
+        ensureLoggedIn(user); // Use imported helper
         const dbListType = resolvers.ListType[listType];
         if (!dbListType) throw new UserInputError(`Invalid list type: ${listType}`);
 
@@ -570,8 +524,7 @@ const resolvers = {
     },
 
     removeMovieFromList: async (_, { movie_id, listType }, { user, db }) => {
-       // ... (Resolver remains largely the same) ...
-       _ensureLoggedIn(user);
+       ensureLoggedIn(user); // Use imported helper
        const dbListType = resolvers.ListType[listType];
        if (!dbListType) throw new UserInputError(`Invalid list type: ${listType}`);
 
@@ -598,7 +551,7 @@ const resolvers = {
     // --- NEW Admin User Management Resolvers ---
 
     adminUpdateUser: async (_, { id, input }, context) => {
-      _ensureAdminRole(context, 'ADMIN'); // Require at least ADMIN role
+      ensureAdminRole(context.admin, 'ADMIN'); // Use imported helper
 
       const { db } = context;
       const { first_name, last_name, username, email, avatar_url, bio } = input;
@@ -672,7 +625,7 @@ const resolvers = {
     },
 
     adminDeleteUser: async (_, { id }, context) => {
-      _ensureAdminRole(context, 'SUPER_ADMIN'); // Require SUPER_ADMIN for deletion
+      ensureAdminRole(context.admin, 'SUPER_ADMIN'); // Use imported helper
 
       const { db } = context;
       const adminId = context.admin.id;

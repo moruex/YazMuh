@@ -7,37 +7,15 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const ms = require('ms');
 const config = require('../config'); // Use centralized config
+// Import helpers from the new utility file
+const { ensureAdminLoggedIn, ensureAdminRole, rolesHierarchy } = require('../utils/authHelpers');
 
 // --- Helper Functions ---
-
-// Checks if context.admin (populated by middleware) exists.
-// Throws error if not logged in as an admin.
-const _ensureAdminLoggedIn = (context) => {
-  // context.admin might just contain { id, role } from the minimal middleware
-  if (!context.admin || !context.admin.id) {
-    throw new GraphQLError('Admin authentication required. Please log in.', { extensions: { code: 'UNAUTHENTICATED' } });
-  }
-};
-
-// Checks role AFTER ensuring logged in
-const _ensureAdminRole = (context, requiredRole = 'ADMIN') => {
-  _ensureAdminLoggedIn(context); // First, ensure logged in
-
-  const adminUser = context.admin; // Contains { id, role }
-  const rolesHierarchy = { CONTENT_MODERATOR: 1, ADMIN: 2, SUPER_ADMIN: 3 };
-  const userLevel = rolesHierarchy[adminUser.role] || 0;
-  const requiredLevel = rolesHierarchy[requiredRole] || 0;
-
-  if (userLevel < requiredLevel) {
-    console.warn(`Authorization failed: Admin ${adminUser.id} (Role: ${adminUser.role}) attempted action requiring ${requiredRole}.`);
-    throw new GraphQLError(`Insufficient privileges. Requires ${requiredRole} role or higher.`, { extensions: { code: 'FORBIDDEN' } });
-  }
-};
 
 // --- Fetch Full Admin Object (Helper for Resolvers) ---
 // Use this when a resolver needs more than just id/role from context.admin
 async function getFullAdminFromContext(context) {
-  _ensureAdminLoggedIn(context);
+  ensureAdminLoggedIn(context.admin);
   const adminId = context.admin.id;
   // Use DataLoader if available and appropriate
   if (context.loaders?.adminLoader) {
@@ -164,7 +142,7 @@ const resolvers = {
     },
 
     admin: async (_, { id }, context) => {
-      _ensureAdminRole(context, 'SUPER_ADMIN'); // Check role
+      ensureAdminRole(context.admin, 'SUPER_ADMIN'); // Check role
       // This query already selected avatar_url, just ensure aliases match logic
       const { rows } = await context.db.query(
         `SELECT a.*, u.id as uid, u.username as uname, u.avatar_url as uavatar_url, u.email as uemail -- etc
@@ -178,7 +156,7 @@ const resolvers = {
     },
 
     admins: async (_, { limit = 10, offset = 0, search }, context) => {
-      _ensureAdminRole(context, 'SUPER_ADMIN');
+      ensureAdminRole(context.admin, 'SUPER_ADMIN');
       
       let query, queryParams;
       
@@ -210,13 +188,13 @@ const resolvers = {
     },
 
     adminCount: async (_, __, context) => {
-      _ensureAdminRole(context, 'SUPER_ADMIN');
+      ensureAdminRole(context.admin, 'SUPER_ADMIN');
       const { rows } = await context.db.query('SELECT COUNT(*) FROM admins');
       return parseInt(rows[0].count, 10);
     },
 
     myAdminSessions: async (_, __, context) => {
-      _ensureAdminLoggedIn(context); // Ensure admin is logged in
+      ensureAdminLoggedIn(context.admin); // Ensure admin is logged in
       const currentJti = context.tokenPayload?.jti; // JTI from the token used for *this* request
       const adminId = context.admin.id;
 
@@ -289,7 +267,7 @@ const resolvers = {
 
     // Logout the *current* session identified by the token used for this request
     adminLogout: async (_, __, context) => {
-      _ensureAdminLoggedIn(context); // Ensure logged in
+      ensureAdminLoggedIn(context.admin);
       const jti = context.tokenPayload?.jti; // JTI from the current token
       const adminId = context.admin.id;
 
@@ -320,7 +298,7 @@ const resolvers = {
 
     // Logout a *specific* session by its JTI (e.g., from the session list)
     adminLogoutSession: async (_, { jti }, context) => {
-      _ensureAdminLoggedIn(context); // Ensure current user is an admin
+      ensureAdminLoggedIn(context.admin); // Ensure current user is an admin
       const adminId = context.admin.id; // ID of the admin *requesting* the logout
 
       if (!jti) {
@@ -386,7 +364,7 @@ const resolvers = {
     },
 
     updateAdminSelf: async (_, { input }, context) => {
-      _ensureAdminLoggedIn(context); // Check login
+      ensureAdminLoggedIn(context.admin); // Check login
       const adminId = context.admin.id;
       const { username, currentPassword, newPassword } = input;
 
@@ -468,7 +446,7 @@ const resolvers = {
     },
 
     createAdmin: async (_, { input }, context) => {
-      _ensureAdminRole(context, 'SUPER_ADMIN'); // Check role
+      ensureAdminRole(context.admin, 'SUPER_ADMIN'); // Check role
       const { userId, username, password, role } = input;
 
       // 1. Validate Input (e.g., password complexity)
@@ -517,7 +495,7 @@ const resolvers = {
     },
 
     updateAdmin: async (_, { id, input }, context) => {
-      _ensureAdminRole(context, 'SUPER_ADMIN');
+      ensureAdminRole(context.admin, 'SUPER_ADMIN');
       const { username, role } = input;
 
       if (!username && !role) {
@@ -599,7 +577,7 @@ const resolvers = {
     },
 
     deleteAdmin: async (_, { id }, context) => {
-      _ensureAdminRole(context, 'SUPER_ADMIN');
+      ensureAdminRole(context.admin, 'SUPER_ADMIN');
       const currentAdminId = context.admin.id;
 
       if (currentAdminId.toString() === id.toString()) {

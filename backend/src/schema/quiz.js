@@ -2,17 +2,10 @@
 // const { gql, AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-express');
 const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql');
+// Import helpers
+const { ensureAdmin, ensureLoggedIn } = require('../utils/authHelpers');
 // Remove admin helper if not used directly, assume admin check is done via context if needed
 // const { _ensureAdminRole } = require('./admin');
-
-// Helpers
-const _ensureAdmin = (adminUser) => {
-  if (!adminUser) throw new GraphQLError('Admin authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
-};
-
-const _ensureLoggedIn = (user) => { // Use user from context
-    if (!user) throw new GraphQLError('You must be logged in.', { extensions: { code: 'UNAUTHENTICATED' } });
-};
 
 // Type Definitions (Simplified Quiz Structure)
 const typeDefs = gql`
@@ -99,7 +92,7 @@ const resolvers = {
         return rows[0] || null;
     },
     myQuizAnswers: async (_, { questionId }, { user, db }) => {
-        _ensureLoggedIn(user);
+        ensureLoggedIn(user);
         let query = 'SELECT * FROM user_quiz_answers WHERE user_id = $1';
         const values = [user.id];
         if (questionId) { query += ' AND question_id = $2'; values.push(questionId); }
@@ -110,8 +103,9 @@ const resolvers = {
   },
 
   Mutation: {
-    createQuizQuestion: async (_, { input }, { admin, db }) => { // Use admin context
-      _ensureAdmin(admin);
+    createQuizQuestion: async (_, { input }, context) => {
+      ensureAdmin(context.admin);
+      const { db } = context;
       const { question_text, allowed_choices_count = 1, choices } = input;
 
       // Validations
@@ -157,7 +151,7 @@ const resolvers = {
     },
 
     submitUserAnswers: async (_, { input }, { user, db }) => {
-        _ensureLoggedIn(user);
+        ensureLoggedIn(user);
         const { question_id, choice_ids } = input;
 
         if (!choice_ids || choice_ids.length === 0) throw new GraphQLError('At least one choice ID must be provided.', { extensions: { code: 'BAD_USER_INPUT' } });

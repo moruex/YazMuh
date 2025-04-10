@@ -2,7 +2,8 @@
 // const { gql } = require('@apollo/server');
 const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql');
-const { _ensureAdminRole } = require('./admin'); // Assuming helper is exported or defined here
+// Import helpers from the new utility file
+const { ensureAdminRole, ensureLoggedIn } = require('../utils/authHelpers');
 
 // --- Helper Functions ---
 // (mapRoleTypeToGraphQL, mapGraphQLRoleToDB - keep as is)
@@ -13,31 +14,6 @@ const mapRoleTypeToGraphQL = (dbRole) => {
 const mapGraphQLRoleToDB = (gqlRole) => {
   const mapping = { ACTOR: 'actor', DIRECTOR: 'director', WRITER: 'writer', PRODUCER: 'producer', CINEMATOGRAPHER: 'cinematographer', COMPOSER: 'composer' };
   return gqlRole ? mapping[gqlRole] : null;
-};
-// Assuming _ensureAdmin is available (e.g., from admin.js or context setup)
-const _ensureAdmin = (adminUser) => {
-    if (!adminUser) {
-        throw new GraphQLError('Admin authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
-    }
-};
-
-const _ensureAdminRole = (adminUser, requiredRole = 'CONTENT_MODERATOR') => {
-    _ensureAdmin(adminUser); // First check if logged in
-
-    const rolesHierarchy = { CONTENT_MODERATOR: 1, ADMIN: 2, SUPER_ADMIN: 3 }; // Define or import hierarchy
-    const userLevel = rolesHierarchy[adminUser.role] || 0;
-    const requiredLevel = rolesHierarchy[requiredRole] || 0;
-
-    if (userLevel < requiredLevel) {
-        throw new GraphQLError(`Insufficient privileges. Requires ${requiredRole} role or higher.`, { extensions: { code: 'FORBIDDEN' } });
-    }
-};
-
-// Helper for standard user login check
-const _ensureLoggedIn = (user) => {
-    if (!user) {
-        throw new GraphQLError('You must be logged in to perform this action.', { extensions: { code: 'UNAUTHENTICATED' } });
-    }
 };
 
 // --- GraphQL Definitions ---
@@ -276,8 +252,8 @@ const resolvers = {
   },
 
   Mutation: {
-    createMovie: async (_, { input }, { admin, db }) => { // Changed user to admin
-        _ensureAdmin(admin); // Ensure admin is logged in
+    createMovie: async (_, { input }, context) => {
+        ensureAdminRole(context.admin, 'CONTENT_MODERATOR'); // Use imported helper
         const { title, release_date, plot_summary, poster_url, duration_minutes, trailer_url } = input;
         // Add validation (e.g., URL format) if needed
         const query = `
@@ -288,31 +264,30 @@ const resolvers = {
         const result = await db.query(query, values);
         return result.rows[0];
     },
-    updateMovie: async (_, { id, input }, { admin, db }) => { // Changed user to admin
-        _ensureAdmin(admin);
-        // ... (dynamic update logic remains the same) ...
-         const setClauses = [];
-         const values = [];
-         let paramCounter = 1;
-         if (input.title !== undefined) { setClauses.push(`title = $${paramCounter++}`); values.push(input.title); }
-         if (input.release_date !== undefined) { setClauses.push(`release_date = $${paramCounter++}`); values.push(input.release_date); }
-         if (input.plot_summary !== undefined) { setClauses.push(`plot_summary = $${paramCounter++}`); values.push(input.plot_summary); }
-         if (input.poster_url !== undefined) { setClauses.push(`poster_url = $${paramCounter++}`); values.push(input.poster_url); }
-         if (input.duration_minutes !== undefined) { setClauses.push(`duration_minutes = $${paramCounter++}`); values.push(input.duration_minutes); }
-         if (input.trailer_url !== undefined) { setClauses.push(`trailer_url = $${paramCounter++}`); values.push(input.trailer_url); }
-         if (setClauses.length === 0) {
-             const existing = await db.query('SELECT * FROM movies WHERE id = $1', [id]);
-             if (existing.rows.length === 0) throw new GraphQLError(`Movie with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
-             return existing.rows[0];
-         }
-         values.push(id); // Add ID for WHERE clause (trigger handles updated_at)
-         const query = `UPDATE movies SET ${setClauses.join(', ')} WHERE id = $${paramCounter} RETURNING *`;
-         const result = await db.query(query, values);
-         if (result.rows.length === 0) throw new GraphQLError(`Movie with ID ${id} not found or update failed.`, { extensions: { code: 'BAD_USER_INPUT' } });
-         return result.rows[0];
+    updateMovie: async (_, { id, input }, context) => {
+        ensureAdminRole(context.admin, 'CONTENT_MODERATOR'); // Use imported helper
+        const setClauses = [];
+        const values = [];
+        let paramCounter = 1;
+        if (input.title !== undefined) { setClauses.push(`title = $${paramCounter++}`); values.push(input.title); }
+        if (input.release_date !== undefined) { setClauses.push(`release_date = $${paramCounter++}`); values.push(input.release_date); }
+        if (input.plot_summary !== undefined) { setClauses.push(`plot_summary = $${paramCounter++}`); values.push(input.plot_summary); }
+        if (input.poster_url !== undefined) { setClauses.push(`poster_url = $${paramCounter++}`); values.push(input.poster_url); }
+        if (input.duration_minutes !== undefined) { setClauses.push(`duration_minutes = $${paramCounter++}`); values.push(input.duration_minutes); }
+        if (input.trailer_url !== undefined) { setClauses.push(`trailer_url = $${paramCounter++}`); values.push(input.trailer_url); }
+        if (setClauses.length === 0) {
+            const existing = await db.query('SELECT * FROM movies WHERE id = $1', [id]);
+            if (existing.rows.length === 0) throw new GraphQLError(`Movie with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
+            return existing.rows[0];
+        }
+        values.push(id); // Add ID for WHERE clause (trigger handles updated_at)
+        const query = `UPDATE movies SET ${setClauses.join(', ')} WHERE id = $${paramCounter} RETURNING *`;
+        const result = await db.query(query, values);
+        if (result.rows.length === 0) throw new GraphQLError(`Movie with ID ${id} not found or update failed.`, { extensions: { code: 'BAD_USER_INPUT' } });
+        return result.rows[0];
     },
-    deleteMovie: async (_, { id }, { admin, db }) => { // Changed user to admin
-        _ensureAdmin(admin);
+    deleteMovie: async (_, { id }, context) => {
+        ensureAdminRole(context.admin, 'ADMIN'); // Example: Require higher role for deletion
         // CASCADE should handle related data in join tables
         const result = await db.query('DELETE FROM movies WHERE id = $1 RETURNING id', [id]);
         if (result.rowCount === 0) {
@@ -322,8 +297,8 @@ const resolvers = {
     },
 
     // <<< Recommendation Section Mutations >>>
-    createRecommendationSection: async (_, { input }, { admin, db }) => {
-        _ensureAdmin(admin); // Or check specific role like SUPER_ADMIN
+    createRecommendationSection: async (_, { input }, context) => {
+        ensureAdminRole(context.admin, 'ADMIN'); // Example: Admin manages sections
         const { title, section_type, description, display_order = 0, is_active = true } = input;
         const dbSectionType = resolvers.RecommendationSectionType[section_type]; // Map enum if needed
         if (!dbSectionType) throw new GraphQLError(`Invalid section type: ${section_type}`, { extensions: { code: 'BAD_USER_INPUT' } });
@@ -343,8 +318,8 @@ const resolvers = {
              throw new Error('Failed to create recommendation section.');
         }
     },
-    updateRecommendationSection: async (_, { id, input }, { admin, db }) => {
-        _ensureAdmin(admin);
+    updateRecommendationSection: async (_, { id, input }, context) => {
+        ensureAdminRole(context.admin, 'ADMIN');
         const setClauses = [];
         const values = [];
         let paramCounter = 1;
@@ -379,8 +354,8 @@ const resolvers = {
              throw new Error('Failed to update recommendation section.');
         }
     },
-    deleteRecommendationSection: async (_, { id }, { admin, db }) => {
-        _ensureAdmin(admin);
+    deleteRecommendationSection: async (_, { id }, context) => {
+        ensureAdminRole(context.admin, 'ADMIN');
         // CASCADE constraint on recommendation_section_movies handles movie links
         const result = await db.query('DELETE FROM recommendation_sections WHERE id = $1 RETURNING id', [id]);
         if (result.rowCount === 0) {
@@ -388,8 +363,8 @@ const resolvers = {
         }
         return true;
     },
-    addMovieToSection: async (_, { sectionId, movieId, displayOrder }, { admin, db }) => {
-        _ensureAdmin(admin);
+    addMovieToSection: async (_, { sectionId, movieId, displayOrder }, context) => {
+        ensureAdminRole(context.admin, 'CONTENT_MODERATOR');
         // Check if section and movie exist
         const sectionExists = await db.query('SELECT id FROM recommendation_sections WHERE id = $1', [sectionId]);
         if (!sectionExists.rows[0]) throw new GraphQLError(`Recommendation section with ID ${sectionId} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
@@ -419,16 +394,16 @@ const resolvers = {
         const updatedSection = await db.query('SELECT * FROM recommendation_sections WHERE id = $1', [sectionId]);
         return updatedSection.rows[0]; // Assume it still exists
     },
-    removeMovieFromSection: async (_, { sectionId, movieId }, { admin, db }) => {
-        _ensureAdmin(admin);
+    removeMovieFromSection: async (_, { sectionId, movieId }, context) => {
+        ensureAdminRole(context.admin, 'CONTENT_MODERATOR');
         await db.query('DELETE FROM recommendation_section_movies WHERE section_id = $1 AND movie_id = $2', [sectionId, movieId]);
         // Refetch the parent section
         const updatedSection = await db.query('SELECT * FROM recommendation_sections WHERE id = $1', [sectionId]);
          if (!updatedSection.rows[0]) throw new GraphQLError(`Recommendation section with ID ${sectionId} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
         return updatedSection.rows[0];
     },
-     updateSectionMovies: async (_, { sectionId, movies }, { admin, db }) => {
-        _ensureAdmin(admin);
+     updateSectionMovies: async (_, { sectionId, movies }, context) => {
+        ensureAdminRole(context.admin, 'CONTENT_MODERATOR');
         // This is more complex - requires a transaction to potentially remove old movies
         // and update/insert new ones with specific orders.
         await db.query('BEGIN');
