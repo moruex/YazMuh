@@ -285,7 +285,7 @@ export const StoragePage: React.FC = () => {
                                 {index > 0 && <span className="breadcrumb-separator"> / </span>}
                                 <span
                                     className="breadcrumb-item"
-                                    onClick={() => navigateToPath(crumb.path)}
+                                    onClick={() => navigateToPath(crumb.path ?? '')}
                                     style={{
                                         cursor: 'pointer',
                                         fontWeight: index === arr.length - 1 ? 'bold' : 'normal',
