@@ -3,7 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const { ApolloServer } = require('@apollo/server'); // Correct import
 const { expressMiddleware } = require('@apollo/server/express4'); // Correct import
-const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer'); // Correct importconst http = require('http');
+const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer'); // Correct import
+const http = require('http');
 const jwt = require('jsonwebtoken');
 // Removed: const { graphqlUploadExpress } = require('graphql-upload');
 const config = require('./config');

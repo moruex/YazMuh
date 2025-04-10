@@ -1,9 +1,13 @@
 // src/schema/genre.js
-const { gql, AuthenticationError, ForbiddenError } = require('apollo-server-express');
+const { gql } = require('@apollo/server');
+const { GraphQLError } = require('graphql');
 
 // --- Helper Functions ---
 const _ensureAdmin = (adminUser) => {
-  if (!adminUser) throw new AuthenticationError('Admin authentication required.');
+  if (!adminUser) {
+    throw new GraphQLError('Admin authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
+  }
+  // Add role check if needed
 };
 
 // --- GraphQL Definitions ---
@@ -140,8 +144,16 @@ const resolvers = {
         INSERT INTO genres (name, description, image_url, is_collection)
         VALUES ($1, $2, $3, $4) RETURNING *`;
       const values = [name, description, image_url, isCollectionValue];
-      const result = await db.query(query, values);
-      return result.rows[0];
+      try {
+        const result = await db.query(query, values);
+        return result.rows[0];
+      } catch (error) {
+        console.error("Error creating genre:", error);
+        if (error.code === '23505') { // Unique violation for name
+          throw new GraphQLError('Genre name already exists.', { extensions: { code: 'BAD_USER_INPUT' } });
+        }
+        throw new Error("Failed to create genre.");
+      }
     },
 
     updateGenre: async (_, { id, input }, { admin, db }) => {
@@ -166,7 +178,10 @@ const resolvers = {
       const query = `UPDATE genres SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${paramCounter} RETURNING *`;
       // console.log("Executing Update Genre Query:", query, values); // Debugging
       const result = await db.query(query, values);
-      return result.rows[0] || null; // Return updated or null if not found
+      if (result.rows.length === 0) {
+        throw new GraphQLError(`Genre with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+      return result.rows[0];
     },
 
     deleteGenre: async (_, { id }, { admin, db }) => {
@@ -180,9 +195,7 @@ const resolvers = {
 
       const result = await db.query('DELETE FROM genres WHERE id = $1 RETURNING id', [id]);
       if (result.rowCount === 0) {
-        // Optional: throw an error or just return false if not found
-         return false;
-        // throw new Error(`Genre with ID ${id} not found.`);
+        throw new GraphQLError(`Genre with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
       }
       return true;
     },

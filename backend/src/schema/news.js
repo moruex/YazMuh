@@ -1,9 +1,11 @@
 // src/schema/news.js
-const { gql, AuthenticationError, ForbiddenError } = require('apollo-server-express');
+// const { gql, AuthenticationError, ForbiddenError } = require('apollo-server-express');
+const { gql } = require('@apollo/server');
+const { GraphQLError } = require('graphql'); // Import GraphQLError
 
-// Assuming _ensureAdmin is available (e.g., from admin.js or context setup)
+// Helpers (assuming admin context is set up)
 const _ensureAdmin = (adminUser) => {
-  if (!adminUser) throw new AuthenticationError('Admin authentication required.');
+  if (!adminUser) throw new GraphQLError('Admin authentication required.', { extensions: { code: 'UNAUTHENTICATED'} });
 };
 
 // --- GraphQL Definitions ---

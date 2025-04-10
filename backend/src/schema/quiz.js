@@ -1,15 +1,17 @@
 // src/schema/quiz.js
-const { gql, AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-express');
+// const { gql, AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-express');
+const { gql } = require('@apollo/server');
+const { GraphQLError } = require('graphql');
 // Remove admin helper if not used directly, assume admin check is done via context if needed
 // const { _ensureAdminRole } = require('./admin');
 
 // Helpers
 const _ensureAdmin = (adminUser) => {
-  if (!adminUser) throw new AuthenticationError('Admin authentication required.');
+  if (!adminUser) throw new GraphQLError('Admin authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
 };
 
 const _ensureLoggedIn = (user) => { // Use user from context
-    if (!user) throw new AuthenticationError('You must be logged in.');
+    if (!user) throw new GraphQLError('You must be logged in.', { extensions: { code: 'UNAUTHENTICATED' } });
 };
 
 // Type Definitions (Simplified Quiz Structure)
@@ -114,10 +116,10 @@ const resolvers = {
 
       // Validations
       if (!choices || choices.length < 1) { // Allow single choice questions for preference
-           throw new UserInputError('A quiz question must have at least one choice.');
+           throw new GraphQLError('A quiz question must have at least one choice.', { extensions: { code: 'BAD_USER_INPUT' } });
       }
       if (allowed_choices_count < 1) {
-           throw new UserInputError('Allowed choices count must be at least 1.');
+           throw new GraphQLError('Allowed choices count must be at least 1.', { extensions: { code: 'BAD_USER_INPUT' } });
       }
 
       // Database Transaction
@@ -158,23 +160,23 @@ const resolvers = {
         _ensureLoggedIn(user);
         const { question_id, choice_ids } = input;
 
-        if (!choice_ids || choice_ids.length === 0) throw new UserInputError('At least one choice ID must be provided.');
+        if (!choice_ids || choice_ids.length === 0) throw new GraphQLError('At least one choice ID must be provided.', { extensions: { code: 'BAD_USER_INPUT' } });
 
         // Validation
         const { rows: questionRows } = await db.query('SELECT allowed_choices_count FROM quiz_questions WHERE id = $1', [question_id]);
-        if (!questionRows[0]) throw new UserInputError(`Quiz question ${question_id} not found.`);
+        if (!questionRows[0]) throw new GraphQLError(`Quiz question ${question_id} not found.`, { extensions: { code: 'NOT_FOUND' } });
         const allowedCount = questionRows[0].allowed_choices_count;
 
-        if (choice_ids.length > allowedCount) throw new UserInputError(`Cannot select more than ${allowedCount} choice(s).`);
+        if (choice_ids.length > allowedCount) throw new GraphQLError(`Cannot select more than ${allowedCount} choice(s).`, { extensions: { code: 'BAD_USER_INPUT' } });
         // Check unique choice IDs submitted
-        if (new Set(choice_ids).size !== choice_ids.length) throw new UserInputError('Duplicate choice IDs submitted.');
+        if (new Set(choice_ids).size !== choice_ids.length) throw new GraphQLError('Duplicate choice IDs submitted.', { extensions: { code: 'BAD_USER_INPUT' } });
 
         // Check if all submitted choice IDs are valid for the question
         const { rowCount: validChoicesCount } = await db.query(
             'SELECT id FROM quiz_choices WHERE question_id = $1 AND id = ANY($2::int[])',
             [question_id, choice_ids]
         );
-        if (validChoicesCount !== choice_ids.length) throw new UserInputError('One or more submitted choices are invalid for this question.');
+        if (validChoicesCount !== choice_ids.length) throw new GraphQLError('One or more submitted choices are invalid for this question.', { extensions: { code: 'BAD_USER_INPUT' } });
 
         // Database Transaction
         const submittedAnswers = [];

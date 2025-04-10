@@ -1,5 +1,7 @@
 // src/schema/file.js
-const { gql, UserInputError, AuthenticationError, ForbiddenError } = require('apollo-server-express');
+// const { gql, UserInputError, AuthenticationError, ForbiddenError } = require('apollo-server-express');
+const { gql } = require('@apollo/server');
+const { GraphQLError } = require('graphql');
 const { S3Client, PutObjectCommand, ListObjectsV2Command, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand, HeadObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const path = require('path');
@@ -9,23 +11,23 @@ const { s3Client } = require('../s3Client');
 // --- Helper Functions (Keep as is) ---
 // --- Helper Functions ---
 
-const ensureAuthenticated = (context) => {
+const _ensureLoggedIn = (context) => {
     if (!context.getCurrentActor()) {
-        throw new AuthenticationError('You must be logged in to perform this action.');
+        throw new GraphQLError('Authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
     }
 };
 
 // Simplified Permission Check (Admin bypass)
 // NOTE: Object-level ownership checks are removed as metadata is gone.
 const checkAdminPermission = (actor, action = 'perform this action') => {
-    if (!actor) throw new AuthenticationError('Authentication required.');
+    if (!actor) throw new GraphQLError('Authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
     // Allow if actor is an admin with sufficient role
     if (actor.role !== 'CONTENT_MODERATOR') {
         return true;
     }
     // Deny for non-admins in this simplified check
     console.warn(`Permission denied: Non-admin actor ${actor.id} (${actor.role}) attempted to ${action}.`);
-    throw new ForbiddenError(`You do not have permission to ${action}. Admin privileges required.`);
+    throw new GraphQLError(`You do not have permission to ${action}. Admin privileges required.`, { extensions: { code: 'FORBIDDEN' } });
 };
 
 // Helper to check if an object exists (using HeadObject)
@@ -44,7 +46,7 @@ async function objectExists(key) {
         }
         // Re-throw other errors (permissions, network, etc.)
         console.error(`Error checking existence for ${key}:`, err);
-        throw new Error(`Failed to check item existence.`);
+        throw new GraphQLError(`Failed to check item existence. ${err.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
     }
 }
 
@@ -104,7 +106,7 @@ const typeDefs = gql`
 const resolvers = {
     Query: {
         listFiles: async (_, { directory = '' }, context) => {
-            ensureAuthenticated(context);
+            _ensureLoggedIn(context);
             const prefix = directory ? (directory.endsWith('/') ? directory : `${directory}/`) : '';
 
             try {
@@ -127,12 +129,12 @@ const resolvers = {
                 return items;
             } catch (error) {
                 console.error(`Error listing files in '${prefix}':`, error);
-                throw new Error(`Failed to list files. ${error.message}`);
+                throw new GraphQLError(`Failed to list files. ${error.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
             }
         },
 
         fileInfo: async (_, { path: itemPath }, context) => {
-            ensureAuthenticated(context);
+            _ensureLoggedIn(context);
             try {
                 const command = new HeadObjectCommand({ Bucket: config.r2.bucketName, Key: itemPath });
                 const response = await s3Client.send(command);
@@ -146,18 +148,18 @@ const resolvers = {
             } catch (err) {
                 if (err.name === 'NoSuchKey' || err.name === 'NotFound') return null;
                 console.error(`Error getting info for '${itemPath}':`, err);
-                throw new Error(`Failed to get file information. ${err.message}`);
+                throw new GraphQLError(`Failed to get file information. ${err.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
             }
         },
 
         // Generates a temporary signed URL, potentially forcing download
         getSignedDownloadUrl: async (_, { path: itemPath, expiresIn, forceDownload }, context) => {
-            ensureAuthenticated(context);
-            if (itemPath.endsWith('/')) throw new UserInputError('Cannot generate download URL for a directory.');
+            _ensureLoggedIn(context);
+            if (itemPath.endsWith('/')) throw new GraphQLError('Cannot generate download URL for a directory.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             try {
                 const exists = await objectExists(itemPath);
-                if (!exists) throw new UserInputError('Item not found.');
+                if (!exists) throw new GraphQLError('Item not found.', { extensions: { code: 'BAD_USER_INPUT' } });
 
                 const commandArgs = { Bucket: config.r2.bucketName, Key: itemPath };
 
@@ -175,8 +177,8 @@ const resolvers = {
                 return url;
             } catch (error) {
                 console.error(`Error generating signed download URL for '${itemPath}':`, error);
-                if (error instanceof UserInputError) throw error;
-                throw new Error(`Failed to generate signed download URL. ${error.message}`);
+                if (error instanceof GraphQLError) throw error;
+                throw new GraphQLError(`Failed to generate signed download URL. ${error.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
             }
         },
     },
@@ -184,20 +186,20 @@ const resolvers = {
     Mutation: {
         // generatePresignedUploadUrl: unchanged - this is for PUTs
         generatePresignedUploadUrl: async (_, { filename, contentType, directory }, context) => {
-           ensureAuthenticated(context);
+           _ensureLoggedIn(context);
            const actor = context.getCurrentActor();
            const bucketName = config.r2.bucketName;
            const prefix = directory ? (directory.endsWith('/') ? directory : `${directory}/`) : '';
            const safeFilename = path.basename(filename);
 
            if (!safeFilename || !contentType || safeFilename !== filename || safeFilename.startsWith('.')) {
-                throw new UserInputError('Invalid filename or missing content type.');
+                throw new GraphQLError('Invalid filename or missing content type.', { extensions: { code: 'BAD_USER_INPUT' } });
            }
            const fileKey = `${prefix}${safeFilename}`;
 
            try {
                 const exists = await objectExists(fileKey);
-                if (exists) throw new UserInputError(`File '${safeFilename}' already exists.`);
+                if (exists) throw new GraphQLError(`File '${safeFilename}' already exists.`, { extensions: { code: 'BAD_USER_INPUT' } });
 
                const command = new PutObjectCommand({
                    Bucket: bucketName,
@@ -211,24 +213,24 @@ const resolvers = {
 
            } catch (error) {
                console.error(`Error generating presigned upload URL for ${fileKey}:`, error);
-               if (error instanceof UserInputError) throw error;
-               throw new Error(`Failed to generate upload URL. ${error.message}`);
+               if (error instanceof GraphQLError) throw error;
+               throw new GraphQLError(`Failed to generate upload URL. ${error.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
            }
         },
 
         // createFolder: unchanged logic, but returns FileOperationResult which includes FileType
          createFolder: async (_, { directory = '', name }, context) => {
-            ensureAuthenticated(context);
+            _ensureLoggedIn(context);
             const actor = context.getCurrentActor();
             checkAdminPermission(actor, 'create folder'); // Keep permission check
 
             const prefix = directory ? (directory.endsWith('/') ? directory : `${directory}/`) : '';
             const folderKey = `${prefix}${name}/`;
-            if (!name || name.includes('/')) throw new UserInputError('Invalid folder name.');
+            if (!name || name.includes('/')) throw new GraphQLError('Invalid folder name.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             try {
                  const exists = await objectExists(folderKey);
-                 if (exists) throw new UserInputError(`Item named '${name}' already exists.`);
+                 if (exists) throw new GraphQLError(`Item named '${name}' already exists.`, { extensions: { code: 'BAD_USER_INPUT' } });
 
                 const command = new PutObjectCommand({
                     Bucket: config.r2.bucketName, Key: folderKey, Body: '', ContentLength: 0,
@@ -239,19 +241,19 @@ const resolvers = {
                 return { success: true, message: `Folder '${name}' created.`, item: createdFolderItem };
             } catch (error) {
                 console.error(`Error creating folder '${folderKey}':`, error);
-                 if (error instanceof UserInputError || error instanceof ForbiddenError) throw error;
-                throw new Error(`Failed to create folder. ${error.message}`);
+                 if (error instanceof GraphQLError || error instanceof ForbiddenError) throw error;
+                throw new GraphQLError(`Failed to create folder. ${error.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
             }
         },
 
         // deleteItem: unchanged logic
         deleteItem: async (_, { path: itemPath }, context) => {
-             ensureAuthenticated(context);
+             _ensureLoggedIn(context);
              const actor = context.getCurrentActor();
              checkAdminPermission(actor, 'delete item'); // Keep permission check
 
              const bucketName = config.r2.bucketName;
-             if (!itemPath) throw new UserInputError('Path required.');
+             if (!itemPath) throw new GraphQLError('Path required.', { extensions: { code: 'BAD_USER_INPUT' } });
 
              try {
                  const exists = await objectExists(itemPath);
@@ -289,31 +291,31 @@ const resolvers = {
                  return { success: true, message: `Item '${path.basename(itemPath.replace(/\/$/, ''))}' deleted.` };
              } catch (error) {
                  console.error(`Error deleting item '${itemPath}':`, error);
-                 if (error instanceof UserInputError || error instanceof ForbiddenError) throw error;
-                 throw new Error(`Failed to delete item. ${error.message}`);
+                 if (error instanceof GraphQLError || error instanceof ForbiddenError) throw error;
+                 throw new GraphQLError(`Failed to delete item. ${error.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
              }
         },
 
 
         // renameItem: logic unchanged, but returns FileType potentially including publicUrl
         renameItem: async (_, { oldPath, newPath }, context) => {
-            ensureAuthenticated(context);
+            _ensureLoggedIn(context);
             const actor = context.getCurrentActor();
             // checkAdminPermission(actor, 'rename item'); // Keep permission check
 
             const bucketName = config.r2.bucketName;
-            if (!oldPath || !newPath || oldPath === newPath) throw new UserInputError('Valid old/new paths required.');
-            if (oldPath === '/' || newPath === '/' || newPath.startsWith(oldPath + (oldPath.endsWith('/') ? '' : '/'))) throw new UserInputError('Invalid rename operation.');
+            if (!oldPath || !newPath || oldPath === newPath) throw new GraphQLError('Valid old/new paths required.', { extensions: { code: 'BAD_USER_INPUT' } });
+            if (oldPath === '/' || newPath === '/' || newPath.startsWith(oldPath + (oldPath.endsWith('/') ? '' : '/'))) throw new GraphQLError('Invalid rename operation.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             try {
                  const sourceExists = await objectExists(oldPath);
-                 if (!sourceExists) throw new UserInputError('Source item not found.');
+                 if (!sourceExists) throw new GraphQLError('Source item not found.', { extensions: { code: 'BAD_USER_INPUT' } });
 
                  const destExists = await objectExists(newPath);
-                 if (destExists) throw new UserInputError('Destination path already exists.');
+                 if (destExists) throw new GraphQLError('Destination path already exists.', { extensions: { code: 'BAD_USER_INPUT' } });
 
                  const isDirectory = oldPath.endsWith('/');
-                 if (isDirectory !== newPath.endsWith('/')) throw new UserInputError("Cannot change item type during rename.");
+                 if (isDirectory !== newPath.endsWith('/')) throw new GraphQLError("Cannot change item type during rename.", { extensions: { code: 'BAD_USER_INPUT' } });
 
                  if (isDirectory) {
                      // Recursive copy+delete (simplified, needs pagination for >1000 items)
@@ -366,8 +368,8 @@ const resolvers = {
                  return { success: true, message: 'Item renamed.', item: newItemInfo };
             } catch (error) {
                  console.error(`Error renaming '${oldPath}' to '${newPath}':`, error);
-                 if (error instanceof UserInputError || error instanceof ForbiddenError) throw error;
-                 throw new Error(`Failed to rename item. ${error.message}`);
+                 if (error instanceof GraphQLError || error instanceof ForbiddenError) throw error;
+                 throw new GraphQLError(`Failed to rename item. ${error.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
             }
         },
     },

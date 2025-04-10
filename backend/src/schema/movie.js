@@ -1,5 +1,6 @@
 // src/schema/movie.js
-const { gql, AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-express');
+const { gql } = require('@apollo/server');
+const { GraphQLError } = require('graphql');
 const { _ensureAdminRole } = require('./admin'); // Assuming helper is exported or defined here
 
 // --- Helper Functions ---
@@ -14,10 +15,29 @@ const mapGraphQLRoleToDB = (gqlRole) => {
 };
 // Assuming _ensureAdmin is available (e.g., from admin.js or context setup)
 const _ensureAdmin = (adminUser) => {
-    if (!adminUser) throw new AuthenticationError('Admin authentication required.');
-    // Add role check if needed, e.g., _ensureAdminRole(adminUser, 'ADMIN');
+    if (!adminUser) {
+        throw new GraphQLError('Admin authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
+    }
 };
 
+const _ensureAdminRole = (adminUser, requiredRole = 'CONTENT_MODERATOR') => {
+    _ensureAdmin(adminUser); // First check if logged in
+
+    const rolesHierarchy = { CONTENT_MODERATOR: 1, ADMIN: 2, SUPER_ADMIN: 3 }; // Define or import hierarchy
+    const userLevel = rolesHierarchy[adminUser.role] || 0;
+    const requiredLevel = rolesHierarchy[requiredRole] || 0;
+
+    if (userLevel < requiredLevel) {
+        throw new GraphQLError(`Insufficient privileges. Requires ${requiredRole} role or higher.`, { extensions: { code: 'FORBIDDEN' } });
+    }
+};
+
+// Helper for standard user login check
+const _ensureLoggedIn = (user) => {
+    if (!user) {
+        throw new GraphQLError('You must be logged in to perform this action.', { extensions: { code: 'UNAUTHENTICATED' } });
+    }
+};
 
 // --- GraphQL Definitions ---
 const typeDefs = gql`
@@ -281,13 +301,13 @@ const resolvers = {
          if (input.trailer_url !== undefined) { setClauses.push(`trailer_url = $${paramCounter++}`); values.push(input.trailer_url); }
          if (setClauses.length === 0) {
              const existing = await db.query('SELECT * FROM movies WHERE id = $1', [id]);
-             if (existing.rows.length === 0) throw new UserInputError(`Movie with ID ${id} not found.`);
+             if (existing.rows.length === 0) throw new GraphQLError(`Movie with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
              return existing.rows[0];
          }
          values.push(id); // Add ID for WHERE clause (trigger handles updated_at)
          const query = `UPDATE movies SET ${setClauses.join(', ')} WHERE id = $${paramCounter} RETURNING *`;
          const result = await db.query(query, values);
-         if (result.rows.length === 0) throw new UserInputError(`Movie with ID ${id} not found or update failed.`);
+         if (result.rows.length === 0) throw new GraphQLError(`Movie with ID ${id} not found or update failed.`, { extensions: { code: 'BAD_USER_INPUT' } });
          return result.rows[0];
     },
     deleteMovie: async (_, { id }, { admin, db }) => { // Changed user to admin
@@ -295,7 +315,7 @@ const resolvers = {
         // CASCADE should handle related data in join tables
         const result = await db.query('DELETE FROM movies WHERE id = $1 RETURNING id', [id]);
         if (result.rowCount === 0) {
-            throw new UserInputError(`Movie with ID ${id} not found.`);
+            throw new GraphQLError(`Movie with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
         }
         return true;
     },
@@ -305,7 +325,7 @@ const resolvers = {
         _ensureAdmin(admin); // Or check specific role like SUPER_ADMIN
         const { title, section_type, description, display_order = 0, is_active = true } = input;
         const dbSectionType = resolvers.RecommendationSectionType[section_type]; // Map enum if needed
-        if (!dbSectionType) throw new UserInputError(`Invalid section type: ${section_type}`);
+        if (!dbSectionType) throw new GraphQLError(`Invalid section type: ${section_type}`, { extensions: { code: 'BAD_USER_INPUT' } });
 
         try {
             const query = `
@@ -317,8 +337,8 @@ const resolvers = {
             return result.rows[0];
         } catch (err) {
              console.error("Error creating recommendation section:", err);
-             if (err.code === '23505') throw new UserInputError('Recommendation section title already exists.');
-             if (err.code === '23514') throw new UserInputError(`Invalid section type: ${dbSectionType}. Check DB constraints.`); // Check constraint violation
+             if (err.code === '23505') throw new GraphQLError('Recommendation section title already exists.', { extensions: { code: 'BAD_USER_INPUT' } });
+             if (err.code === '23514') throw new GraphQLError(`Invalid section type: ${dbSectionType}. Check DB constraints.`, { extensions: { code: 'BAD_USER_INPUT' } }); // Check constraint violation
              throw new Error('Failed to create recommendation section.');
         }
     },
@@ -331,7 +351,7 @@ const resolvers = {
         if (input.title !== undefined) { setClauses.push(`title = $${paramCounter++}`); values.push(input.title); }
         if (input.section_type !== undefined) {
              const dbSectionType = resolvers.RecommendationSectionType[input.section_type];
-             if (!dbSectionType) throw new UserInputError(`Invalid section type: ${input.section_type}`);
+             if (!dbSectionType) throw new GraphQLError(`Invalid section type: ${input.section_type}`, { extensions: { code: 'BAD_USER_INPUT' } });
              setClauses.push(`section_type = $${paramCounter++}`); values.push(dbSectionType);
         }
         if (input.description !== undefined) { setClauses.push(`description = $${paramCounter++}`); values.push(input.description); }
@@ -340,7 +360,7 @@ const resolvers = {
 
         if (setClauses.length === 0) {
             const existing = await db.query('SELECT * FROM recommendation_sections WHERE id = $1', [id]);
-             if (!existing.rows[0]) throw new UserInputError(`Recommendation section with ID ${id} not found.`);
+             if (!existing.rows[0]) throw new GraphQLError(`Recommendation section with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
              return existing.rows[0]; // Return existing if no changes
         }
 
@@ -349,12 +369,12 @@ const resolvers = {
 
         try {
             const result = await db.query(query, values);
-            if (result.rows.length === 0) throw new UserInputError(`Recommendation section with ID ${id} not found.`);
+            if (result.rows.length === 0) throw new GraphQLError(`Recommendation section with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
             return result.rows[0];
         } catch (err) {
              console.error("Error updating recommendation section:", err);
-             if (err.code === '23505') throw new UserInputError('Recommendation section title already exists.');
-             if (err.code === '23514') throw new UserInputError(`Invalid section type provided. Check DB constraints.`);
+             if (err.code === '23505') throw new GraphQLError('Recommendation section title already exists.', { extensions: { code: 'BAD_USER_INPUT' } });
+             if (err.code === '23514') throw new GraphQLError(`Invalid section type provided. Check DB constraints.`, { extensions: { code: 'BAD_USER_INPUT' } });
              throw new Error('Failed to update recommendation section.');
         }
     },
@@ -363,7 +383,7 @@ const resolvers = {
         // CASCADE constraint on recommendation_section_movies handles movie links
         const result = await db.query('DELETE FROM recommendation_sections WHERE id = $1 RETURNING id', [id]);
         if (result.rowCount === 0) {
-            throw new UserInputError(`Recommendation section with ID ${id} not found.`);
+            throw new GraphQLError(`Recommendation section with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
         }
         return true;
     },
@@ -371,9 +391,9 @@ const resolvers = {
         _ensureAdmin(admin);
         // Check if section and movie exist
         const sectionExists = await db.query('SELECT id FROM recommendation_sections WHERE id = $1', [sectionId]);
-        if (!sectionExists.rows[0]) throw new UserInputError(`Recommendation section with ID ${sectionId} not found.`);
+        if (!sectionExists.rows[0]) throw new GraphQLError(`Recommendation section with ID ${sectionId} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
         const movieExists = await db.query('SELECT id FROM movies WHERE id = $1', [movieId]);
-        if (!movieExists.rows[0]) throw new UserInputError(`Movie with ID ${movieId} not found.`);
+        if (!movieExists.rows[0]) throw new GraphQLError(`Movie with ID ${movieId} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
 
         let order = displayOrder;
         // If displayOrder is not provided, calculate the next available order
@@ -403,7 +423,7 @@ const resolvers = {
         await db.query('DELETE FROM recommendation_section_movies WHERE section_id = $1 AND movie_id = $2', [sectionId, movieId]);
         // Refetch the parent section
         const updatedSection = await db.query('SELECT * FROM recommendation_sections WHERE id = $1', [sectionId]);
-         if (!updatedSection.rows[0]) throw new UserInputError(`Recommendation section with ID ${sectionId} not found.`);
+         if (!updatedSection.rows[0]) throw new GraphQLError(`Recommendation section with ID ${sectionId} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
         return updatedSection.rows[0];
     },
      updateSectionMovies: async (_, { sectionId, movies }, { admin, db }) => {
@@ -443,7 +463,7 @@ const resolvers = {
 
         // Refetch the updated section
         const updatedSection = await db.query('SELECT * FROM recommendation_sections WHERE id = $1', [sectionId]);
-        if (!updatedSection.rows[0]) throw new UserInputError(`Recommendation section with ID ${sectionId} not found.`);
+        if (!updatedSection.rows[0]) throw new GraphQLError(`Recommendation section with ID ${sectionId} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
         return updatedSection.rows[0];
     }
   },

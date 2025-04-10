@@ -1,5 +1,6 @@
 // src/schema/admin.js
-const { gql, AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-express');
+const { gql } = require('@apollo/server');
+const { GraphQLError } = require('graphql');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
@@ -13,7 +14,7 @@ const config = require('../config'); // Use centralized config
 const _ensureAdminLoggedIn = (context) => {
   // context.admin might just contain { id, role } from the minimal middleware
   if (!context.admin || !context.admin.id) {
-    throw new AuthenticationError('Admin authentication required. Please log in.');
+    throw new GraphQLError('Admin authentication required. Please log in.', { extensions: { code: 'UNAUTHENTICATED' } });
   }
 };
 
@@ -28,7 +29,7 @@ const _ensureAdminRole = (context, requiredRole = 'ADMIN') => {
 
   if (userLevel < requiredLevel) {
     console.warn(`Authorization failed: Admin ${adminUser.id} (Role: ${adminUser.role}) attempted action requiring ${requiredRole}.`);
-    throw new ForbiddenError(`Insufficient privileges. Requires ${requiredRole} role or higher.`);
+    throw new GraphQLError(`Insufficient privileges. Requires ${requiredRole} role or higher.`, { extensions: { code: 'FORBIDDEN' } });
   }
 };
 
@@ -52,7 +53,7 @@ async function getFullAdminFromContext(context) {
          WHERE a.id = $1`, [adminId]
   );
   if (!rows[0]) {
-    throw new AuthenticationError('Admin account not found for authenticated session.'); // Should not happen if token is valid
+    throw new GraphQLError('Admin account not found for authenticated session.', { extensions: { code: 'NOT_FOUND' } }); // Should not happen if token is valid
   }
   // Destructure the new field
   const { user_id_alias, user_username, user_email, user_avatar_url, ...adminData } = rows[0];
@@ -168,7 +169,7 @@ const resolvers = {
         `SELECT a.*, u.id as uid, u.username as uname, u.avatar_url as uavatar_url, u.email as uemail -- etc
            FROM admins a LEFT JOIN users u ON a.user_id = u.id WHERE a.id = $1`, [id]);
       if (rows.length === 0) {
-        throw new UserInputError(`Admin account with ID ${id} not found.`);
+        throw new GraphQLError(`Admin account with ID ${id} not found.`, { extensions: { code: 'NOT_FOUND' } });
       }
       const { uid, uname, uemail, uavatar_url, ...adminData } = rows[0]; // Ensure uavatar_url is destructured
       adminData.user = uid ? { id: uid, username: uname, email: uemail, avatar_url: uavatar_url } : null; // Add avatar_url here
@@ -244,7 +245,7 @@ const resolvers = {
       // Verify password
       if (!admin || !(await bcrypt.compare(password, admin.password_hash))) {
         console.warn(`Admin login failed for username: ${username}`);
-        throw new AuthenticationError('Invalid admin username or password.');
+        throw new GraphQLError('Invalid admin username or password.', { extensions: { code: 'UNAUTHENTICATED' } });
       }
 
       // --- Session Creation ---
@@ -264,7 +265,7 @@ const resolvers = {
         );
       } catch (dbError) {
         console.error(`Failed to create admin session record for ${username}:`, dbError);
-        throw new Error('Login failed: Could not record session.');
+        throw new GraphQLError('Login failed: Could not record session.', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
       }
 
       // --- JWT Generation ---
@@ -293,7 +294,7 @@ const resolvers = {
 
       if (!jti) {
         console.error(`Admin logout attempt for ${adminId} without a JTI in context payload.`);
-        throw new AuthenticationError("Cannot logout: Session identifier missing.");
+        throw new GraphQLError("Cannot logout: Session identifier missing.", { extensions: { code: 'UNAUTHENTICATED' } });
       }
 
       try {
@@ -312,7 +313,7 @@ const resolvers = {
         return false;
       } catch (err) {
         console.error(`Error revoking admin session (logout) for User ${adminId}, JTI ${jti}:`, err);
-        throw new Error("Logout failed due to a server error.");
+        throw new GraphQLError("Logout failed due to a server error.", { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
       }
     },
 
@@ -322,7 +323,7 @@ const resolvers = {
       const adminId = context.admin.id; // ID of the admin *requesting* the logout
 
       if (!jti) {
-        throw new UserInputError("Session identifier (JTI) is required.");
+        throw new GraphQLError("Session identifier (JTI) is required.", { extensions: { code: 'BAD_USER_INPUT' } });
       }
 
       try {
@@ -341,7 +342,7 @@ const resolvers = {
         return false;
       } catch (err) {
         console.error(`Error during specific admin session revocation for User ${adminId}, JTI ${jti}:`, err);
-        throw new Error("Session revocation failed due to a server error.");
+        throw new GraphQLError("Session revocation failed due to a server error.", { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
       }
     },
 
@@ -379,7 +380,7 @@ const resolvers = {
         return { success: true, message: "Password reset processed (INSECURE - DEV ONLY)." };
       } catch (err) {
         console.error(`Error during insecure password reset for admin ${username}:`, err);
-        throw new Error("Password reset failed due to a server error.");
+        throw new GraphQLError("Password reset failed due to a server error.", { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
       }
     },
 
@@ -389,7 +390,7 @@ const resolvers = {
       const { username, currentPassword, newPassword } = input;
 
       if (!username && !newPassword) {
-        throw new UserInputError('No updates provided. Please specify a new username or password.');
+        throw new GraphQLError('No updates provided. Please specify a new username or password.', { extensions: { code: 'BAD_USER_INPUT' } });
       }
 
       const updates = [];
@@ -399,7 +400,7 @@ const resolvers = {
       // Fetch current admin data for password check if needed
       const { rows: currentAdminRows } = await context.db.query('SELECT username, password_hash FROM admins WHERE id = $1', [adminId]);
       if (currentAdminRows.length === 0) {
-          throw new AuthenticationError('Admin account not found.'); // Should not happen if logged in
+          throw new GraphQLError('Admin account not found.', { extensions: { code: 'NOT_FOUND' } }); // Should not happen if logged in
       }
       const currentAdmin = currentAdminRows[0];
 
@@ -408,7 +409,7 @@ const resolvers = {
         // Optional: Check if username already exists
         const { rows: existingUser } = await context.db.query('SELECT id FROM admins WHERE lower(username) = lower($1) AND id != $2', [username, adminId]);
         if (existingUser.length > 0) {
-          throw new UserInputError(`Username "${username}" is already taken.`);
+          throw new GraphQLError(`Username "${username}" is already taken.`, { extensions: { code: 'BAD_USER_INPUT' } });
         }
         updates.push(`username = $${valueCounter++}`);
         values.push(username);
@@ -417,15 +418,15 @@ const resolvers = {
       // Handle password update
       if (newPassword) {
         if (!currentPassword) {
-          throw new UserInputError('Current password is required to set a new password.');
+          throw new GraphQLError('Current password is required to set a new password.', { extensions: { code: 'BAD_USER_INPUT' } });
         }
         const validPassword = await bcrypt.compare(currentPassword, currentAdmin.password_hash);
         if (!validPassword) {
-          throw new AuthenticationError('Incorrect current password.');
+          throw new GraphQLError('Incorrect current password.', { extensions: { code: 'UNAUTHENTICATED' } });
         }
         // Optional: Add password complexity rules here
         if (newPassword.length < 8) { // Example minimum length
-            throw new UserInputError('New password must be at least 8 characters long.');
+            throw new GraphQLError('New password must be at least 8 characters long.', { extensions: { code: 'BAD_USER_INPUT' } });
         }
         const saltRounds = 12;
         const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
@@ -449,7 +450,7 @@ const resolvers = {
       try {
         const { rows: updatedAdminRows } = await context.db.query(updateQuery, values);
          if (updatedAdminRows.length === 0) {
-             throw new Error('Failed to update admin profile.'); // Should not happen if WHERE clause is correct
+             throw new GraphQLError('Failed to update admin profile.', { extensions: { code: 'INTERNAL_SERVER_ERROR' } }); // Should not happen if WHERE clause is correct
          }
         console.log(`Admin profile updated successfully for ID: ${adminId}`);
         // Use getFullAdminFromContext to return the correctly structured object with nested user
@@ -458,10 +459,10 @@ const resolvers = {
         return await getFullAdminFromContext(minimalContext);
       } catch (err) {
         console.error(`Error updating admin profile for ID ${adminId}:`, err);
-         if (err instanceof UserInputError || err instanceof AuthenticationError) {
+         if (err instanceof GraphQLError) {
            throw err; // Re-throw specific Apollo errors
          }
-        throw new Error('Failed to update admin profile due to a server error.');
+        throw new GraphQLError('Failed to update admin profile due to a server error.', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
       }
     },
 
@@ -471,17 +472,17 @@ const resolvers = {
 
       // 1. Validate Input (e.g., password complexity)
        if (password.length < 8) { // Example minimum length
-            throw new UserInputError('Password must be at least 8 characters long.');
+            throw new GraphQLError('Password must be at least 8 characters long.', { extensions: { code: 'BAD_USER_INPUT' } });
         }
 
       // 2. Check if User exists and is not already an admin
       const { rows: userRows } = await context.db.query('SELECT id FROM users WHERE id = $1', [userId]);
       if (userRows.length === 0) {
-        throw new UserInputError(`User with ID ${userId} not found.`);
+        throw new GraphQLError(`User with ID ${userId} not found.`, { extensions: { code: 'NOT_FOUND' } });
       }
       const { rows: existingAdminRows } = await context.db.query('SELECT id FROM admins WHERE user_id = $1 OR lower(username) = lower($2)', [userId, username]);
       if (existingAdminRows.length > 0) {
-        throw new UserInputError('An admin account already exists for this user or username.');
+        throw new GraphQLError('An admin account already exists for this user or username.', { extensions: { code: 'BAD_USER_INPUT' } });
       }
 
       // 3. Hash password
@@ -496,7 +497,7 @@ const resolvers = {
       try {
         const { rows: newAdminRows } = await context.db.query(insertQuery, [userId, username, passwordHash, role]);
         if (newAdminRows.length === 0) {
-            throw new Error("Failed to create admin record.");
+            throw new GraphQLError("Failed to create admin record.", { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
         }
         const newAdminId = newAdminRows[0].id;
         const newAdminRole = newAdminRows[0].role;
@@ -508,9 +509,9 @@ const resolvers = {
       } catch (err) {
         console.error(`Error creating admin ${username}:`, err);
          if (err.code === '23505') { // Handle potential unique constraint violation (e.g., race condition on username)
-            throw new UserInputError('Username or associated user conflict.');
+            throw new GraphQLError('Username or associated user conflict.', { extensions: { code: 'BAD_USER_INPUT' } });
         }
-        throw new Error('Failed to create admin due to a server error.');
+        throw new GraphQLError('Failed to create admin due to a server error.', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
       }
     },
 
@@ -519,7 +520,7 @@ const resolvers = {
       const { username, role } = input;
 
       if (!username && !role) {
-        throw new UserInputError('No update data provided. Specify username or role.');
+        throw new GraphQLError('No update data provided. Specify username or role.', { extensions: { code: 'BAD_USER_INPUT' } });
       }
 
       // Prevent updating the current super admin's own role if needed? (Optional)
@@ -530,7 +531,7 @@ const resolvers = {
       // Check if admin exists
        const { rows: existingAdminRows } = await context.db.query('SELECT id, role FROM admins WHERE id = $1', [id]);
         if (existingAdminRows.length === 0) {
-            throw new UserInputError(`Admin with ID ${id} not found.`);
+            throw new GraphQLError(`Admin with ID ${id} not found.`, { extensions: { code: 'NOT_FOUND' } });
         }
         const currentRole = existingAdminRows[0].role;
 
@@ -540,7 +541,7 @@ const resolvers = {
            const { rows: superAdminCountRows } = await context.db.query('SELECT COUNT(*) FROM admins WHERE role = $1', ['SUPER_ADMIN']);
            const superAdminCount = parseInt(superAdminCountRows[0].count, 10);
            if (superAdminCount <= 1) {
-               throw new ForbiddenError('Cannot remove the last SUPER_ADMIN.');
+               throw new GraphQLError('Cannot remove the last SUPER_ADMIN.', { extensions: { code: 'FORBIDDEN' } });
            }
        }
 
@@ -553,7 +554,7 @@ const resolvers = {
          // Check if new username is already taken by another admin
         const { rows: existingUser } = await context.db.query('SELECT id FROM admins WHERE lower(username) = lower($1) AND id != $2', [username, id]);
         if (existingUser.length > 0) {
-          throw new UserInputError(`Username "${username}" is already taken by another admin.`);
+          throw new GraphQLError(`Username "${username}" is already taken by another admin.`, { extensions: { code: 'BAD_USER_INPUT' } });
         }
         updates.push(`username = $${valueCounter++}`);
         values.push(username);
@@ -565,7 +566,7 @@ const resolvers = {
 
       if (updates.length === 0) {
            // Should not happen due to initial check, but good practice
-           throw new UserInputError('No valid update fields provided.');
+           throw new GraphQLError('No valid update fields provided.', { extensions: { code: 'BAD_USER_INPUT' } });
       }
 
       updates.push(`updated_at = NOW()`);
@@ -577,7 +578,7 @@ const resolvers = {
         const { rows: updatedAdminRows } = await context.db.query(updateQuery, values);
          if (updatedAdminRows.length === 0) {
              // Should not happen if admin was found initially
-             throw new Error('Admin update failed unexpectedly.');
+             throw new GraphQLError('Admin update failed unexpectedly.', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
          }
         const updatedAdminRole = updatedAdminRows[0].role; // Get potentially updated role
         console.log(`Admin updated successfully for ID: ${id}`);
@@ -586,13 +587,13 @@ const resolvers = {
         return await getFullAdminFromContext({ admin: { id: id, role: updatedAdminRole }, db: context.db, loaders: context.loaders });
       } catch (err) {
         console.error(`Error updating admin ID ${id}:`, err);
-         if (err instanceof UserInputError || err instanceof ForbiddenError) {
+         if (err instanceof GraphQLError) {
            throw err; // Re-throw specific Apollo errors
          }
          if (err.code === '23505') { // Handle potential unique constraint violation on username
-            throw new UserInputError('Username conflict during update.');
+            throw new GraphQLError('Username conflict during update.', { extensions: { code: 'BAD_USER_INPUT' } });
         }
-        throw new Error('Failed to update admin due to a server error.');
+        throw new GraphQLError('Failed to update admin due to a server error.', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
       }
     },
 
@@ -601,7 +602,7 @@ const resolvers = {
       const currentAdminId = context.admin.id;
 
       if (currentAdminId.toString() === id.toString()) {
-        throw new ForbiddenError('You cannot delete your own admin account.');
+        throw new GraphQLError('You cannot delete your own admin account.', { extensions: { code: 'FORBIDDEN' } });
       }
 
       // Check if admin exists before attempting delete
@@ -620,7 +621,7 @@ const resolvers = {
         const { rows: superAdminCountRows } = await context.db.query('SELECT COUNT(*) FROM admins WHERE role = $1', ['SUPER_ADMIN']);
         const superAdminCount = parseInt(superAdminCountRows[0].count, 10);
         if (superAdminCount <= 1) {
-          throw new ForbiddenError('Cannot delete the last SUPER_ADMIN.');
+          throw new GraphQLError('Cannot delete the last SUPER_ADMIN.', { extensions: { code: 'FORBIDDEN' } });
         }
       }
 
@@ -652,17 +653,17 @@ const resolvers = {
           } catch(txError) {
               await client.query('ROLLBACK');
               console.error(`Transaction error deleting admin ID ${id}:`, txError);
-              throw new Error("Failed to delete admin due to a server error (transaction failed).");
+              throw new GraphQLError("Failed to delete admin due to a server error (transaction failed).", { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
           } finally {
               client.release();
           }
       } catch (err) {
           // Catch errors from getting client or re-throw from transaction block
            console.error(`Error during admin deletion process for ID ${id}:`, err);
-           if (err instanceof ForbiddenError || err instanceof UserInputError) {
+           if (err instanceof GraphQLError) {
              throw err; // Re-throw specific Apollo errors
            }
-          throw new Error('Failed to delete admin due to a server error.');
+          throw new GraphQLError('Failed to delete admin due to a server error.', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
       }
     },
 

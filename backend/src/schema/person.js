@@ -1,10 +1,11 @@
 // src/schema/person.js
-const { gql, AuthenticationError, ForbiddenError } = require('apollo-server-express');
+const { gql } = require('@apollo/server');
+const { GraphQLError } = require('graphql'); // Import GraphQLError for standard errors
 
 // --- Helper Functions ---
 // Assuming _ensureAdmin is available (e.g., from admin.js or context setup)
 const _ensureAdmin = (adminUser) => {
-  if (!adminUser) throw new AuthenticationError('Admin authentication required.');
+  if (!adminUser) throw new GraphQLError('Admin authentication required.', { extensions: { code: 'UNAUTHENTICATED'} });
 };
 
 // --- GraphQL Definitions ---
@@ -129,7 +130,7 @@ const resolvers = {
          if (result.rowCount === 0) {
            // Return false instead of throwing an error, as schema expects Boolean!
            // Or throw a specific Apollo Error like UserInputError
-           // throw new UserInputError(`Person with ID ${id} not found.`);
+           // throw new GraphQLError(`Person with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT'} });
            return false; // Align with Boolean! return type if not found is not an "error"
          }
         return true; // Successfully deleted

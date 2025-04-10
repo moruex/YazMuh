@@ -1,5 +1,6 @@
 // src/schema/user.js
-const { gql, AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-express');
+const { gql } = require('@apollo/server');
+const { GraphQLError } = require('graphql');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 // Assuming config is accessible or passed appropriately
@@ -14,14 +15,22 @@ const config = {
 // --- Helper Functions ---
 const _ensureLoggedIn = (user) => {
     if (!user) {
-        throw new AuthenticationError('You must be logged in to perform this action.');
+        throw new GraphQLError('You must be logged in to perform this action.', {
+            extensions: {
+                code: 'UNAUTHENTICATED',
+            },
+        });
     }
 };
 
 // --- Admin Helper Functions (Copied from admin.js - REFACOR to shared util recommended) ---
 const _ensureAdminLoggedIn = (context) => {
   if (!context.admin || !context.admin.id) {
-    throw new AuthenticationError('Admin authentication required. Please log in.');
+    throw new GraphQLError('Admin authentication required. Please log in.', {
+        extensions: {
+            code: 'UNAUTHENTICATED',
+        },
+    });
   }
 };
 
@@ -36,7 +45,11 @@ const _ensureAdminRole = (context, requiredRole = 'ADMIN') => {
 
   if (userLevel < requiredLevel) {
     console.warn(`Authorization failed: Admin ${adminUser.id} (Role: ${adminUser.role}) attempted user management action requiring ${requiredRole}.`);
-    throw new ForbiddenError(`Insufficient privileges. Requires ${requiredRole} role or higher to manage users.`);
+    throw new GraphQLError(`Insufficient privileges. Requires ${requiredRole} role or higher to manage users.`, {
+        extensions: {
+            code: 'FORBIDDEN',
+        },
+    });
   }
 };
 // --- End Admin Helper Functions ---
@@ -225,7 +238,11 @@ const resolvers = {
             query = 'SELECT * FROM users WHERE lower(username) = lower($1)';
             values = [username];
         } else {
-            throw new UserInputError('Either user ID or username must be provided.');
+            throw new GraphQLError('Either user ID or username must be provided.', {
+                extensions: {
+                    code: 'BAD_USER_INPUT',
+                },
+            });
         }
         const result = await db.query(query, values);
         if (!result.rows[0]) return null;
@@ -262,7 +279,11 @@ const resolvers = {
     },
     userList: async (_, { userId, listType }, { db }) => {
       const dbListType = resolvers.ListType[listType];
-      if (!dbListType) throw new UserInputError(`Invalid list type: ${listType}`);
+      if (!dbListType) throw new GraphQLError(`Invalid list type: ${listType}`, {
+        extensions: {
+            code: 'BAD_USER_INPUT',
+        },
+      });
       const result = await db.query(
         'SELECT * FROM user_lists WHERE user_id = $1 AND list_type = $2',
         [userId, dbListType]
@@ -277,10 +298,18 @@ const resolvers = {
 
       // Basic validation
       if (!password || password.length < 6) {
-          throw new UserInputError('Password must be at least 6 characters long.');
+          throw new GraphQLError('Password must be at least 6 characters long.', {
+              extensions: {
+                  code: 'BAD_USER_INPUT',
+              },
+          });
       }
       if (!email || !username) {
-           throw new UserInputError('Email and Username are required.');
+           throw new GraphQLError('Email and Username are required.', {
+               extensions: {
+                   code: 'BAD_USER_INPUT',
+               },
+           });
       }
       // Add email format validation? URL validation for avatar_url?
 
@@ -290,7 +319,11 @@ const resolvers = {
         [email, username]
       );
       if (existingUser.rows.length > 0) {
-        throw new UserInputError('User with this email or username already exists.');
+        throw new GraphQLError('User with this email or username already exists.', {
+            extensions: {
+                code: 'BAD_USER_INPUT',
+            },
+        });
       }
 
       // Hash password
@@ -312,9 +345,17 @@ const resolvers = {
            console.error("Registration failed:", error);
             // Check specific DB errors (e.g., unique constraint)
             if (error.code === '23505') { // PostgreSQL unique violation
-                throw new UserInputError('User with this email or username already exists.');
+                throw new GraphQLError('User with this email or username already exists.', {
+                    extensions: {
+                        code: 'BAD_USER_INPUT',
+                    },
+                });
             }
-           throw new Error("Failed to register user. Please try again.");
+           throw new GraphQLError("Failed to register user. Please try again.", {
+               extensions: {
+                   code: 'INTERNAL_SERVER_ERROR',
+               },
+           });
        }
 
       // Generate JWT token
@@ -330,7 +371,11 @@ const resolvers = {
       const { login, password } = input; // 'login' contains username or email
 
       if (!login || !password) {
-           throw new UserInputError('Login identifier and password are required.');
+           throw new GraphQLError('Login identifier and password are required.', {
+               extensions: {
+                   code: 'BAD_USER_INPUT',
+               },
+           });
       }
 
       // Find user by email OR username (case-insensitive)
@@ -341,13 +386,21 @@ const resolvers = {
       const user = result.rows[0];
 
       if (!user) {
-        throw new AuthenticationError('Invalid credentials.'); // Generic error
+        throw new GraphQLError('Invalid credentials.', {
+            extensions: {
+                code: 'UNAUTHENTICATED',
+            },
+        }); // Generic error
       }
 
       // Compare submitted password with stored hash
       const validPassword = await bcrypt.compare(password, user.password_hash);
       if (!validPassword) {
-        throw new AuthenticationError('Invalid credentials.'); // Generic error
+        throw new GraphQLError('Invalid credentials.', {
+            extensions: {
+                code: 'UNAUTHENTICATED',
+            },
+        }); // Generic error
       }
 
       // Generate JWT token
@@ -376,23 +429,43 @@ const resolvers = {
 
       // Check uniqueness if username/email are being changed
       if (input.username !== undefined && input.username.toLowerCase() !== user.username.toLowerCase()) {
-         if (!input.username) throw new UserInputError('Username cannot be empty.');
+         if (!input.username) throw new GraphQLError('Username cannot be empty.', {
+             extensions: {
+                 code: 'BAD_USER_INPUT',
+             },
+         });
          const existing = await db.query('SELECT id FROM users WHERE lower(username) = lower($1) AND id != $2', [input.username, user.id]);
-         if (existing.rows.length > 0) throw new UserInputError('Username already taken.');
+         if (existing.rows.length > 0) throw new GraphQLError('Username already taken.', {
+             extensions: {
+                 code: 'BAD_USER_INPUT',
+             },
+         });
          updates.push(`username = $${paramCounter++}`); values.push(input.username);
       }
       if (input.email !== undefined && input.email.toLowerCase() !== user.email.toLowerCase()) {
-         if (!input.email) throw new UserInputError('Email cannot be empty.');
+         if (!input.email) throw new GraphQLError('Email cannot be empty.', {
+             extensions: {
+                 code: 'BAD_USER_INPUT',
+             },
+         });
          // Add email format validation
          const existing = await db.query('SELECT id FROM users WHERE lower(email) = lower($1) AND id != $2', [input.email, user.id]);
-         if (existing.rows.length > 0) throw new UserInputError('Email already taken.');
+         if (existing.rows.length > 0) throw new GraphQLError('Email already taken.', {
+             extensions: {
+                 code: 'BAD_USER_INPUT',
+             },
+         });
          updates.push(`email = $${paramCounter++}`); values.push(input.email);
       }
 
       // Handle password change
       if (input.password !== undefined) {
          if (!input.password || input.password.length < 6) { // Ensure password is not empty and meets length requirement
-             throw new UserInputError('New password must be at least 6 characters long.');
+             throw new GraphQLError('New password must be at least 6 characters long.', {
+                 extensions: {
+                     code: 'BAD_USER_INPUT',
+                 },
+             });
          }
          const passwordHash = await bcrypt.hash(input.password, 12);
          updates.push(`password_hash = $${paramCounter++}`); values.push(passwordHash);
@@ -413,7 +486,11 @@ const resolvers = {
 
       try {
             const result = await db.query(query, values);
-            if (!result.rows[0]) throw new Error("Failed to update user or user not found."); // Should be caught by _ensureLoggedIn
+            if (!result.rows[0]) throw new GraphQLError("Failed to update user or user not found.", {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                },
+            }); // Should be caught by _ensureLoggedIn
 
             const { password_hash, ...updatedUser } = result.rows[0];
             return updatedUser;

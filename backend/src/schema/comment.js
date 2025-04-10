@@ -1,5 +1,6 @@
 // src/schema/comment.js
-const { gql, AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-express');
+const { gql } = require('@apollo/server');
+const { GraphQLError } = require('graphql');
 
 // --- Helper Functions ---
 // Assume these are defined in a shared utility or passed via context setup
@@ -8,14 +9,14 @@ const { gql, AuthenticationError, ForbiddenError, UserInputError } = require('ap
 
 // Placeholder if not imported/shared:
 const _ensureLoggedIn = (user) => {
-    if (!user || !user.id) { // Check for user object and id
-        throw new AuthenticationError('Authentication required. Please log in.');
+    if (!user) {
+        throw new GraphQLError('You must be logged in to comment.', { extensions: { code: 'UNAUTHENTICATED' } });
     }
 };
 
 const _ensureAdminRole = (context, requiredRole = 'CONTENT_MODERATOR') => {
     if (!context.admin || !context.admin.id) {
-        throw new AuthenticationError('Admin authentication required.');
+        throw new GraphQLError('Admin authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
     }
     const rolesHierarchy = { CONTENT_MODERATOR: 1, ADMIN: 2, SUPER_ADMIN: 3 }; // Define or import hierarchy
     const userLevel = rolesHierarchy[context.admin.role] || 0;
@@ -23,10 +24,21 @@ const _ensureAdminRole = (context, requiredRole = 'CONTENT_MODERATOR') => {
 
     if (userLevel < requiredLevel) {
         console.warn(`Admin Authorization failed: Admin ${context.admin.id} (Role: ${context.admin.role}) attempted action requiring ${requiredRole}.`);
-        throw new ForbiddenError(`Insufficient privileges. Requires ${requiredRole} role or higher.`);
+        throw new GraphQLError(`Insufficient privileges. Requires ${requiredRole} role or higher.`, { extensions: { code: 'FORBIDDEN' } });
     }
     // Return admin info if check passes, might be useful
     return context.admin;
+};
+
+// Optional: Admin check for deletion if needed
+const _ensureAdminOrOwner = (actor, ownerId) => {
+    if (!actor) {
+        throw new GraphQLError('Authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
+    }
+    if (actor.type === 'admin') return; // Admins can always delete
+    if (actor.type === 'user' && actor.id === ownerId) return; // Owner can delete
+
+    throw new GraphQLError('You do not have permission to delete this comment.', { extensions: { code: 'FORBIDDEN' } });
 };
 // --- End Placeholder Helpers ---
 
@@ -203,7 +215,7 @@ const resolvers = {
         comment: async (_, { id }, { db }) => {
             const result = await db.query('SELECT * FROM comments WHERE id = $1', [id]);
             if (!result.rows[0]) {
-                throw new UserInputError('Comment not found.');
+                throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
             // Optional: Check if censored and if user should see it?
             // For now, return regardless of censorship status, let client handle display
@@ -230,16 +242,16 @@ const resolvers = {
             const { movie_id, content, parent_comment_id } = input;
 
             if (!content.trim()) {
-                throw new UserInputError("Comment content cannot be empty.");
+                throw new GraphQLError('Comment content cannot be empty.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
             // Check movie exists
             const movieExists = await db.query('SELECT id FROM movies WHERE id = $1', [movie_id]);
-            if (movieExists.rows.length === 0) throw new UserInputError('Movie not found.');
+            if (movieExists.rows.length === 0) throw new GraphQLError('Movie not found.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             // Check parent comment exists if provided (and belongs to the same movie)
             if (parent_comment_id) {
                 const parentExists = await db.query('SELECT id FROM comments WHERE id = $1 AND movie_id = $2', [parent_comment_id, movie_id]);
-                if (parentExists.rows.length === 0) throw new UserInputError('Parent comment not found or does not belong to this movie.');
+                if (parentExists.rows.length === 0) throw new GraphQLError('Parent comment not found or does not belong to this movie.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
 
             // Insert the comment
@@ -262,7 +274,7 @@ const resolvers = {
         likeComment: async (_, { id }, { user, db }) => {
             _ensureLoggedIn(user);
             const commentExists = await db.query('SELECT id FROM comments WHERE id = $1', [id]);
-            if (commentExists.rows.length === 0) throw new UserInputError('Comment not found.');
+            if (commentExists.rows.length === 0) throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             try {
                 await db.query(
@@ -281,7 +293,7 @@ const resolvers = {
         unlikeComment: async (_, { id }, { user, db }) => {
             _ensureLoggedIn(user);
             const commentExists = await db.query('SELECT id FROM comments WHERE id = $1', [id]);
-            if (commentExists.rows.length === 0) throw new UserInputError('Comment not found.'); // Added check
+            if (commentExists.rows.length === 0) throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             try {
                 await db.query(
@@ -304,13 +316,13 @@ const resolvers = {
             const { content } = input;
 
             if (!content.trim()) {
-                throw new UserInputError("Comment content cannot be empty.");
+                throw new GraphQLError('Comment content cannot be empty.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
 
             // 1. Fetch the comment to check ownership/existence
             const commentResult = await db.query('SELECT user_id FROM comments WHERE id = $1', [id]);
             if (commentResult.rows.length === 0) {
-                throw new UserInputError('Comment not found.');
+                throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
             const commentOwnerId = commentResult.rows[0].user_id;
 
@@ -335,7 +347,7 @@ const resolvers = {
             }
 
             if (!canUpdate) {
-                throw new ForbiddenError('You do not have permission to update this comment.');
+                throw new GraphQLError('You do not have permission to update this comment.', { extensions: { code: 'FORBIDDEN' } });
             }
 
             // 3. Perform Update
@@ -364,7 +376,7 @@ const resolvers = {
             if (commentResult.rows.length === 0) {
                 // Return true if already deleted (idempotency), or throw if it must exist
                 console.warn(`Attempted to delete non-existent comment ID: ${id}`);
-                return true; // Or throw new UserInputError('Comment not found.');
+                return true; // Or throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
             const commentOwnerId = commentResult.rows[0].user_id;
 
@@ -385,7 +397,7 @@ const resolvers = {
             }
 
             if (!canDelete) {
-                throw new ForbiddenError('You do not have permission to delete this comment.');
+                throw new GraphQLError('You do not have permission to delete this comment.', { extensions: { code: 'FORBIDDEN' } });
             }
 
             // 3. Perform Deletion
@@ -419,7 +431,7 @@ const resolvers = {
             // Validate reason code
             const reasonResult = await db.query('SELECT 1 FROM censorship_reasons WHERE reason_code = $1 AND is_active = TRUE', [reason_code]);
             if (reasonResult.rows.length === 0) {
-                throw new UserInputError(`Invalid or inactive censorship reason code: ${reason_code}`);
+                throw new GraphQLError(`Invalid or inactive censorship reason code: ${reason_code}`, { extensions: { code: 'BAD_USER_INPUT' } });
             }
 
             // --- FIX: Use db.connect() to get a client from the pool ---
@@ -431,7 +443,7 @@ const resolvers = {
                 const commentRes = await client.query('SELECT content FROM comments WHERE id = $1 FOR UPDATE', [id]);
                 if (commentRes.rows.length === 0) {
                     // Throw error inside transaction so it gets rolled back
-                    throw new UserInputError('Comment not found.');
+                    throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
                 }
                 const originalContent = commentRes.rows[0].content;
 
@@ -462,7 +474,7 @@ const resolvers = {
                 await client.query('ROLLBACK'); // Rollback on error
                 console.error(`Error censoring comment ${id} by admin ${actingAdmin.id}:`, err);
                 // Re-throw specific errors or a generic one
-                if (err instanceof UserInputError || err instanceof ForbiddenError || err instanceof AuthenticationError) {
+                if (err instanceof GraphQLError) {
                     throw err;
                 }
                 throw new Error('Failed to censor comment due to a server error.');
@@ -479,7 +491,7 @@ const resolvers = {
             // Check if comment exists and is actually censored (can use pool directly for read)
             const checkRes = await db.query('SELECT is_currently_censored FROM comments WHERE id = $1', [id]);
             if (checkRes.rows.length === 0) {
-                throw new UserInputError('Comment not found.');
+                throw new GraphQLError('Comment not found.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
             if (!checkRes.rows[0].is_currently_censored) {
                 const currentComment = await db.query('SELECT * FROM comments WHERE id = $1', [id]);
@@ -514,7 +526,7 @@ const resolvers = {
                 await client.query('ROLLBACK'); // Rollback on error
                 console.error(`Error uncensoring comment ${id} by admin ${actingAdmin.id}:`, err);
                 // Re-throw specific errors or a generic one
-                if (err instanceof UserInputError || err instanceof ForbiddenError || err instanceof AuthenticationError) {
+                if (err instanceof GraphQLError) {
                     throw err;
                 }
                 throw new Error('Failed to uncensor comment due to a server error.');
@@ -531,25 +543,25 @@ const resolvers = {
             const { movie_id, content, parent_comment_id } = input;
 
             if (!content.trim()) {
-                throw new UserInputError("Comment content cannot be empty.");
+                throw new GraphQLError("Comment content cannot be empty.", { extensions: { code: 'BAD_USER_INPUT' } });
             }
 
             // 1. Get the admin's linked user_id
             const { rows: adminUserRows } = await db.query('SELECT user_id FROM admins WHERE id = $1', [actingAdmin.id]);
             if (adminUserRows.length === 0 || !adminUserRows[0].user_id) {
-                throw new ForbiddenError("Admin account is not linked to a user account.");
+                throw new GraphQLError("Admin account is not linked to a user account.", { extensions: { code: 'FORBIDDEN' } });
                 // Or potentially allow adding with a null user_id if schema permits & intended
             }
             const adminUserId = adminUserRows[0].user_id;
 
             // 2. Check movie exists
             const movieExists = await db.query('SELECT id FROM movies WHERE id = $1', [movie_id]);
-            if (movieExists.rows.length === 0) throw new UserInputError('Movie not found.');
+            if (movieExists.rows.length === 0) throw new GraphQLError('Movie not found.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             // 3. Check parent comment exists if provided
             if (parent_comment_id) {
                 const parentExists = await db.query('SELECT id FROM comments WHERE id = $1 AND movie_id = $2', [parent_comment_id, movie_id]);
-                if (parentExists.rows.length === 0) throw new UserInputError('Parent comment not found or does not belong to this movie.');
+                if (parentExists.rows.length === 0) throw new GraphQLError('Parent comment not found or does not belong to this movie.', { extensions: { code: 'BAD_USER_INPUT' } });
             }
 
             // 4. Insert the comment using the admin's user_id
