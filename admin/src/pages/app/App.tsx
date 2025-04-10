@@ -6,7 +6,6 @@ import {
     useLazyQuery,
     useApolloClient,
     ApolloQueryResult,
-    OperationVariables,
     useMutation,
     ApolloError, // Import ApolloError
 } from '@apollo/client';
@@ -17,7 +16,7 @@ import '@src/index.css';
 import '@styles/components/Sidebar.css';
 
 import Sidebar from "@components/sidebar/Sidebar";
-import { LogOut, MenuIcon, User as UserIcon } from 'lucide-react';
+import { MenuIcon } from 'lucide-react';
 import MobileSidebar from '@components/sidebar/MobileSidebar';
 import Header from '@pages/app/Header';
 import Breadcrumbs from '@pages/app/Breadcrumbs';
@@ -201,7 +200,7 @@ const App: React.FC = () => {
     const initialCheckPerformed = useRef(false); // Prevent multiple initial checks
 
     // Use 'meAdmin' as the query name based on schema
-    const [fetchCurrentAdmin, { loading: adminLoading, error: adminError, refetch: refetchAdminQuery }] = useLazyQuery<{ meAdmin: ApiAdmin | null }>(
+    const [fetchCurrentAdmin, { refetch: refetchAdminQuery }] = useLazyQuery<{ meAdmin: ApiAdmin | null }>(
         // IMPORTANT: Use the correct Query name 'meAdmin' from your schema/operations
         // Assuming GET_CURRENT_ADMIN actually contains the 'meAdmin' query
         GET_CURRENT_ADMIN,

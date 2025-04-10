@@ -179,8 +179,13 @@ export const AdminsPage: React.FC = () => {
         userId: formData.userId!     // Required for create
       };
       await createAdminMutation({ variables: { input } });
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("Caught submission error:", e);
+      if (e instanceof Error) {
+        setMutationError(`Submission failed: ${e.message}`);
+      } else {
+        setMutationError("An unknown error occurred during submission.");
+      }
     }
   };
 
@@ -204,8 +209,13 @@ export const AdminsPage: React.FC = () => {
       }
 
       await updateAdminMutation({ variables: { id: selectedAdmin.id, input: finalInput } });
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("Caught submission error:", e);
+      if (e instanceof Error) {
+        setMutationError(`Submission failed: ${e.message}`);
+      } else {
+        setMutationError("An unknown error occurred during submission.");
+      }
     }
   };
 
@@ -213,8 +223,13 @@ export const AdminsPage: React.FC = () => {
     if (window.confirm(`Are you sure you want to delete admin ID ${adminId}? This cannot be undone.`)) {
       try {
         await deleteAdminMutation({ variables: { id: adminId } });
-      } catch (e) {
+      } catch (e: unknown) {
         console.error("Caught delete error:", e);
+        if (e instanceof Error) {
+          alert(`Error deleting admin: ${e.message}`);
+        } else {
+          alert("An unknown error occurred during deletion.");
+        }
       }
     }
   };

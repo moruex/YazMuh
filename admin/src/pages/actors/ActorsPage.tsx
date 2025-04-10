@@ -1,5 +1,5 @@
 // --- START OF FILE ActorsPage.tsx ---
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, ApolloError } from "@apollo/client";
 import {
   Button,
@@ -17,7 +17,6 @@ import { Add, Edit, Delete } from "@mui/icons-material"; // Use icons consistent
 import { GET_PERSONS, GET_PERSON_COUNT } from "@src/graphql/queries/person.queries"; // Adjust import path
 import { CREATE_PERSON, UPDATE_PERSON, DELETE_PERSON } from "@src/graphql/mutations/person.mutations"; // Adjust import path
 import { AddEditActorsModal } from "./AddEditActorsModal";
-import { debounce } from 'lodash'; // Import debounce
 import { ApiPersonCore } from "@interfaces/index";
 import { PersonInput } from "@interfaces/person.interfaces";
 import { Search } from "lucide-react";
@@ -41,7 +40,6 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 25, 50];
 export const ActorsPage: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [currentPerson, setCurrentPerson] = useState<ApiPersonCore | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(ROWS_PER_PAGE_OPTIONS[1]); // Default to 10
@@ -53,13 +51,6 @@ export const ActorsPage: React.FC = () => {
     () => debounce((value: string) => setDebouncedSearchTerm(value), 500),
     [] // Create the debounced function only once
   );
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setSearchTerm(value);
-    debouncedSetSearch(value);
-    setPage(0); // Reset to first page on search
-  };
 
   // --- Data Fetching ---
   const { data: personsData, loading: loadingPersons, error: personsError, refetch: refetchPersons } = useQuery<{ persons: ApiPersonCore[] }>(
@@ -186,7 +177,7 @@ export const ActorsPage: React.FC = () => {
     }
   };
 
-  const handlePageChange = (event: unknown, newPage: number) => {
+  const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
@@ -208,7 +199,7 @@ export const ActorsPage: React.FC = () => {
           <input
             type="text"
             placeholder="Search movies..."
-            onChange={handleSearchChange}
+            onChange={debouncedSetSearch}
           />
         </div>
         <div style={{flex: 1}}></div>

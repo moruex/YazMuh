@@ -4,74 +4,52 @@ import { StatCard } from '@components/StatCard';
 import { Activity, Calendar, Eye, Film, MessageSquare, Star, Users } from 'lucide-react';
 import { LogTable } from '@components/LogTable';
 import CustomChart from '@components/CustomChart';
-import debounce from 'lodash.debounce';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export const AnalyticsPage = () => {
     // States to store the data
-    const [totalUsers, setTotalUsers] = useState(0);
-    const [totalFilms, setTotalFilms] = useState(0);
-    const [mostLikedFilms, setMostLikedFilms] = useState([]);
-    const [mostRatedFilms, setMostRatedFilms] = useState([]);
-    const [mostViewedFilms, setMostViewedFilms] = useState([]);
-    const [totalReviews, setTotalReviews] = useState(0);
-    const [mostActiveUsers, setMostActiveUsers] = useState([]);
+    const [mostLikedFilms] = useState([
+        { title: 'Film A', likes: 500 },
+        { title: 'Film B', likes: 400 },
+        { title: 'Film C', likes: 300 },
+        { title: 'Film D', likes: 500 },
+        { title: 'Film E', likes: 700 },
+        { title: 'Film F', likes: 600 },
+        { title: 'Film G', likes: 300 },
+        { title: 'Film H', likes: 670 },
+        { title: 'Film I', likes: 380 },
+        { title: 'Film J', likes: 700 },
+    ]);
+    const [mostRatedFilms] = useState([
+        { title: 'Film A', ratings: 500 },
+        { title: 'Film B', ratings: 400 },
+        { title: 'Film C', ratings: 300 },
+        { title: 'Film D', ratings: 500 },
+        { title: 'Film E', ratings: 700 },
+        { title: 'Film F', ratings: 600 },
+        { title: 'Film G', ratings: 300 },
+        { title: 'Film H', ratings: 670 },
+        { title: 'Film I', ratings: 380 },
+        { title: 'Film J', ratings: 700 },
+    ]);
+    const [mostViewedFilms] = useState([
+        { title: 'Film A', views: 500 },
+        { title: 'Film B', views: 400 },
+        { title: 'Film C', views: 300 },
+        { title: 'Film D', views: 500 },
+        { title: 'Film E', views: 700 },
+        { title: 'Film F', views: 600 },
+        { title: 'Film G', views: 300 },
+        { title: 'Film H', views: 670 },
+        { title: 'Film I', views: 380 },
+        { title: 'Film J', views: 700 },
+    ]);
 
     // Fetch data on component mount
     useEffect(() => {
         // Simulate API call with dummy data
-        setTotalUsers(1500);
-        setTotalFilms(500);
-        setMostLikedFilms([
-            { title: 'Film A', likes: 500 },
-            { title: 'Film B', likes: 400 },
-            { title: 'Film C', likes: 300 },
-            { title: 'Film D', likes: 500 },
-            { title: 'Film E', likes: 700 },
-            { title: 'Film F', likes: 600 },
-            { title: 'Film G', likes: 300 },
-            { title: 'Film H', likes: 670 },
-            { title: 'Film I', likes: 380 },
-            { title: 'Film J', likes: 700 },
-        ]);
-        setMostRatedFilms([
-            { title: 'Film A', ratings: 500 },
-            { title: 'Film B', ratings: 400 },
-            { title: 'Film C', ratings: 300 },
-            { title: 'Film D', ratings: 500 },
-            { title: 'Film E', ratings: 700 },
-            { title: 'Film F', ratings: 600 },
-            { title: 'Film G', ratings: 300 },
-            { title: 'Film H', ratings: 670 },
-            { title: 'Film I', ratings: 380 },
-            { title: 'Film J', ratings: 700 },
-        ]);
-        setMostViewedFilms([
-            { title: 'Film A', views: 500 },
-            { title: 'Film B', views: 400 },
-            { title: 'Film C', views: 300 },
-            { title: 'Film D', views: 500 },
-            { title: 'Film E', views: 700 },
-            { title: 'Film F', views: 600 },
-            { title: 'Film G', views: 300 },
-            { title: 'Film H', views: 670 },
-            { title: 'Film I', views: 380 },
-            { title: 'Film J', views: 700 },
-        ]);
-        setTotalReviews(1200);
-        setMostActiveUsers([
-            { name: 'User 1', reviews: 100 },
-            { name: 'User 2', reviews: 90 },
-            { name: 'User 3', reviews: 80 },
-            { name: 'User 4', reviews: 100 },
-            { name: 'User 5', reviews: 90 },
-            { name: 'User 6', reviews: 80 },
-            { name: 'User 7', reviews: 100 },
-            { name: 'User 8', reviews: 90 },
-            { name: 'User 9', reviews: 80 },
-            { name: 'User 10', reviews: 100 },
-        ]);
+        // totalUsers, totalFilms, totalReviews, mostActiveUsers are removed
     }, []);
 
     // Memoize chart data to avoid recalculating on every render
@@ -101,17 +79,6 @@ export const AnalyticsPage = () => {
             backgroundColor: 'rgba(37, 81, 255, 0.62)',
         }],
     }), [mostViewedFilms]);
-
-    // Debounce resize events to avoid performance issues
-    useEffect(() => {
-        const handleResize = debounce(() => {
-            // Force charts to resize
-            window.dispatchEvent(new Event('resize'));
-        }, 200);
-
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     return (
         <div className="analytics-container">

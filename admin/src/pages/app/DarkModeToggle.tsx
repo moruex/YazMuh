@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import '@styles/components/DarkModeToggle.css';
 
 import { Moon, Sun } from 'lucide-react';
 
-const DarkModeToggle = ({ onChange }) => {
+interface DarkModeToggleProps {
+    onChange?: (isDark: boolean) => void; // Add type for onChange prop
+}
+
+const DarkModeToggle: React.FC<DarkModeToggleProps> = ({ onChange }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {

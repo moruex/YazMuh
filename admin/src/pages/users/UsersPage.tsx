@@ -204,7 +204,10 @@ export const UsersPage: React.FC = () => {
         bio: formData.bio || null,
       };
       await registerUserMutation({ variables: { input } });
-    } catch (e) { /* Error handled by onError */ }
+    } catch (e: unknown) { 
+      /* Error handled by onError */ 
+      console.error("Add submit catch:", e);
+    }
   };
 
   const handleEditSubmit = async (formData: UserFormData) => {
@@ -230,7 +233,10 @@ export const UsersPage: React.FC = () => {
 
       console.log("Updating user ID:", selectedUser.id, "with input:", input);
       await adminUpdateUserMutation({ variables: { id: selectedUser.id, input } });
-    } catch (e) { /* Error handled by onError */ }
+    } catch (e: unknown) { 
+      /* Error handled by onError */ 
+      console.error("Edit submit catch:", e);
+    }
   };
 
   // --- Delete Handler ---
@@ -240,7 +246,10 @@ export const UsersPage: React.FC = () => {
       try {
         // Call the actual delete mutation
         await adminDeleteUserMutation({ variables: { id: userId } });
-      } catch (e) { /* Error handled by onError */ }
+      } catch (e: unknown) { 
+        /* Error handled by onError */ 
+        console.error("Delete catch:", e);
+      }
     }
   };
 

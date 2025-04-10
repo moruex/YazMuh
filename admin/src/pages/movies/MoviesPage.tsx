@@ -15,6 +15,7 @@ import {
   UPDATE_MOVIE,
 } from "@graphql/index";
 import { Movie, MovieInputData, ApiMovieCore, ApiMovieDetail, RoleType, ApiPersonCore } from "@interfaces/index";
+import { ApolloError } from '@apollo/client';
 
 // --- Notification System ---
 const useNotification = () => {
@@ -144,7 +145,7 @@ export const MoviesPage = () => {
 
   // --- Mutations ---
   const commonMutationOptions = {
-    onError: (err) => {
+    onError: (err: ApolloError) => {
       addNotification(`Operation failed: ${err.message}`, 'error');
     }
   };
