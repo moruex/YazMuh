@@ -1,12 +1,19 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import { fileURLToPath } from 'url';
 
-// https://vitejs.dev/config/
+// Define __dirname using import.meta.url
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    react()
-  ],
+  // server: {
+  //   host: true, // this allows it to be accessible via your local IP
+  //   port: 5173, // optional, default is 5173
+  // },
+  plugins: [react()],
   resolve: {
     alias: {
       "@src": path.resolve(__dirname, "./src"),
