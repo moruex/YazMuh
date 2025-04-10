@@ -91,7 +91,8 @@ const resolvers = {
         const { rows } = await context.db.query('SELECT * FROM quiz_questions WHERE id = $1', [id]);
         return rows[0] || null;
     },
-    myQuizAnswers: async (_, { questionId }, { user, db }) => {
+    myQuizAnswers: async (_, { questionId }, context) => {
+        const { user, db } = context;
         ensureLoggedIn(user);
         let query = 'SELECT * FROM user_quiz_answers WHERE user_id = $1';
         const values = [user.id];
@@ -203,7 +204,8 @@ const resolvers = {
   QuizQuestion: {
     choices: async (question, _, context) => (await context.db.query('SELECT * FROM quiz_choices WHERE question_id = $1 ORDER BY created_at ASC', [question.id])).rows,
     // correct_choices resolver removed
-    user_answers: async (question, _, { user, db }) => {
+    user_answers: async (question, _, context) => {
+         const { user, db } = context;
          if (!user) return [];
          return (await db.query('SELECT * FROM user_quiz_answers WHERE user_id = $1 AND question_id = $2', [user.id, question.id])).rows;
     }
@@ -212,15 +214,18 @@ const resolvers = {
   // QuizChoice needs no specific resolvers
 
   UserQuizAnswer: {
-    user: async (ans, _, { db, loaders }) => { /* ... fetch user ... */
+    user: async (ans, _, context) => {
+        const { db, loaders } = context;
         if (loaders?.userLoader) return loaders.userLoader.load(ans.user_id);
         const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [ans.user_id]); if (!rows[0]) return null; const { password_hash, ...u } = rows[0]; return u;
     },
-    question: async (ans, _, { db, loaders }) => { /* ... fetch question ... */
+    question: async (ans, _, context) => {
+        const { db, loaders } = context;
         if (loaders?.quizQuestionLoader) return loaders.quizQuestionLoader.load(ans.question_id);
         return (await db.query('SELECT * FROM quiz_questions WHERE id = $1', [ans.question_id])).rows[0];
     },
-    choice: async (ans, _, { db, loaders }) => { /* ... fetch choice ... */
+    choice: async (ans, _, context) => {
+        const { db, loaders } = context;
         if (loaders?.quizChoiceLoader) return loaders.quizChoiceLoader.load(ans.choice_id);
         return (await db.query('SELECT * FROM quiz_choices WHERE id = $1', [ans.choice_id])).rows[0];
     },

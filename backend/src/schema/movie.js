@@ -468,9 +468,10 @@ const resolvers = {
   },
 
   MoviePerson: {
-    person: async (moviePerson, _, { db, loaders }) => {
+    person: async (moviePerson, _, context) => {
+       const { db, loaders } = context;
        if (loaders?.personLoader) return loaders.personLoader.load(moviePerson.person_id);
-      const result = await context.db.query('SELECT * FROM persons WHERE id = $1', [moviePerson.person_id]);
+      const result = await db.query('SELECT * FROM persons WHERE id = $1', [moviePerson.person_id]);
       return result.rows[0];
     },
     role_type: (moviePerson) => mapRoleTypeToGraphQL(moviePerson.role_type),
