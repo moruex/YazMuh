@@ -7,7 +7,7 @@ MovieQ isimli film yorumlama sitemiz kullanıcılarının eski ve yeni çıkmı�
 
 **Referans Uygulama:** [imdb.com](https://www.imdb.com/), [rottentomatoes.com](https://www.rottentomatoes.com/)
 
-**Uygulama Adresi:** [movieq.com.tr](https://www.movieq.com.tr/)
+**Uygulama Adresi:** [movieq.com.tr](https://movieq.com.tr/)
 
 **Grup Adı:** SAYFA
 
