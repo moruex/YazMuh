@@ -5,10 +5,10 @@ import { Menu as MenuIcon, Search as SearchIcon, ChevronDown } from 'lucide-reac
 import './Navbar.css'; // Import the new CSS file
 
 // Import SVG flags (adjust path if necessary)
-import enFlag from '@assets/flags/en.svg';
-import trFlag from '@assets/flags/tr.svg';
-import tkFlag from '@assets/flags/tk.svg';
-import ruFlag from '@assets/flags/ru.svg';
+import enFlag from 'en.svg';
+import trFlag from 'tr.svg';
+import tkFlag from 'tk.svg';
+import ruFlag from 'ru.svg';
 
 // Define language type - flag is now a string (path or imported module)
 interface Language {

@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 800 800">
-  <g fill-rule="nonzero" transform="matrix(1.84837, 0, 0, 1.84837, -73.1843, -73.1843)">
-    <path fill="#E0E1E2" d="M472.405 256.232H39.597l-.003-.231c0-119.52 96.886-216.407 216.407-216.407 119.517 0 216.407 96.887 216.407 216.407l-.003.231z"></path>
-    <path fill="#D52B1E" d="M39.597 256.232h432.808c-.124 119.411-96.963 216.176-216.404 216.176-119.444 0-216.28-96.765-216.404-216.176z"></path>
-    <path fill="#0039A6" d="M52.038 183.55h407.926c8.048 22.652 12.444 47.036 12.444 72.451 0 25.586-4.452 50.131-12.606 72.915H52.2c-8.154-22.784-12.606-47.329-12.606-72.915 0-25.415 4.396-49.799 12.444-72.451z"></path>
-  </g>
-</svg>
