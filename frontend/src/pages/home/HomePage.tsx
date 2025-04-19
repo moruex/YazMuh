@@ -306,7 +306,7 @@ interface NewsCardProps {
 
 const NewsCard = ({ title, posterUrl, description, date }: NewsCardProps) => (
   <div className="movie-news-card">
-    <a href={`/newsd`} className="movie-card-link">
+    <a href={`/newsd`} className="hm-movie-card-link">
       <div className="movie-news-image">
         <img src={posterUrl} alt={title} />
       </div>
