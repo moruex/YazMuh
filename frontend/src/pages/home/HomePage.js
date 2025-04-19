@@ -226,7 +226,7 @@ const mockMovies = [
         language: "Japanese"
     },
 ];
-// Example of data you would pass to the component:
+
 const myMovieDataRaw = [
     {
         id: 'm1',
@@ -277,9 +277,9 @@ const myMovieDataRaw = [
             likes: 199
         }
     },
-    // ... add more movies
+    
 ];
-// Map the raw data to include the base 'rating' field and convert id
+
 const myMovieData = myMovieDataRaw.map((movie, index) => {
     var _a, _b;
     return (Object.assign(Object.assign({}, movie), { id: parseInt(movie.id.replace('m', ''), 10) || index, rating: (_b = (_a = movie.movieQRating) !== null && _a !== void 0 ? _a : movie.imdbRating) !== null && _b !== void 0 ? _b : 0 // Use MovieQ rating, fallback to IMDb, then 0
