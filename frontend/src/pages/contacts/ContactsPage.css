@@ -13,23 +13,23 @@
 .contact-page {
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - var(--navbar-height, 60px)); /* Adjust navbar height if needed */
+    min-height: calc(100vh - var(--navbar-height, 60px)); 
     /* background-color: var(--dark-bg); */
     color: var(--text-primary);
     padding: 20px;
-    padding-bottom: 0; /* Let Footer handle bottom spacing */
+    padding-bottom: 0; 
 }
 
 .contact-container {
     /* width: 100%; */
-    max-width: 700px; /* Adjusted max-width for form */
-    margin: 20px auto; /* Added top margin */
+    max-width: 700px; 
+    margin: 20px auto; 
     background-color: var(--dark-surface);
     border-radius: 8px;
     padding: 30px 40px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     border: 1px solid var(--border-color);
-    flex-grow: 1; /* Make container grow to fill space before footer */
+    flex-grow: 1; 
 }
 
 .contact-heading {
@@ -78,8 +78,8 @@
     font-size: 1rem;
     outline: none;
     /* transition: all 0.3s ease; */
-    width: 100%; /* Ensure full width */
-    box-sizing: border-box; /* Include padding and border in width */
+    width: 100%; 
+    box-sizing: border-box; 
 }
 
 .contact-form-group input::placeholder,
@@ -92,11 +92,11 @@
 .contact-form-group textarea:focus {
     border-color: var(--primary-green);
     box-shadow: 0 0 0 2px rgba(0, 224, 84, 0.2);
-    background-color: var(--dark-surface); /* Slightly darker on focus */
+    background-color: var(--dark-surface); 
 }
 
 .contact-form-group textarea {
-    resize: vertical; /* Allow vertical resize */
+    resize: vertical; 
     min-height: 120px;
 }
 
@@ -104,13 +104,13 @@
     background-color: var(--primary-green);
     color: var(--dark-bg);
     border: none;
-    border-radius: 25px; /* Pill shape */
+    border-radius: 25px; 
     padding: 12px 24px;
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    align-self: center; /* Center button */
+    align-self: center; 
     margin-top: 10px;
 }
 
@@ -198,6 +198,6 @@
         font-size: 1.8rem;
     }
      .contact-submit-button {
-         width: 100%; /* Make button full width on small screens */
+         width: 100%; 
      }
 }
