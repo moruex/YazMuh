@@ -57,16 +57,16 @@
 
 .mc-carousel-inner {
     display: flex;
-    /* Width, Transform, Transition set inline */
+    
     will-change: transform;
 }
 
 .mc-slide {
     flex-shrink: 0;
     box-sizing: border-box;
-    /* Width set inline */
+   
     position: relative;
-    overflow: hidden; /* Ensure slide content clips */
+    overflow: hidden; 
 }
 
 /* --- Slide Content Layout --- */
@@ -76,7 +76,7 @@
     background-color: var(--mc-card-bg);
     width: 100%;
     height: 100%;
-    min-height: 400px; /* Adjust as needed */
+    min-height: 400px; 
     box-sizing: border-box;
 }
 
@@ -105,10 +105,10 @@
     padding: clamp(1rem, 3vw, 1.5rem) clamp(1.25rem, 4vw, 2rem);
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Helps position ratings at bottom if needed */
+    justify-content: space-between; 
     overflow-y: auto;
     box-sizing: border-box;
-    gap: clamp(1rem, 2.5vh, 1.5rem); /* Increased gap for better separation */
+    gap: clamp(1rem, 2.5vh, 1.5rem); 
 }
 
 /* --- Text Elements --- */
@@ -155,7 +155,7 @@
 
 /* --- Top Comment Section --- */
 .mc-top-comment-section {
-    /* Positioned by the flex gap in details-container */
+   
 }
 
 .mc-comment-heading {
@@ -210,7 +210,7 @@
     line-height: 1.5;
     margin: 0 0 0.6rem 0;
     overflow-wrap: break-word;
-    word-wrap: break-word; /* Legacy */
+    word-wrap: break-word; 
     hyphens: auto;
 }
 
@@ -236,7 +236,7 @@
 .mc-ratings-section {
     padding-top: clamp(0.75rem, 2vh, 1rem);
     border-top: 1px solid var(--mc-border-color);
-    /* margin-top: auto; /* Re-add if needed, but gap might suffice */
+    /* margin-top: auto;  */
 }
 
 .mc-ratings-heading {
@@ -437,7 +437,7 @@
     .mc-details-container {
         padding: 1rem 1.25rem;
         overflow-y: visible;
-        gap: 1rem; /* Consistent gap */
+        gap: 1rem; 
     }
      .mc-movie-title { font-size: 1.2rem; }
     .mc-movie-year-genre { font-size: 0.8rem; }
