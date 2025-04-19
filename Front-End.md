@@ -1,12 +1,9 @@
-Admin'i yayınladığınız domain adresi: https://movieq.com.tr
-
+Admin'i yayınladığınız domain adresi: https://movieq.com.tr<br>
 Frontend'i yayınladığınız domain adresi: https://movieq.com.tr
 
-**Backend girişi**
-
-Username:asimsinan 
-
-Password:123456
+**Backend girişi**<br>
+Username : asimsinan<br>
+Password : 123456
 
 # Semih Çantal #
 1. Kullanıcı kaydı [User Registration](https://movieq.com.tr/login#)
