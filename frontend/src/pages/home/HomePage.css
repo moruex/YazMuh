@@ -146,12 +146,18 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align:center;
 }
 
 .hm-movie-year {
   color: var(--text-secondary);
   font-size: 14px;
   margin-bottom: 8px;
+  text-align:center;
+}
+
+.hm-movie-genres{
+  text-align:center;
 }
 
 /* News Section */
