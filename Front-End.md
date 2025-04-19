@@ -34,9 +34,9 @@ Frontend'i yayınladığınız domain adresi: https://movieq.com.tr
 6. Film güncelleme [Edit Movie](/movies)
 
 # Abdullah Kural #
-1. Oyuncu ve yönetmen bilgileri ekleme [Actors/Directors](/actors)
+1. Oyuncu ve yönetmen bilgileri ekleme [Actors/Directors](https://movieq-admin.netlify.app/actors) **ADD PERSON** butona tıkla
 2. Film haberleri [News](https://movieq.com.tr/news)
-3. Haber ekleme [Add News](/news)
-4. Haber düzenleme [Edit News](/news)
-5. Haber silme  [Delete News](/news)
-6. Yorum onaylama [Moderate Commends](/commends)   
+3. Haber ekleme [Add News](https://movieq-admin.netlify.app//news) **ADD ARTICLE** butona tıkla
+4. Haber düzenleme [Edit News](https://movieq-admin.netlify.app//news) **EDIT** butona tıkla
+5. Haber silme  [Delete News](https://movieq-admin.netlify.app//news) **DELETE** butona tıkla
+6. Yorum onaylama [Moderate Commends](https://movieq-admin.netlify.app/commends) **CENSOR** butona tıkla
