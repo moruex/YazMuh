@@ -4,12 +4,6 @@ import { IconButton } from '@mui/material';
 import { Menu as MenuIcon, Search as SearchIcon, ChevronDown } from 'lucide-react'; // Use Lucide Search, Added ChevronDown
 import './Navbar.css'; // Import the new CSS file
 
-// Import SVG flags (adjust path if necessary)
-import enFlag from 'en.svg';
-import trFlag from 'tr.svg';
-import tkFlag from 'tk.svg';
-import ruFlag from 'ru.svg';
-
 // Define language type - flag is now a string (path or imported module)
 interface Language {
   code: string;
@@ -24,17 +18,17 @@ const Navbar = ({ isLoggedIn = false }) => {
   const navigate = useNavigate(); // Hook for navigation
 
   // Language Dropdown State
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>({ code: 'en', name: 'English', flag: enFlag });
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>({ code: 'en', name: 'English', flag: '/en.svg' });
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const langDropdownRef = useRef<HTMLLIElement>(null); // Ref for dropdown
 
   // Available languages - updated with imported flags
   const languages: Language[] = [
-    { code: 'en', name: 'English', flag: enFlag },
-    { code: 'tr', name: 'Türkçe', flag: trFlag },
-    { code: 'tk', name: 'Türkmençe', flag: tkFlag },
-    { code: 'ru', name: 'Русский', flag: ruFlag },
-  ];
+    { code: 'en', name: 'English', flag: '/en.svg' },
+    { code: 'tr', name: 'Türkçe', flag: '/tr.svg' },
+    { code: 'tk', name: 'Türkmençe', flag: '/tk.svg' },
+    { code: 'ru', name: 'Русский', flag: '/ru.svg' },
+  ];  
 
   // Track scroll for navbar appearance
   useEffect(() => {
