@@ -10,7 +10,7 @@ const ContactsPage: React.FC = () => {
         message: '',
     });
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false); // Added submitting state
+    const [isSubmitting, setIsSubmitting] = useState(false); 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -22,17 +22,17 @@ const ContactsPage: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setIsSubmitting(true); // Start submission indicator
-        // Simulate form submission
+        setIsSubmitting(true); 
+        
         console.log('Form data submitted:', formData);
-        // Replace with actual API call later
+        
         setTimeout(() => {
             setIsSubmitted(true);
-            setIsSubmitting(false); // Stop submission indicator
-            setFormData({ name: '', email: '', subject: '', message: '' }); // Reset form
-            // Hide thank you message after a few seconds
+            setIsSubmitting(false); 
+            setFormData({ name: '', email: '', subject: '', message: '' }); 
+            
             setTimeout(() => setIsSubmitted(false), 5000);
-        }, 1500); // Simulate network delay
+        }, 1500); 
     };
 
     return (
@@ -109,11 +109,7 @@ const ContactsPage: React.FC = () => {
                         <p>
                             For general inquiries, you can also reach out to us at: <a href="mailto:support@movieq.com">movieq3231@gmail.com</a>
                         </p>
-                        {/* Add social media links here if applicable */}
-                        {/* <div className="contact-social-links">
-                         <a href="#">[Social Icon 1]</a>
-                         <a href="#">[Social Icon 2]</a>
-                     </div> */}
+                        {}
                     </div>
                 </div>
             </div>
