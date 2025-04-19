@@ -165,6 +165,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     min-height: 2.6em; /* Ensure space for two lines */
+    text-align:center;
 }
 
 .rec-movie-year {
@@ -173,6 +174,7 @@
     margin: 0;
     margin-top: auto; /* Pushes year to the bottom */
     padding-top: 8px; /* Space above the year */
+    text-align:center;
 }
 
 /* Responsive adjustments */
