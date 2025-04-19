@@ -158,7 +158,7 @@ const mockMovies = [
     posterUrl: "https://m.media-amazon.com/images/M/MV5BYmQ4YWMxYjUtNjZmYi00MDQ1LWFjMjMtNjA5ZDdiYjdiODU5XkEyXkFqcGdeQXVyMTMzNDExODE5._V1_FMjpg_UX1000_.jpg",
     rating: 9.5,
     genres: ["Crime", "Drama", "Thriller"],
-    runtime: 45, // per episode
+    runtime: 45, 
     language: "English"
   },
   {
@@ -228,7 +228,7 @@ const mockMovies = [
   },
 ]
 
-// Example of data you would pass to the component:
+
 const myMovieDataRaw = [
   {
       id: 'm1',
@@ -240,7 +240,7 @@ const myMovieDataRaw = [
       imdbRating: 8.7,
       movieQRating: 9.5,
       kinopoiskRating: 8.6,
-      topComment: { // <-- HAS COMMENT DATA
+      topComment: { 
           avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Tom_Holland_by_Gage_Skidmore.jpg/330px-Tom_Holland_by_Gage_Skidmore.jpg", // Use your actual paths
           username: "SpaceFanatic",
           text: "Mind-blowing! The scale, the music, the feels... Cooper!",
@@ -256,7 +256,7 @@ const myMovieDataRaw = [
       imdbRating: 8.1,
       movieQRating: 8.8,
       kinopoiskRating: 7.9,
-      topComment: { // <-- HAS COMMENT DATA
+      topComment: { 
         avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Tom_Holland_by_Gage_Skidmore.jpg/330px-Tom_Holland_by_Gage_Skidmore.jpg", // Use your actual paths
         username: "SpaceFanatic",
         text: "Mind-blowing! The scale, the music, the feels... Cooper!",
@@ -272,21 +272,21 @@ const myMovieDataRaw = [
       imdbRating: 8.5,
       movieQRating: 9.2,
       kinopoiskRating: 8.0,
-       topComment: { // <-- HAS COMMENT DATA
+       topComment: { 
           avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Tom_Holland_by_Gage_Skidmore.jpg/330px-Tom_Holland_by_Gage_Skidmore.jpg",
           username: "FilmBuff_Kim",
           text: "Absolutely brilliant script and direction. The tension builds perfectly. Deserved all the awards.",
           likes: 199
       }
   },
-  // ... add more movies
+  
 ];
 
-// Map the raw data to include the base 'rating' field and convert id
+
 const myMovieData = myMovieDataRaw.map((movie, index) => ({
   ...movie,
-  id: parseInt(movie.id.replace('m', ''), 10) || index, // Convert string ID to number, fallback to index
-  rating: movie.movieQRating ?? movie.imdbRating ?? 0 // Use MovieQ rating, fallback to IMDb, then 0
+  id: parseInt(movie.id.replace('m', ''), 10) || index, 
+  rating: movie.movieQRating ?? movie.imdbRating ?? 0 
 }));
 
 const mockMoviesSections = {
@@ -296,7 +296,7 @@ const mockMoviesSections = {
   recentlyAdded: mockMovies,
 };
 
-// Interface for NewsCard props
+
 interface NewsCardProps {
   title: string;
   posterUrl: string;
