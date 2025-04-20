@@ -201,7 +201,7 @@ const resolvers = {
       // Add LIMIT if needed for performance in specific views
       const result = await context.db.query(
         `SELECT m.* FROM movies m JOIN movie_genres mg ON m.id = mg.movie_id WHERE mg.genre_id = $1`,
-        [genre.id]
+         [genre.id]
       );
       return result.rows;
     },
