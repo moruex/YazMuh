@@ -40,6 +40,12 @@
     color: var(--text-primary);
 }
 
+.mvhide {
+    display: inline-block;
+    ;
+    color: #fff;
+}
+
 /* Search Container Styles */
 .ms-search-container1 {
     background-color: var(--dark-surface);
@@ -97,9 +103,10 @@ input.ms-search-input1[type=number]::-webkit-outer-spin-button {
     transition: all 0.3s ease;
 }
 
-.ms-search-button:hover {
+.ms-advanced-toggle:active,
+.ms-search-button:active {
     background-color: var(--accent-green);
-    transform: translateY(-2px);
+    transform: scale(0.98);
 }
 
 .ms-advanced-toggle {
@@ -355,7 +362,7 @@ input.ms-search-input1[type=number]::-webkit-outer-spin-button {
     color: inherit;
     display: block;
     height: 100%;
-  }
+}
 
 .ms-movie-card:hover {
     transform: translateY(-5px);
@@ -461,6 +468,14 @@ input.ms-search-input1[type=number]::-webkit-outer-spin-button {
 }
 
 @media (max-width: 768px) {
+    .mvhide {
+        display: inline;
+    }
+
+    .mvhide-text {
+        display: none;
+    }
+
     .ms-page {
         padding: 10px;
         padding-bottom: 0;
@@ -497,7 +512,7 @@ input.ms-search-input1[type=number]::-webkit-outer-spin-button {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         border: 1px solid var(--border-color);
     }
-    
+
 
     .movie-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -669,4 +684,68 @@ input.ms-multi-select-checkbox:checked {
     color: var(--text-primary);
     font-size: 14px;
     width: 80px;
+}
+
+.ms-search-button {
+    background-color: var(--primary-green);
+    color: var(--dark-bg);
+    border: none;
+    border-radius: 20px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    min-width: 100px;
+}
+
+.ms-advanced-toggle {
+    background-color: transparent;
+    color: var(--primary-green);
+    border: 2px solid var(--primary-green);
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    min-width: 100px;
+}
+
+/* Add this for responsive behavior */
+@media (max-width: 768px) {
+    .ms-main-search1 {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px 10px 0px 10px;
+    }
+
+    .ms-filter-row {
+        padding: 10px;
+    }
+
+    .ms-search-button,
+    .ms-advanced-toggle {
+        border-radius: 50%;
+        min-width: 0;
+        min-height: 0;
+        padding: 5px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .mvhide {
+        display: inline-block;
+    }
+
+    .mvhide-text {
+        display: none;
+    }
 }
