@@ -53,5 +53,5 @@ module.exports = {
     ensureAdminLoggedIn,
     ensureAdminRole,
     ensureAdmin, // Export the basic admin check too
-    rolesHierarchy // Export hierarchy if needed elsewhere
+    rolesHierarchy //Export hierarchy if needed elsewhere
 }; 
