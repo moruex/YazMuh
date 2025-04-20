@@ -18,22 +18,19 @@ const MovieCard7: React.FC<MovieCardProps> = ({ movie }) => {
         <div className="mp-movie-card-header">
           <h3 className="mp-movie-card-title">{movie.title}</h3>
           <div className="mp-movie-card-ratings">
-            {/* Use optional chaining or checks if these could be truly missing */}
             {movie.rating && (
               <span className="rating-item imdb-rating">
                 IMDb: {movie.rating.toFixed(1)}
               </span>
             )}
             {movie.rating && (
-              <span className="rating-item rt-rating">
-                {/* Label was MiQ, assuming it should be RT */}
-                RT: {movie.rating}%
+              <span className="rating-item ltb-rating">
+                LTB: {movie.rating}%
               </span>
             )}
             {movie.rating && (
-              <span className="rating-item mc-rating">
-                {/* Label was KP, assuming it should be MC */}
-                MC: {movie.rating}
+              <span className="rating-item miq-rating">
+                M<label>iQ<label/>: {movie.rating}
               </span>
             )}
           </div>

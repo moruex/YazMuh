@@ -528,11 +528,6 @@ const MoviesPage: React.FC = () => {
       <div className="movie-archive-container">
         <div className="archive-header">
           <h1 className="archive-title">All Movies</h1>
-          {totalFilteredMovies > 0 && (
-            <p className="archive-count">
-              Showing {totalFilteredMovies} movies
-            </p>
-          )}
         </div>
 
         <FilterControls
