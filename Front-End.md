@@ -9,7 +9,7 @@ Password : 123456
 1. Kullanıcı kaydı [User Registration](https://movieq.com.tr/login#)
 2. Kullanıcı girişi [User Login](https://movieq.com.tr/login)
 3. Kullanıcı avatar yükleme [User Avatar](https://movieq.com.tr/profile)**Simulate Login** butona tıkla
-4. Film filtreleme [Movie Filtering](https://movieq.com.tr/search?query=one)
+4. Film filtreleme [Movie Filtering](https://movieq.com.tr/search?query=one)**Show** butona tıkla
 5. Profil düzenleme  [Profile Editing](http://movieq.com.tr/profile)**Simulate Login** butona tıkla
 6. Şifre sıfırlama  [Reset Password](https://movieq.com.tr/profile)**Simulate Login** butona tıkla
 
