@@ -163,7 +163,7 @@ const resolvers = {
 
           await db.query('COMMIT');
           return newNews; // Return the created news item
-      } catch (error) {
+       } catch (error) {
           await db.query('ROLLBACK');
           console.error("Error creating news:", error);
           // Rethrow a more specific or the original error if helpful
