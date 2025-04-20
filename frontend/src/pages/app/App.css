@@ -219,9 +219,15 @@ body {
   object-fit: contain;
 }
 
-
-@media (min-width: 0px) {
+@media (min-width: 601px) {
   html {
     overflow-y: scroll;
+  }
+}
+
+@media (max-width: 600px) {
+  html {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
