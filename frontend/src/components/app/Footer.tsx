@@ -7,7 +7,7 @@ const Footer = () => {
             Mov<span className="accent">i</span>e
             <span className="accent">Q</span>
           </p>
-          <p>The social platform for sharing your taste in film.</p>
+          <p>The social platform for sharing your taste in movie.</p>
         </div>
         <div className="footer-section">
           <h4>Navigation</h4>

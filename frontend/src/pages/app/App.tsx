@@ -15,6 +15,7 @@ import RecPage from '@pages/rec/RecPage';
 import AboutPage from '@pages/about/AboutPage';
 import ContactsPage from '@pages/contacts/ContactsPage';
 import PersonDetailsPage from '@pages/person/PersonDetailPage';
+import MoviesPage from '@pages/movies/MoviesPage';
 
 const App = () => {
   // State to track if user is logged in
@@ -27,7 +28,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<MovieSearch />} />
-          <Route path="/movies" element={<RecPage />} />
+          <Route path="/movies" element={<MoviesPage />} />
           <Route path="/recs" element={<RecPage />} />
           <Route path="/movies/:movieId" element={<MovieDetailsPage />} />
           <Route path="/person/:personId" element={<PersonDetailsPage />} />
