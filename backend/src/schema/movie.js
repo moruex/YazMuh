@@ -494,7 +494,7 @@ const resolvers = {
          const values = [section.id, limit, offset];
          const result = await context.db.query(query, values);
          return result.rows;
-     },
+      },
      movieCount: async (section, _, context) => {
         const result = await context.db.query('SELECT COUNT(*) FROM recommendation_section_movies WHERE section_id = $1', [section.id]);
         return parseInt(result.rows[0].count, 10);
