@@ -11,7 +11,7 @@ Password : 123456
 3. Kullanıcı avatar yükleme [User Avatar](https://movieq.com.tr/profile)**Simulate Login** butona tıkla
 4. Film filtreleme [Movie Filtering](https://movieq.com.tr/search?query=one)**Show** butona tıkla
 5. Profil düzenleme  [Profile Editing](http://movieq.com.tr/profile)**Simulate Login** butona tıkla
-6. Şifre sıfırlama  [Reset Password](https://movieq.com.tr/profile)**Simulate Login** butona tıkla
+6. Şifre sıfırlama  [Reset Password](https://movieq.com.tr/profile)**Simulate Login** ve **Account Settings** butona tıkla
 
 # Akif Tarık Binici #
 1. Film detayını görme [Movie Details](https://movieq.com.tr/movies/1)
