@@ -16,7 +16,7 @@ const { typeDefs: newsTypeDefs, resolvers: newsResolvers } = require('./news');
 const { typeDefs: quizTypeDefs, resolvers: quizResolvers } = require('./quiz');
 const { typeDefs: fileTypeDefs, resolvers: fileResolvers } = require('./file');
 
-// Base types
+//  Base types
 const baseTypeDefs = gql`
   scalar DateTime
   scalar Date
