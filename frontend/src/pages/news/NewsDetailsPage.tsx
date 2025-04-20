@@ -228,7 +228,7 @@ const NewsDetailsPage = () => {
                   <p>{item.date}</p>
                 </div>
               </Link>
-            ))}
+             ))}
           </div>
         </div>
       </div>

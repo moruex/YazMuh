@@ -7,7 +7,7 @@ export const AUTH_PAYLOAD_FIELDS = gql`
   ${USER_FIELDS}
   fragment AuthPayloadFields on AuthPayload {
     token
-    user {
+    user   {
       ...UserFields
     }
   }
