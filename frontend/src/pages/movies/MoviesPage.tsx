@@ -1,11 +1,52 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; // Import React explicitly
 import "./MoviesPage.css"; // Using existing CSS file
 import MovieCard7 from "./MovieCard7";
-import Footer from "@src/components/app/Footer";
-("./MovieCard7");
+import Footer from "@src/components/app/Footer"; // Assuming path is correct
 
-// --- Mock Data ---
-const mockMovies = [
+// --- Define Interfaces (can be moved to a types file) ---
+export interface Movie {
+  id: number;
+  title: string;
+  year: number;
+  posterUrl: string;
+  rating: number; // Overall rating used initially for sorting default
+  imdbRating?: number;
+  rtRating?: number;
+  mcRating?: number;
+  genres: string[];
+  director?: string;
+  runtime?: number;
+  language?: string;
+}
+
+// Define the possible sort keys explicitly for type safety
+export type SortByType = "rating" | "title" | "year";
+
+export interface FiltersState {
+  sortBy: SortByType;
+  year: string; // Keep as string from input, parse when filtering
+  minRating: string; // Keep as string from input, parse when filtering
+  category: string;
+}
+
+export interface FilterControlsProps {
+  filters: FiltersState;
+  onFilterChange: (name: keyof FiltersState, value: string) => void;
+  onApplyFilters: () => void;
+}
+
+export interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (pageNumber: number) => void;
+}
+
+export interface MovieCardProps {
+  movie: Movie;
+}
+// --- Mock Data (Typed) ---
+// Explicitly type mockMovies array
+const mockMovies: Movie[] = [
   {
     id: 1,
     title: "The Shawshank Redemption",
@@ -156,10 +197,15 @@ const mockMovies = [
     runtime: 132,
     language: "Korean",
   },
+  // ... rest of mock movies
 ];
 
-// Improved FilterControls with better responsiveness
-const FilterControls = ({ filters, onFilterChange, onApplyFilters }) => {
+// --- FilterControls Component (Typed) ---
+const FilterControls: React.FC<FilterControlsProps> = ({
+  filters,
+  onFilterChange,
+  onApplyFilters,
+}) => {
   const genres = [
     "Action",
     "Adventure",
@@ -177,35 +223,37 @@ const FilterControls = ({ filters, onFilterChange, onApplyFilters }) => {
     "Documentary",
   ];
 
-  const sortOptions = [
-    { value: "rating", label: "By IMDb Rating" }, // Assuming 'rating' in mock data is IMDb
+  // Type the sort options array
+  const sortOptions: { value: SortByType; label: string }[] = [
+    { value: "rating", label: "By IMDb Rating" },
     { value: "title", label: "By Title" },
     { value: "year", label: "By Year" },
   ];
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  // Type the event parameter
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    // Assert the name is a key of FiltersState for type safety with onFilterChange
+    const name = e.target.name as keyof FiltersState;
+    const value = e.target.value;
     onFilterChange(name, value);
   };
 
-  // Trigger filter application automatically on sort change or category change
-  // Keep the button for year and rating filters for explicit control
-  const handleSelectChange = (e) => {
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     handleChange(e);
-    // Optionally, trigger applyFilters immediately for selects
-    // onApplyFilters(); // Uncomment if you want instant filtering on select change
+    // onApplyFilters(); // Optional: Trigger apply on select change
   };
 
   return (
     <div className="filter-controls">
-      {/* Sort By Dropdown */}
       <div className="filter-group">
         <label htmlFor="sortBy">Sort by:</label>
         <select
           name="sortBy"
           id="sortBy"
           value={filters.sortBy}
-          onChange={handleSelectChange} // Use specific handler or combine if desired
+          onChange={handleSelectChange}
           className="filter-select"
         >
           {sortOptions.map((option) => (
@@ -216,8 +264,8 @@ const FilterControls = ({ filters, onFilterChange, onApplyFilters }) => {
         </select>
       </div>
 
-      {/* Year Input */}
       <div className="filter-group">
+        {/* Year Input - Input type is number but value is managed as string in state */}
         <input
           type="number"
           name="year"
@@ -231,8 +279,8 @@ const FilterControls = ({ filters, onFilterChange, onApplyFilters }) => {
         />
       </div>
 
-      {/* Min Rating Input */}
       <div className="filter-group">
+        {/* Min Rating Input */}
         <input
           type="number"
           step="0.1"
@@ -247,7 +295,6 @@ const FilterControls = ({ filters, onFilterChange, onApplyFilters }) => {
         />
       </div>
 
-      {/* Category Select */}
       <div className="filter-group">
         <select
           name="category"
@@ -265,7 +312,6 @@ const FilterControls = ({ filters, onFilterChange, onApplyFilters }) => {
         </select>
       </div>
 
-      {/* Filter Button */}
       <button
         type="button"
         onClick={onApplyFilters}
@@ -279,53 +325,50 @@ const FilterControls = ({ filters, onFilterChange, onApplyFilters }) => {
           viewBox="0 0 16 16"
           className="filter-icon"
         >
+          {/* SVG Path */}
           <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z" />
         </svg>
-        Apply
+        Apply Filters
       </button>
     </div>
   );
 };
 
-// --- Pagination Component ---
-const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+// --- Pagination Component (Typed) ---
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
   if (totalPages <= 1) {
-    return null; // Don't render pagination if there's only one page or less
+    return null;
   }
 
-  // --- Simple Pagination Logic ---
-  // Show first, last, current, current +/- 1, and ellipsis
-  const getPageNumbers = () => {
-    const delta = 1; // How many pages to show around the current page
-    const pages = [];
+  const getPageNumbers = (): (number | string)[] => {
+    // Return type includes string for "..."
+    const delta = 1;
+    const pages: (number | string)[] = []; // Allow numbers or "..." string
 
-    // Always show the first page
     pages.push(1);
 
-    // Ellipsis before current page block?
     if (currentPage > delta + 2) {
       pages.push("...");
     }
 
-    // Pages around the current page
     const start = Math.max(2, currentPage - delta);
     const end = Math.min(totalPages - 1, currentPage + delta);
     for (let i = start; i <= end; i++) {
       if (!pages.includes(i)) {
-        // Avoid duplicates if near start/end
         pages.push(i);
       }
     }
 
-    // Ellipsis after current page block?
     if (currentPage < totalPages - delta - 1) {
-      // Ensure ellipsis isn't redundant if end was already totalPages - 1
       if (end < totalPages - 1) {
         pages.push("...");
       }
     }
 
-    // Always show the last page (if different from the first)
     if (totalPages > 1 && !pages.includes(totalPages)) {
       pages.push(totalPages);
     }
@@ -337,7 +380,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 
   return (
     <div className="ms-pagination-container">
-      {/* Previous Button */}
       <button
         className="ms-pagination-button"
         onClick={() => onPageChange(currentPage - 1)}
@@ -347,7 +389,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         Previous
       </button>
 
-      {/* Page Number Buttons */}
       {pageNumbers.map((page, index) =>
         typeof page === "string" ? (
           <span key={`ellipsis-${index}`} className="ms-pagination-ellipsis">
@@ -359,7 +400,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
             className={`ms-pagination-button ${
               currentPage === page ? "ms-pagination-active" : ""
             }`}
-            onClick={() => onPageChange(page)}
+            // Type assertion needed here if TS can't infer page is number
+            onClick={() => onPageChange(page as number)}
             aria-label={`Go to page ${page}`}
             aria-current={currentPage === page ? "page" : undefined}
           >
@@ -368,7 +410,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         )
       )}
 
-      {/* Next Button */}
       <button
         className="ms-pagination-button"
         onClick={() => onPageChange(currentPage + 1)}
@@ -381,107 +422,103 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   );
 };
 
-const MoviesPage = () => {
-  const [filters, setFilters] = useState({
-    sortBy: "rating", // Default sort
+// --- MoviesPage Component (Typed) ---
+const MoviesPage: React.FC = () => {
+  // Use React.FC for functional components
+  // Type the state for filters
+  const [filters, setFilters] = useState<FiltersState>({
+    sortBy: "rating", // Default sort matches SortByType
     year: "",
     minRating: "",
     category: "",
   });
 
-  // Holds the full list of movies *after* filtering and sorting
-  const [filteredMovies, setFilteredMovies] = useState([]);
-  // Holds the current page number
-  const [currentPage, setCurrentPage] = useState(1);
-  // Define how many movies per page
-  const itemsPerPage = 6; // Adjust as needed
+  // Explicitly type the state for filteredMovies
+  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 6;
 
-  // Apply filters and sorting
   const applyFiltersAndSort = () => {
-    let results = [...mockMovies]; // Start with a fresh copy
+    let results = [...mockMovies];
 
-    // --- Filtering ---
     results = results.filter((movie) => {
-      // Year filter
-      if (filters.year && movie.year !== parseInt(filters.year, 10)) {
+      const filterYear = parseInt(filters.year, 10);
+      if (!isNaN(filterYear) && movie.year !== filterYear) {
         return false;
       }
-      // Rating filter (using imdbRating for clarity)
+
       const minRatingValue = parseFloat(filters.minRating);
-      if (!isNaN(minRatingValue) && movie.imdbRating < minRatingValue) {
+      if (!isNaN(minRatingValue) && (movie.imdbRating === undefined || movie.imdbRating < minRatingValue)) {
         return false;
       }
-      // Category/Genre filter
+
       if (filters.category && !movie.genres.includes(filters.category)) {
         return false;
       }
       return true;
     });
 
-    // --- Sorting ---
+    // --- Sorting (Type Safe - Revised) ---
     results.sort((a, b) => {
-      const aValue = a[filters.sortBy];
-      const bValue = b[filters.sortBy];
-
-      // Handle sorting based on type
-      if (filters.sortBy === "title") {
-        // Case-insensitive string comparison for title
-        return aValue.toLowerCase().localeCompare(bValue.toLowerCase());
-      } else if (filters.sortBy === "rating") {
-        // Numeric comparison (descending for rating)
-        return (bValue || 0) - (aValue || 0); // Use imdbRating or default rating
-      } else if (filters.sortBy === "year") {
-        // Numeric comparison (ascending for year)
-        return (aValue || 0) - (bValue || 0);
+      // Access properties directly based on the specific sort key
+      if (filters.sortBy === 'title') {
+        // Here, we know we are dealing with strings
+        return a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+      } else if (filters.sortBy === 'rating') {
+        // Here, we know we are dealing with numbers (or undefined)
+        const ratingA = a.imdbRating ?? a.rating ?? 0; // Prefer imdbRating, fallback to rating
+        const ratingB = b.imdbRating ?? b.rating ?? 0;
+        return ratingB - ratingA; // Descending order for rating
+      } else if (filters.sortBy === 'year') {
+        // Here, we know we are dealing with numbers
+        // Assuming 'year' is always present based on Movie interface, but nullish coalescing is safe
+        return (a.year ?? 0) - (b.year ?? 0); // Ascending order for year
       }
-      return 0; // Default no sort change
+
+      // Default case (shouldn't be reached with typed sortBy, but good practice)
+      return 0;
     });
 
     setFilteredMovies(results);
-    setCurrentPage(1); // Reset to page 1 whenever filters change
+    setCurrentPage(1);
   };
 
-  // Update filters state
-  const handleFilterChange = (name, value) => {
+  // Type parameters for handleFilterChange
+  const handleFilterChange = (name: keyof FiltersState, value: string) => {
     setFilters((prev) => ({
       ...prev,
       [name]: value,
     }));
-    // Optional: Apply filters immediately on any change
-    // applyFiltersAndSort(); // Uncomment for instant filtering/sorting on change
+    // applyFiltersAndSort(); // Optional instant apply
   };
 
-  // Function explicitly called by the "Apply Filters" button
   const handleApplyFiltersClick = () => {
     applyFiltersAndSort();
   };
 
-  // Apply default sort/filter on initial load
   useEffect(() => {
     applyFiltersAndSort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount
+  }, []); // Initial load
 
-  // Apply sorting immediately when sortBy changes via dropdown
   useEffect(() => {
+    // This effect specifically handles re-sorting when sortBy changes
     applyFiltersAndSort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.sortBy]);
+  }, [filters.sortBy]); // Re-run only when sortBy changes
 
-  // --- Pagination Calculations ---
   const totalFilteredMovies = filteredMovies.length;
   const totalPages = Math.ceil(totalFilteredMovies / itemsPerPage);
 
-  // Calculate the movies to display on the current page
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
+  // currentMoviesOnPage is correctly inferred as Movie[]
   const currentMoviesOnPage = filteredMovies.slice(startIndex, endIndex);
 
-  // Handle page change
-  const handlePageChange = (pageNumber) => {
+  // Type the parameter for handlePageChange
+  const handlePageChange = (pageNumber: number) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber);
-      // Scroll to top when page changes (optional but good UX)
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
@@ -490,11 +527,7 @@ const MoviesPage = () => {
     <>
       <div className="movie-archive-container">
         <div className="archive-header">
-          <h1 className="archive-title">
-            {/* Optional: Add an icon span here if needed by CSS */}
-            All Movies
-          </h1>
-          {/* Display count of filtered movies */}
+          <h1 className="archive-title">All Movies</h1>
           {totalFilteredMovies > 0 && (
             <p className="archive-count">
               Showing {totalFilteredMovies} movies
@@ -505,10 +538,9 @@ const MoviesPage = () => {
         <FilterControls
           filters={filters}
           onFilterChange={handleFilterChange}
-          onApplyFilters={handleApplyFiltersClick} // Pass the explicit apply function
+          onApplyFilters={handleApplyFiltersClick}
         />
 
-        {/* Top Pagination */}
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -517,23 +549,24 @@ const MoviesPage = () => {
 
         <div className="results-area">
           {currentMoviesOnPage.length > 0 ? (
+            // movie is correctly inferred as Movie here
             currentMoviesOnPage.map((movie) => (
               <MovieCard7 key={movie.id} movie={movie} />
             ))
           ) : (
             <div className="no-results">
               <p>No movies found matching your criteria.</p>
-              {/* Optionally add a button to clear filters */}
               {(filters.year || filters.minRating || filters.category) && (
                 <button
                   onClick={() => {
                     setFilters({
+                      // Reset filters, keeping sortBy
                       sortBy: filters.sortBy,
                       year: "",
                       minRating: "",
                       category: "",
                     });
-                    applyFiltersAndSort(); // Re-apply after clearing
+                    // applyFiltersAndSort(); // No need to call explicitly if state change triggers useEffect
                   }}
                   className="clear-filters-button"
                 >
@@ -544,14 +577,13 @@ const MoviesPage = () => {
           )}
         </div>
 
-        {/* Bottom Pagination */}
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
       </div>
-      <Footer />
+      <Footer /> {/* Assuming Footer component exists and works */}
     </>
   );
 };
