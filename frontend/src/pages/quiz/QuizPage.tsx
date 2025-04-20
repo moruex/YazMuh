@@ -249,15 +249,18 @@ const QuizPage: React.FC = () => {
   };
 
   return (
-    <div className="quiz-page">
-      <div className="quiz-container">
-        <div className="quiz-header">
-          <h1>Quiz</h1>
-          <p>Discover your movie personality</p>
+    <>
+      <div className="quiz-page">
+        <div className="quiz-container">
+          <div className="quiz-header">
+            <h1>Quiz</h1>
+            <p>Discover your movie personality</p>
+          </div>
+          {renderQuizContent()}
         </div>
-        {renderQuizContent()}
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 
