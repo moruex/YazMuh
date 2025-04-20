@@ -17,9 +17,9 @@ Password : 123456
 1. Film detayını görme [Movie Details](https://movieq.com.tr/movies/1)
 2. Film puanlama [Rate Movie](https://movieq.com.tr/movies/1)
 3. Dil seçenekleri [Language Options](https://movieq.com.tr/)
-4. İzlenecekler listesi oluşturma [Watchlist](https://movieq.com.tr/profile)
-5. Favori listesi oluşturma  [Favorites](https://movieq.com.tr/profile)
-6. İzlenen filmler listesi oluşturma  [Watched List](https://movieq.com.tr/profile)
+4. İzlenecekler listesi oluşturma [Watchlist](https://movieq.com.tr/profile) **Simulate Login** butona tıkla
+5. Favori listesi oluşturma  [Favorites](https://movieq.com.tr/profile) **Simulate Login** butona tıkla
+6. İzlenen filmler listesi oluşturma  [Watched List](https://movieq.com.tr/profile) **Simulate Login** butona tıkla
 
 # Ylyas Yylkybayev #
 1. Film arama [Search Movie](https://movieq.com.tr/search?query=one)
