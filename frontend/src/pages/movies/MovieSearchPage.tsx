@@ -4,6 +4,7 @@ import './MovieSearchPage.css';
 import Footer from '@components/app/Footer';
 import { MovieCard2 } from './MovieCard2';
 import { Movie } from '@src/types/Movie';
+import { Filter, Search } from 'lucide-react';
 
 interface FilterOptions {
     query: string;
@@ -452,7 +453,7 @@ const MovieSearchPage = () => {
         }
         // Add other filters like runtime, language, director if/when they are implemented
         if (filters.sortBy && filters.sortBy !== 'title') { // Don't add default sort
-             newSearchParams.set('sortBy', filters.sortBy);
+            newSearchParams.set('sortBy', filters.sortBy);
         }
         if (filters.sortOrder && filters.sortOrder !== 'asc') { // Don't add default order
             newSearchParams.set('sortOrder', filters.sortOrder);
@@ -461,8 +462,8 @@ const MovieSearchPage = () => {
         // Use replace: true to avoid adding multiple history entries for filter changes
         setSearchParams(newSearchParams, { replace: true });
 
-    // Only run when filters change. Avoid dependency on setSearchParams.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // Only run when filters change. Avoid dependency on setSearchParams.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filters]);
 
     // React to external URL changes (e.g., from Navbar or back/forward)
@@ -485,12 +486,12 @@ const MovieSearchPage = () => {
         // doesn't have focus.
         const queryFromUrl = searchParams.get('query') || '';
         if (queryFromUrl !== inputValue && document.activeElement !== queryInputRef.current) {
-             console.log("Syncing input value from URL:", queryFromUrl);
-             setInputValue(queryFromUrl);
+            console.log("Syncing input value from URL:", queryFromUrl);
+            setInputValue(queryFromUrl);
         }
 
-    // Trigger this effect when the searchParams object itself changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // Trigger this effect when the searchParams object itself changes.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchParams]); // Removed filters dependency here to prevent loops
 
     const handleQueryInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -521,7 +522,7 @@ const MovieSearchPage = () => {
         // Reset to page 1 if the query or other filters initiated the search
         // Note: Filter changes already reset the page. This ensures query changes also reset it.
         if (currentPage !== 1) {
-             setCurrentPage(1);
+            setCurrentPage(1);
         }
         queryInputRef.current?.blur();
     };
@@ -654,13 +655,16 @@ const MovieSearchPage = () => {
                                     placeholder="Search movies..."
                                     className="ms-search-input1" />
                                 <button type="submit" className="ms-search-button">
-                                    Search
+                                    <Search size={18} />
+                                    <span className="mvhide-text">Search</span>
                                 </button>
+
                                 <button
                                     type="button"
                                     className="ms-advanced-toggle"
-                                    onClick={toggleAdvancedSearch} >
-                                    {advancedSearchOpen ? 'Hide' : 'Show'}
+                                    onClick={toggleAdvancedSearch}>
+                                    <Filter size={18} />
+                                    <span className="mvhide-text">{advancedSearchOpen ? 'Hide' : 'Filters'}</span>
                                 </button>
                             </div>
                             {advancedSearchOpen && (
@@ -737,6 +741,7 @@ const MovieSearchPage = () => {
                                                 </button>
                                             </div>
                                         </div>
+
                                         <div className="ms-filter-group ms-filter-actions">
                                             <button type="button" onClick={triggerSearch} className="ms-apply-filters-button">
                                                 Apply
@@ -745,7 +750,7 @@ const MovieSearchPage = () => {
                                                 type="button"
                                                 className="ms-reset-filters-button"
                                                 onClick={resetFiltersAndSearch}
-                                                >
+                                            >
                                                 Reset
                                             </button>
                                         </div>
