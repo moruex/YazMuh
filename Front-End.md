@@ -1,4 +1,4 @@
-Admin'i yayınladığınız domain adresi: https://movieq-admin.nelify.app<br>
+Admin'i yayınladığınız domain adresi: https://movieq-admin.netlify.app<br>
 Frontend'i yayınladığınız domain adresi: https://movieq.com.tr
 
 **Backend girişi**<br>
