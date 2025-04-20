@@ -270,9 +270,9 @@ input.ms-search-input1[type=number]::-webkit-outer-spin-button {
 }
 
 /* Results Container Styles */
-.ms-results-container {
-    margin-top: 30px;
-}
+/*.ms-results-container {
+    
+}*/
 
 .ms-loading-indicator {
     display: flex;
