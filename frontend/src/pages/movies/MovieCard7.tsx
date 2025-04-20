@@ -25,12 +25,12 @@ const MovieCard7: React.FC<MovieCardProps> = ({ movie }) => {
             )}
             {movie.rating && (
               <span className="rating-item ltb-rating">
-                LTB: {movie.rating}%
+                LTB: {movie.rating}
               </span>
             )}
             {movie.rating && (
               <span className="rating-item miq-rating">
-                M<label>iQ<label/>: {movie.rating}
+                M<label>iQ</label>: {movie.rating}
               </span>
             )}
           </div>
