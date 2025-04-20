@@ -547,7 +547,7 @@ const resolvers = {
             RETURNING *`;
             const values = [adminUserId, movie_id, content, parent_comment_id];
 
-            try {
+            try  {
                 const result = await db.query(insertQuery, values);
                 console.log(`Admin ${actingAdmin.id} (User ${adminUserId}) added comment ${result.rows[0].id}`);
                 return result.rows[0];
@@ -611,7 +611,7 @@ const resolvers = {
         //    `, [comment.id]);
         //    // Format the result to match CommentCensorshipLog type if defined
         //    return logResult.rows[0] || null;
-        // }
+        
 
         // is_currently_censored: (comment) => comment.is_currently_censored // Direct mapping
         // created_at, updated_at should map directly too
