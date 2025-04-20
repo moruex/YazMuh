@@ -218,3 +218,10 @@ body {
   height: 20px;
   object-fit: contain;
 }
+
+
+@media (min-width: 0px) {
+  html {
+    overflow-y: scroll;
+  }
+}
