@@ -118,7 +118,7 @@ async function startApolloServer() {
 const initializeHandler = async () => {
     if (serverlessHandler) {
         return serverlessHandler;
-    }
+     }
 
     try {
         console.log("🚀 Initializing Apollo Server for serverless function...");
