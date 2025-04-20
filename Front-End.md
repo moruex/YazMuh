@@ -27,7 +27,7 @@ Password : 123456
 3. Popüler film önerme [Popular Movies Rec](https://movieq.com.tr/movies)
 4. Yeni Filmler önerme [Latest Movies Rec](https://movieq.com.tr/movies)
 5. Film testi [Quiz](https://movieq.com.tr/quiz)
-6. Film türleri ekleme [Add Genre](/genres)
+6. Film türleri ekleme [Add Genre](https://movieq-admin.netlify.app/genres)
 
 # Furkan Sayar #
 1. Yorum silme [Delete Comment](https://movieq.com.tr/movies/1)
