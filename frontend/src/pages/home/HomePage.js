@@ -157,7 +157,7 @@ const mockMovies = [
         posterUrl: "https://m.media-amazon.com/images/M/MV5BYmQ4YWMxYjUtNjZmYi00MDQ1LWFjMjMtNjA5ZDdiYjdiODU5XkEyXkFqcGdeQXVyMTMzNDExODE5._V1_FMjpg_UX1000_.jpg",
         rating: 9.5,
         genres: ["Crime", "Drama", "Thriller"],
-        runtime: 45, // per episode
+        runtime: 45,
         language: "English"
     },
     {
@@ -226,7 +226,6 @@ const mockMovies = [
         language: "Japanese"
     },
 ];
-
 const myMovieDataRaw = [
     {
         id: 'm1',
@@ -277,13 +276,10 @@ const myMovieDataRaw = [
             likes: 199
         }
     },
-    
 ];
-
 const myMovieData = myMovieDataRaw.map((movie, index) => {
     var _a, _b;
-    return (Object.assign(Object.assign({}, movie), { id: parseInt(movie.id.replace('m', ''), 10) || index, rating: (_b = (_a = movie.movieQRating) !== null && _a !== void 0 ? _a : movie.imdbRating) !== null && _b !== void 0 ? _b : 0 // Use MovieQ rating, fallback to IMDb, then 0
-     }));
+    return (Object.assign(Object.assign({}, movie), { id: parseInt(movie.id.replace('m', ''), 10) || index, rating: (_b = (_a = movie.movieQRating) !== null && _a !== void 0 ? _a : movie.imdbRating) !== null && _b !== void 0 ? _b : 0 }));
 });
 const mockMoviesSections = {
     popular: mockMovies,

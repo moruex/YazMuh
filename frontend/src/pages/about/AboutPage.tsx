@@ -44,7 +44,7 @@ const AboutPage: React.FC = () => {
                     <section className="about-section">
                         <h2>Created By</h2>
                         <div className='university'>
-                            <img src="/src/assets/flags/sdu.svg" alt="Suleyman Demirel University Logo" className="ab-logo" />
+                            <img src="/sdu.svg" alt="Suleyman Demirel University Logo" className="ab-logo" />
                             Suleyman Demirel University
                         </div>
                         <ul>

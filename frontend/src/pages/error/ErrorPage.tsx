@@ -11,7 +11,7 @@ const ErrorPage: React.FC = () => {
           {/* Image */}
           <div className="error-image-container">
             <img
-              src="/src/assets/error1.png"
+              src="/error.png"
               alt="Error"
               className="error-image"
             />

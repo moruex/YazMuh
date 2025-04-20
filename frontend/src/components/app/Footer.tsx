@@ -3,7 +3,10 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-container">
         <div className="footer-section">
-          <p className="brand">Mov<span className="accent">i</span>e<span className="accent">Q</span></p>
+          <p className="brand">
+            Mov<span className="accent">i</span>e
+            <span className="accent">Q</span>
+          </p>
           <p>The social platform for sharing your taste in film.</p>
         </div>
         <div className="footer-section">
@@ -26,9 +29,15 @@ const Footer = () => {
         <div className="footer-section">
           <h4>Connect</h4>
           <div className="social-links">
-            <span>Twitter</span>
-            <span>Facebook</span>
-            <span>Instagram</span>
+            <span>
+              <img src="/x.svg" alt="X" /> @movieq
+            </span>
+            <span>
+              <img src="/f.svg" alt="Facebook" /> movieq
+            </span>
+            <span>
+              <img src="/i.svg" alt="Instagram" /> @movieq
+            </span>
           </div>
         </div>
       </div>
