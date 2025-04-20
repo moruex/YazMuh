@@ -4,6 +4,7 @@ import ProfileTabs from './ProfileTabs';
 import ProfileEditForm from './ProfileEditTab';
 import MovieLists from '@components/profile/MovieLists';
 import AccountSettings from './AccountSettings';
+import Footer from "@src/components/app/Footer"; // Assuming path is correct
 
 import "./ProfilePage.css";
 import { Movie } from '@src/types/Movie';
@@ -137,28 +138,31 @@ const ProfilePage: React.FC = () => {
     };
 
     return (
-        <div className="user-profile-container">
-            <ProfileHeader
-                avatar={user.avatar}
-                nickname={user.nickname}
-                username={user.username} />
-            <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-            <div className="profile-content">
-                {activeTab === 'profile' && (
-                    <ProfileEditForm
-                        user={user}
-                        updateUser={updateUser}
-                        handleSubmit={handleProfileSubmit}
-                    />
-                )}
-                {activeTab === 'lists' && (
-                    <MovieLists movies={sampleMovies} />
-                )}
-                {activeTab === 'settings' && (
-                    <AccountSettings />
-                )}
+        <>
+            <div className="user-profile-container">
+                <ProfileHeader
+                    avatar={user.avatar}
+                    nickname={user.nickname}
+                    username={user.username} />
+                <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+                <div className="profile-content">
+                    {activeTab === 'profile' && (
+                        <ProfileEditForm
+                            user={user}
+                            updateUser={updateUser}
+                            handleSubmit={handleProfileSubmit}
+                        />
+                    )}
+                    {activeTab === 'lists' && (
+                        <MovieLists movies={sampleMovies} />
+                    )}
+                    {activeTab === 'settings' && (
+                        <AccountSettings />
+                    )}
+                </div>
             </div>
-        </div>
+            <Footer />
+        </>
     );
 };
 

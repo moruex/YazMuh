@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from "react"; // Import React explicitly
-import "./MoviesPage.css"; // Using existing CSS file
+import React, { useState, useEffect } from "react";
+import "./MoviesPage.css";
 import MovieCard7 from "./MovieCard7";
-import Footer from "@src/components/app/Footer"; // Assuming path is correct
+import Footer from "@src/components/app/Footer";
 
-// --- Define Interfaces (can be moved to a types file) ---
 export interface Movie {
   id: number;
   title: string;
   year: number;
   posterUrl: string;
-  rating: number; // Overall rating used initially for sorting default
+  rating: number;
   imdbRating?: number;
   rtRating?: number;
   mcRating?: number;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './QuizPage.css';
+import Footer from "@src/components/app/Footer";
 
 interface Option {
   id: string;
