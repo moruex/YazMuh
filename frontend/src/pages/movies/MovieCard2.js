@@ -1,4 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-export const MovieCard2 = ({ movie }) => {
-    return (_jsx("div", { className: "ms-movie-card", children: _jsxs("a", { href: `/movies/${movie.id}`, className: "ms-movie-card-link", children: [_jsxs("div", { className: "ms-movie-poster", children: [_jsx("img", { src: movie.posterUrl, alt: `${movie.title} poster` }), _jsx("div", { className: "ms-rating-badge", children: movie.rating.toFixed(1) })] }), _jsxs("div", { className: "ms-movie-info", children: [_jsx("h3", { className: "ms-movie-title", children: movie.title }), _jsx("div", { className: "ms-movie-year", children: movie.year }), _jsxs("div", { className: "ms-movie-details", children: [movie.runtime && _jsxs("span", { children: [movie.runtime, " min"] }), movie.director && _jsxs("span", { children: [" \u2022 ", movie.director] })] }), _jsx("div", { className: "ms-movie-genres", children: movie.genres.join(', ') })] })] }) }));
-};
