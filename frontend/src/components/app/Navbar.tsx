@@ -100,7 +100,7 @@ const Navbar = ({ isLoggedIn = false }) => {
   // Navigation links
   const navLinks = [
     { title: 'Home', path: '/' },
-    { title: 'Movies', path: '/recs' },
+    { title: 'Recommended', path: '/recs' },
     { title: 'News', path: '/news' },
     { title: 'About', path: '/about' },
     { title: 'Contacts', path: '/contacts' },
