@@ -1,11 +1,4 @@
-/* MoviesPage.css - Updated version */
-
-body {
-  background-color: #121418;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  margin: 0;
-  color: #e0e0e0;
-}
+/* MoviesPage.css */
 
 .movie-archive-container {
   max-width: 1200px;
@@ -13,7 +6,6 @@ body {
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
-  background-color: #121418;
   border-radius: 5px;
 }
 
@@ -69,10 +61,10 @@ body {
   gap: 15px 10px;
   align-items: center;
   padding: 15px;
-  background-color: #1e2128;
+  background-color: #121212;
   border-radius: 8px;
   margin-bottom: 25px;
-  border: 1px solid #2a2d36;
+  border: 1px solid var(--border-color);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -93,7 +85,7 @@ body {
 .filter-input,
 .filter-select {
   padding: 8px 10px;
-  background-color: #272a34;
+  background-color: #1e1e1e;
   border: 1px solid #3a3f4d;
   color: #e0e0e0;
   border-radius: 6px;
@@ -175,12 +167,12 @@ body {
 
 /* --- MovieCard --- */
 .mp-movie-card {
-  background-color: #1e2128;
+  background-color: #121212;
   border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: row;
-  border: 1px solid #2a2d36;
+  border: 1px solid var(--border-color);
   margin-bottom: 0;
   color: #e0e0e0;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -331,7 +323,7 @@ body {
   font-size: 0.85rem;
   color: #a0a0a0;
   margin-top: 15px;
-  border-top: 1px solid #2a2d36;
+  border-top: 1px solid var(--border-color);
   padding-top: 10px;
 }
 
