@@ -381,7 +381,7 @@ const resolvers = {
             // Only return for files, and only if public URL base is configured
             if (file.isDirectory || !config.r2.publicUrl || !file.path) {
                 return null;
-            }
+        }
             // Construct the public URL
             const baseUrl = config.r2.publicUrl.replace(/\/$/, ''); // Remove trailing slash if exists
             const filePath = file.path.replace(/^\//, ''); // Remove leading slash if exists
