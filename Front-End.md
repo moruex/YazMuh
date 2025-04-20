@@ -1,4 +1,4 @@
-Admin'i yayınladığınız domain adresi: https://movieq.com.tr<br>
+Admin'i yayınladığınız domain adresi: https://movieq-admin.netlify.app<br>
 Frontend'i yayınladığınız domain adresi: https://movieq.com.tr
 
 **Backend girişi**<br>
@@ -8,10 +8,10 @@ Password : 123456
 # Semih Çantal #
 1. Kullanıcı kaydı [User Registration](https://movieq.com.tr/login#)
 2. Kullanıcı girişi [User Login](https://movieq.com.tr/login)
-3. Kullanıcı avatar yükleme [User Avatar](https://movieq.com.tr/profile)**Simulate Login** butona tıkla
-4. Film filtreleme [Movie Filtering](https://movieq.com.tr/search?query=one)**Show** butona tıkla
-5. Profil düzenleme  [Profile Editing](http://movieq.com.tr/profile)**Simulate Login** butona tıkla
-6. Şifre sıfırlama  [Reset Password](https://movieq.com.tr/profile)**Simulate Login** ve **Account Settings** butona tıkla
+3. Kullanıcı avatar yükleme [User Avatar](https://movieq.com.tr/profile) **Simulate Login** butona tıkla
+4. Film filtreleme [Movie Filtering on Search Page](https://movieq.com.tr/search?query=one) veya [Movie Filtering](https://movieq.com.tr/movies)
+5. Profil düzenleme  [Profile Editing](http://movieq.com.tr/profile) **Simulate Login** butona tıkla
+6. Şifre sıfırlama  [Reset Password](https://movieq.com.tr/profile) **Simulate Login** ve **Account Settings** butona tıkla
 
 # Akif Tarık Binici #
 1. Film detayını görme [Movie Details](https://movieq.com.tr/movies/1)
