@@ -33,9 +33,9 @@ Password : 123456
 1. Yorum silme [Delete Comment](https://movieq.com.tr/movies/1)
 2. Yorum ekleme [Add Comment](https://movieq.com.tr/movies/1)
 3. Yorum düzenleme [Edit Comment](https://movieq.com.tr/movies/1)
-4. Film ekleme [Add Movie](/movies)
-5. Film silme [Delete Movie](/movies)
-6. Film güncelleme [Edit Movie](/movies)
+4. Film ekleme [Add Movie](https://movieq-admin.netlify.app/movies)
+5. Film silme [Delete Movie](https://movieq-admin.netlify.app/movies)
+6. Film güncelleme [Edit Movie](https://movieq-admin.netlify.app/movies)
 
 # Abdullah Kural #
 1. Oyuncu ve yönetmen bilgileri ekleme [Actors/Directors](https://movieq-admin.netlify.app/actors) **ADD PERSON** butona tıkla
