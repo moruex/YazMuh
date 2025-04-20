@@ -86,7 +86,7 @@
 .filter-select {
   padding: 8px 10px;
   background-color: #1e1e1e;
-  border: 1px solid #3a3f4d;
+  border: 1px solid var(--border-color);
   color: #e0e0e0;
   border-radius: 6px;
   font-size: 0.9rem;
