@@ -17,7 +17,7 @@ module.exports = {
     bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10),
 
     // R2 Configuration
-    r2: {
+    r2:  {
         endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
         accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID,
         secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
