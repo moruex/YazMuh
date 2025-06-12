@@ -1,28 +1,27 @@
 // src/components/News/NewsTable.tsx
 
 import React from 'react';
-import { Edit, Trash2, Eye } from "lucide-react"; // Add Eye
+import { Edit, Trash2, Eye, Calendar } from "lucide-react";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    // IconButton, // Unused
     Tooltip,
-    TablePagination, // Add TablePagination
-    Box, // Add Box
-    Typography, // Add Typography
-    Skeleton, // Add Skeleton
+    TablePagination,
+    Box,
+    Typography,
+    Skeleton,
 } from '@mui/material';
-import { Image as ImageIcon } from '@mui/icons-material'; // Add ImageIcon
-// Use interface matching GraphQL schema
-import type { ApiNews } from '../../interfaces';
+import { Image as ImageIcon } from '@mui/icons-material';
+import type { ApiNewsArticle } from '../../interfaces';
 
 interface NewsTableProps {
-    news: ApiNews[] | null; // Can be null initially
+    news: ApiNewsArticle[] | null;
     loading: boolean;
-    error?: Error; // Optional error display
-    onEdit: (newsItem: ApiNews) => void;
-    onView: (newsItem: ApiNews) => void;
-    onDelete: (id: string) => void; // ID is string
-    // --- MUI Pagination Props ---
+    error?: Error;
+    onEdit: (newsItem: ApiNewsArticle) => void;
+    onView: (newsItem: ApiNewsArticle) => void;
+    onDelete: (id: string) => void;
+    onPublish?: (id: string) => void;
+    // Pagination Props
     count: number;
     page: number;
     rowsPerPage: number;
@@ -38,6 +37,15 @@ const formatTableDate = (isoString: string | null | undefined): string => {
     } catch (e) {
         return 'Invalid Date';
     }
+};
+
+// Helper to determine if an article is effectively a draft
+const isDraft = (published_at: string | null | undefined): boolean => {
+    if (!published_at) return true; // No publish date means it's a draft
+    // Optionally, consider future dates as drafts/scheduled if needed
+    // const পাবলিশDate = new Date(published_at);
+    // if (publishDate.getTime() > Date.now()) return true; // Future date
+    return false;
 };
 
 // Skeleton Row Helper
@@ -56,6 +64,7 @@ export const NewsTable = ({
     onEdit,
     onView,
     onDelete,
+    onPublish,
     count,
     page,
     rowsPerPage,
@@ -63,7 +72,7 @@ export const NewsTable = ({
     onRowsPerPageChange,
 }: NewsTableProps) => {
 
-    const columns = 5; // Image, Title, Author, Date, Actions
+    const columns = 5; // Image, Title, Author, Date, Actions (Status column removed)
 
     if (error) {
         return <Typography color="error">Error loading news: {error.message}</Typography>;
@@ -76,9 +85,9 @@ export const NewsTable = ({
                     <TableRow>
                         <TableCell sx={{ width: '80px' }}></TableCell> {/* Image */}
                         <TableCell>Title</TableCell>
-                        <TableCell sx={{ width: '15%' }}>Author</TableCell>
-                        <TableCell sx={{ width: '15%' }}>Published</TableCell>
-                        {/* Removed Source column */}
+                        {/* <TableCell sx={{ width: '10%' }}>Status</TableCell> Removed Status Column */}
+                        <TableCell sx={{ width: '20%' }}>Author</TableCell>
+                        <TableCell sx={{ width: '20%' }}>Published</TableCell>
                         <TableCell align="center" sx={{ width: '120px' }}>Actions</TableCell>
                     </TableRow>
                 </TableHead>
@@ -101,9 +110,9 @@ export const NewsTable = ({
                                         width={80}
                                         height={120}
                                     >
-                                        {item.image_url ? (
+                                        {item.featured_image_url ? (
                                             <img
-                                                src={item.image_url} alt={item.title}
+                                                src={item.featured_image_url} alt={item.title}
                                                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                                 loading="lazy"
                                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -114,25 +123,31 @@ export const NewsTable = ({
                                     </Box>
                                 </TableCell>
                                 <TableCell component="th" scope="row">
-                                    <Tooltip title={item.short_content ?? ''} placement="top-start">
+                                    <Tooltip title={item.excerpt ?? ''} placement="top-start">
                                         <Typography variant="body2" fontWeight="medium" noWrap>
                                             {item.title}
                                         </Typography>
                                     </Tooltip>
-                                    {/* Optional: Show linked movies as chips */}
-                                    {/* <Box sx={{mt: 0.5}}>
-                                              {item.movies?.slice(0, 2).map(m => <Chip key={m.id} label={m.title} size="small" sx={{mr:0.5}}/>)}
-                                              {item.movies && item.movies.length > 2 && <Chip label="..." size="small"/>}
-                                          </Box> */}
                                 </TableCell>
+                                {/* Status Cell Removed
                                 <TableCell>
-                                    {/* Display author username or 'System' */}
+                                    <Chip
+                                        label={item.status}
+                                        color={
+                                            item.status === 'PUBLISHED' ? 'success' :
+                                            item.status === 'DRAFT' ? 'default' :
+                                            'error'
+                                        }
+                                        size="small"
+                                    />
+                                </TableCell>
+                                */}
+                                <TableCell>
                                     <Typography variant="body2" color="text.secondary">
                                         {item.author?.username ?? 'System'}
                                     </Typography>
                                 </TableCell>
                                 <TableCell>{formatTableDate(item.published_at)}</TableCell>
-                                {/* Removed Source Cell */}
                                 <TableCell align="center" sx={{ padding: '0' }}>
                                     <div className="main-action-buttons">
                                         <button
@@ -142,17 +157,26 @@ export const NewsTable = ({
                                         >
                                             <Eye size={16} />
                                         </button>
+                                        {isDraft(item.published_at) && onPublish && (
+                                            <button
+                                                onClick={() => { onPublish(item.id); }}
+                                                className="main-btn main-btn-icon success"
+                                                title="Publish Article"
+                                            >
+                                                <Calendar size={16} />
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => { onEdit(item); }}
                                             className="main-btn main-btn-icon rename"
-                                            title="Edit Movie"
+                                            title="Edit Article"
                                         >
                                             <Edit size={16} />
                                         </button>
                                         <button
                                             onClick={() => { onDelete(item.id); }}
                                             className="main-btn main-btn-icon delete"
-                                            title="Delete Movie"
+                                            title="Delete Article"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -163,17 +187,17 @@ export const NewsTable = ({
                     )}
                 </TableBody>
             </Table>
-            {/* --- MUI Pagination --- */}
+
             <TablePagination
-                    rowsPerPageOptions={[5, 10, 25, 50]}
-                    component="div"
-                    count={count}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={onPageChange}
-                    onRowsPerPageChange={onRowsPerPageChange}
-                    className="main-pagination"
-                />
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                component="div"
+                count={count}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={onPageChange}
+                onRowsPerPageChange={onRowsPerPageChange}
+                className="main-pagination"
+            />
         </TableContainer>
     );
 };

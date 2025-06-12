@@ -1,14 +1,13 @@
 // src/components/News/ViewNewsModal.tsx
 
 import { Close } from "@mui/icons-material";
-import { Box, Dialog, DialogTitle, IconButton, DialogContent, Typography, DialogActions, Button, Chip } from "@mui/material";
-// Use interface matching GraphQL schema
-import type { ApiNews } from '../../interfaces'; // Adjust path if needed
+import { Box, Dialog, DialogTitle, IconButton, DialogContent, Typography, DialogActions, Button /*, Chip*/ } from "@mui/material"; // Chip might not be needed if tags & category are gone
+import type { ApiNewsArticle } from '../../interfaces';
 
 interface ViewNewsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    news: ApiNews | null; // Allow null in case it's closed before data loads
+    news: ApiNewsArticle | null;
 }
 
 // Helper to format date for display
@@ -25,16 +24,30 @@ const formatDisplayDate = (isoString: string | null | undefined): string => {
     }
 };
 
+// Helper to determine if an article is published based on published_at
+const getDerivedStatusText = (published_at: string | null | undefined): string => {
+    if (published_at) {
+        const publishDate = new Date(published_at);
+        if (publishDate.getTime() <= Date.now()) {
+            return 'Published';
+        }
+        return 'Scheduled';
+    }
+    return 'Draft';
+};
+
 export const ViewNewsModal = ({
     isOpen,
     onClose,
-    news // news prop is now typed as ApiNews | null
+    news
 }: ViewNewsModalProps) => {
 
     // Add a check to prevent rendering if news is null
     if (!news) {
         return null;
     }
+
+    const derivedStatusText = getDerivedStatusText(news.published_at);
 
     return (
         <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
@@ -48,10 +61,10 @@ export const ViewNewsModal = ({
                 <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
                     {/* Image Section */}
                     <Box sx={{ flex: 1, textAlign: 'center' }}>
-                        {news.image_url ? (
+                        {news.featured_image_url ? (
                             <Box
                                 component="img"
-                                src={news.image_url}
+                                src={news.featured_image_url}
                                 alt={news.title}
                                 sx={{ maxWidth: '100%', maxHeight: 350, objectFit: 'contain', borderRadius: 1, mb: 2 }}
                             />
@@ -64,37 +77,33 @@ export const ViewNewsModal = ({
                     <Box sx={{ flex: 2 }}>
                         <Typography variant="h5" component="h2" gutterBottom>{news.title}</Typography>
                         <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                            {/* FIXED: Access username and use correct date field */}
-                            {news.author ? `By ${news.author.username}` : 'System'} | Published: {formatDisplayDate(news.published_at)}
+                            {news.author ? `By ${news.author.username}` : 'System'}
+                            {news.published_at && derivedStatusText === 'Published' ? ` | Published: ${formatDisplayDate(news.published_at)}` : (derivedStatusText === 'Scheduled' ? ` | Scheduled: ${formatDisplayDate(news.published_at)}` : ' | Draft')}
                         </Typography>
-                        {/* Display linked movies */}
-                        {news.movies && news.movies.length > 0 && (
-                            <Box sx={{ my: 1 }}>
-                                <Typography variant="caption" component="div" color="text.secondary">Linked Movies:</Typography>
-                                {news.movies.map(movie => (
-                                    <Chip key={movie.id} label={movie.title} size="small" sx={{ mr: 0.5, mb: 0.5 }} />
-                                ))}
-                            </Box>
-                        )}
 
-                        {/* FIXED: Use short_content from ApiNews */}
-                        {news.short_content && (
+                        {/* Status text - derived from published_at (No Chip needed if just text) */}
+                        <Typography variant="caption" sx={{ mb: 2, display: 'block', fontStyle: 'italic' }}>
+                            Status: {derivedStatusText}
+                        </Typography>
+
+                        {/* Category Display Removed */}
+                        {/* Tags Display Removed */}
+
+                        {/* Excerpt/Short content */}
+                        {news.excerpt && (
                             <Box sx={{ mb: 2, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
                                 <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>Summary</Typography>
-                                <Typography variant="body1">{news.short_content}</Typography>
+                                <Typography variant="body1">{news.excerpt}</Typography>
                             </Box>
                         )}
 
                         <Box sx={{ mb: 2 }}>
                             <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>Content</Typography>
-                            {/* Render content - Careful if it contains HTML/Markdown */}
-                            {/* FIXED: Use content from ApiNews */}
                             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{news.content}</Typography>
                         </Box>
 
                         <Typography variant="caption" color="text.secondary">
-                             {/* FIXED: Use correct date fields */}
-                            Created: {formatDisplayDate(news.created_at)} | Updated: {formatDisplayDate(news.updated_at)}
+                            Updated: {formatDisplayDate(news.updated_at)}
                         </Typography>
                     </Box>
                 </Box>
