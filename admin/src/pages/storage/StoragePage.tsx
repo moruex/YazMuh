@@ -17,7 +17,7 @@ import {
     renameItemGraphQL,
     getSignedUrlForDownload,
 } from './utils';
-import { AuthContext } from '@pages/app/App';
+import { AuthContext } from '@contexts/AuthContext';
 import { AdminRole, ApiAdmin } from '@interfaces/index';
 import { IconButton } from '@mui/material';
 import UploadFilesModal from './UploadFilesModal';
