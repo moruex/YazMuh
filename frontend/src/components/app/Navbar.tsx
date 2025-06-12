@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IconButton } from '@mui/material';
-import { Menu as MenuIcon, Search as SearchIcon, ChevronDown } from 'lucide-react'; // Use Lucide Search, Added ChevronDown
+import { Menu as MenuIcon, Search as SearchIcon, ChevronDown } from 'lucide-react'; // Added LogOut
 import './Navbar.css'; // Import the new CSS file
+import { useAuth } from '@src/context/AuthContext'; // Import useAuth
+import { useTranslation } from 'react-i18next';
 
 // Define language type - flag is now a string (path or imported module)
 interface Language {
@@ -11,11 +13,13 @@ interface Language {
   flag: string; // Path or imported SVG module
 }
 
-const Navbar = ({ isLoggedIn = false }) => {
+const Navbar = () => {
+  const { isLoggedIn, user, isLoading: authIsLoading } = useAuth(); // Use auth state
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState(''); // State for search input
   const navigate = useNavigate(); // Hook for navigation
+  const { t, i18n } = useTranslation();
 
   // Language Dropdown State
   const [selectedLanguage, setSelectedLanguage] = useState<Language>({ code: 'en', name: 'English', flag: '/en.svg' });
@@ -91,27 +95,38 @@ const Navbar = ({ isLoggedIn = false }) => {
   const selectLanguage = (lang: Language) => {
     setSelectedLanguage(lang);
     setIsLangDropdownOpen(false);
-    // TODO: Implement actual translation logic here
-    // This usually involves setting the language in a context or using an i18n library instance
-    console.log(`Language selected: ${lang.name} (${lang.code})`);
-    // For demo, maybe reload or update a global state
+    i18n.changeLanguage(lang.code);
+    localStorage.setItem('i18nextLng', lang.code);
   };
 
   // Navigation links
   const navLinks = [
-    { title: 'Home', path: '/' },
-    { title: 'Movies', path: '/movies' },
-    { title: 'Recommended', path: '/recs' },
-    { title: 'News', path: '/news' },
-    { title: 'About', path: '/about' },
-    { title: 'Contacts', path: '/contacts' },
+    { title: t('home'), path: '/' },
+    { title: t('movies'), path: '/movies' },
+    { title: t('recommended'), path: '/recs' },
+    { title: t('news'), path: '/news' },
+    { title: t('about'), path: '/about' },
+    { title: t('contacts'), path: '/contacts' },
     // Language dropdown will be added dynamically after Contacts
   ];
 
   // Navigation links for logged-in users
   const authLinks = [
-    { title: 'Quiz', path: '/quiz' },
+    { title: t('quiz'), path: '/quiz' },
   ];
+
+  // Add handleLogout for sign out
+  // const handleLogout = () => {
+  //   logout();
+  //   navigate('/login'); // Optionally redirect to login or home after logout
+  // };
+
+  // Display a simple loading or avoid rendering parts of navbar if auth is still loading
+  // This is a basic check; you might want a more sophisticated loading state display.
+  if (authIsLoading && !isLoggedIn) { 
+    // Could return a minimal navbar or null if preferred during initial auth check
+    // For now, let it render but buttons might be in a temp state
+  }
 
   return (
     <header className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
@@ -127,7 +142,7 @@ const Navbar = ({ isLoggedIn = false }) => {
             <SearchIcon className="search-icon" size={20} />
             <input
               type="text"
-              placeholder="Search movies..."
+              placeholder={t("searchMovies")}
               className="search-input"
               aria-label="search movies"
               value={searchQuery}
@@ -190,12 +205,23 @@ const Navbar = ({ isLoggedIn = false }) => {
           <div className="auth-actions">
             {!isLoggedIn ? (
               <Link to="/login" className="sign-in-button" onClick={handleLinkClick}>
-                Sign In
+                {t('signIn')}
               </Link>
             ) : (
-              <Link to="/profile" className="profile-link" title="Your Profile" onClick={handleLinkClick}>
-                <div className="nav-profile-avatar">MQ</div>
-              </Link>
+              <>
+                <Link to="/profile" className="profile-link" title={user?.username || t('profile')} onClick={handleLinkClick}>
+                  <div className="nav-profile-avatar">
+                    {user?.avatar_url ? (
+                        <img src={user.avatar_url} alt={user.username} className="avatar-image" />
+                    ) : (
+                        user?.username?.substring(0, 2).toUpperCase() || 'MQ'
+                    )}
+                    </div>
+                </Link>
+                {/* <IconButton onClick={handleLogout} className="sign-out-button" title="Sign Out" aria-label="Sign out">
+                  <LogOut size={22} />
+                </IconButton> */}
+              </>
             )}
           </div>
         </div> {/* End nav-auth-wrapper */}
