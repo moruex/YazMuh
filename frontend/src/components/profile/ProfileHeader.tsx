@@ -2,18 +2,17 @@ import React from 'react';
 
 interface ProfileHeaderProps {
   avatar: string;
-  nickname: string;
   username: string;
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ avatar, nickname, username }) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ avatar, username }) => {
   return (
     <div className="profile-header">
       <div className="profile-avatar">
-        <img src={avatar} alt={nickname} />
+        <img src={avatar} alt={username} />
       </div>
       <div className="profile-info">
-        <h1>{nickname}</h1>
+        <h1>{username}</h1>
         <p>@{username}</p>
         <div className="profile-meta">
           <div className="meta-item">

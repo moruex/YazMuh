@@ -5,7 +5,7 @@ const MovieCard3: React.FC<{ movie: Movie }> = ({ movie }) => {
   return (
     <div key={movie.id} className="pro-movie-card3">
       <div className="pro-movie-poster">
-        <img src={movie.posterUrl} alt={movie.title} />
+        <img src={movie.posterUrl!} alt={movie.title} />
         {movie.rating && (
           <div className="pro-movie-rating">
             <span>{movie.rating.toFixed(1)}</span>
@@ -18,7 +18,7 @@ const MovieCard3: React.FC<{ movie: Movie }> = ({ movie }) => {
         {movie.genres && (
           <div className="pro-movie-genres">
             {movie.genres.slice(0, 2).map(genre => (
-              <span key={genre} className="pro-genre-tag">{genre}</span>
+              <span key={genre.id} className="pro-genre-tag">{genre.name}</span>
             ))}
           </div>
         )}
