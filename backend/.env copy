@@ -1,0 +1,16 @@
+# Server Configuration
+PORT=4000
+NODE_ENV=development # or production
+
+# Database Connection (PostgreSQL Example)
+# Example: postgresql://username:password@hostname:port/database_name
+# DATABASE_URL=postgres://avnadmin:AVNS_bH5xHFMtgp_k8tzr4bH@movieq-db-movieq.c.aivencloud.com:17456/movieq?sslmode=require
+# OR
+DB_USER = avnadmin
+DB_HOST = movieq-db-movieq.c.aivencloud.com
+DB_NAME = movieq
+DB_PASSWORD = AVNS_bH5xHFMtgp_k8tzr4bH
+DB_PORT = 17456
+# JWT Configuration
+JWT_SECRET=abcd
+JWT_EXPIRATION=1d # Examples: '1h', '7d', '30m'
