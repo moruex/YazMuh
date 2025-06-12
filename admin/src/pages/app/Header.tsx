@@ -4,7 +4,7 @@ import { User as UserIcon } from 'lucide-react'; // Rename default import
 
 import '@styles/components/Header.css';
 import DarkModeToggle from './DarkModeToggle';
-import { AuthContext } from './App'; // Adjust path if needed
+import { AuthContext } from '@contexts/AuthContext';
 import ProfileModal from './ProfileModal'; // Import the modal
 
 // Consider adding a real default avatar image

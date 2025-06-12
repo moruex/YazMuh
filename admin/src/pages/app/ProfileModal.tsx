@@ -15,7 +15,7 @@ import {
   Box
 } from '@mui/material';
 import { Close, Save, Logout } from '@mui/icons-material';
-import { AuthContext } from '@pages/app/App';
+import { AuthContext } from '@contexts/AuthContext';
 import { UPDATE_CURRENT_ADMIN_PROFILE } from '@graphql/index';
 import { ApiAdmin /* AdminUpdateInput, AdminPasswordInput */ } from '@interfaces/index';
 

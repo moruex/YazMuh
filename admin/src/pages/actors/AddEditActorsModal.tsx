@@ -7,12 +7,21 @@ import {
   DialogActions,
   TextField,
   Button,
-  Grid,
   IconButton,
-  CircularProgress, // For loading state
+  CircularProgress,
+  Box,
+  Typography,
+  InputAdornment,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
-import { Close } from '@mui/icons-material';
-import type { ApiPersonCore as GqlPerson, PersonInput as PersonSubmitInput } from '@interfaces/person.interfaces'; // Corrected import path and names
+import { Close, Image } from '@mui/icons-material';
+import type { 
+  ApiPersonCore, 
+  CreatePersonInput, 
+  UpdatePersonInput 
+} from '@interfaces/person.interfaces';
+import "./Actors.css";
 
 // Helper to format Date object to 'YYYY-MM-DD' or return empty string
 const formatDateForInput = (date: Date | string | null | undefined): string => {
@@ -30,19 +39,17 @@ const formatDateForInput = (date: Date | string | null | undefined): string => {
 interface PersonModalProps {
   open: boolean;
   onClose: () => void;
-  // onSubmit now receives the prepared input data for the mutation
-  onSubmit: (data: PersonSubmitInput, id?: string) => void;
+  onSubmit: (data: CreatePersonInput | UpdatePersonInput) => void;
   isLoading: boolean;
-  person: GqlPerson | null; // Use the GraphQL-aligned type
+  person: ApiPersonCore | null;
 }
 
-const initialFormData: PersonSubmitInput = {
+const initialFormData: CreatePersonInput = {
     name: "",
-    bio: "",
-    birth_date: null, // Store as null initially
+    biography: "",
+    birthday: null,
     profile_image_url: "",
 };
-
 
 export const AddEditActorsModal: React.FC<PersonModalProps> = ({
   open,
@@ -51,142 +58,170 @@ export const AddEditActorsModal: React.FC<PersonModalProps> = ({
   isLoading,
   person
 }) => {
-  const [formData, setFormData] = useState<PersonSubmitInput>(initialFormData);
+  const [formData, setFormData] = useState<CreatePersonInput | UpdatePersonInput>(initialFormData);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (person) {
-      // Map the fetched person data (GqlPerson) to the form state (PersonSubmitInput)
+      console.log("Person data received:", person); // Debug log
+      // Map the fetched person data to the form state
       setFormData({
           name: person.name || "",
-          bio: person.bio || "",
-          // Format date string for the input type='date'
-          birth_date: person.birth_date ? formatDateForInput(person.birth_date) : null,
-          profile_image_url: person.profile_image_url || ""
+          biography: person.biography || "",
+          birthday: person.birthday ? formatDateForInput(person.birthday) : null,
+          profile_image_url: person.profile_image_url || "",
       });
     } else {
       // Reset form for adding a new person
       setFormData(initialFormData);
     }
-  }, [person, open]); // Depend on 'open' as well to reset when reopening for 'add'
+  }, [person, open]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
         ...prev,
-        // Handle empty string for optional fields explicitly if needed,
-        // or rely on GraphQL null handling
-        [name]: value === '' ? null : value // Store null if cleared, otherwise the value
+        [name]: value === '' ? null : value
     }));
   };
 
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Prepare data: ensure empty strings become null for optional fields if backend expects null
-    const submitData: PersonSubmitInput = {
-        ...formData,
-        bio: formData.bio?.trim() || null,
-        birth_date: formData.birth_date || null, // Already null if empty from handleInputChange
-        profile_image_url: formData.profile_image_url?.trim() || null,
-    };
-    // Pass prepared data and ID (if editing) to the parent component's handler
-    onSubmit(submitData, person?.id);
+    
+    // Convert any empty strings to null for optional fields
+    const submitData = { ...formData };
+    for (const key in submitData) {
+      if (submitData[key as keyof typeof submitData] === '') {
+        // Use type assertion to handle the type conversion safely
+        (submitData as any)[key] = null;
+      }
+    }
+    
+    onSubmit(submitData);
   };
 
+  const imageUrl = formData.profile_image_url || '';
+  const placeholderImage = !imageUrl ? (
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column',
+      alignItems: 'center', 
+      justifyContent: 'center',
+      color: 'text.secondary',
+      height: '100%',
+      width: '100%',
+      padding: 2
+    }}>
+      <Image sx={{ fontSize: 60, opacity: 0.5, mb: 1 }} />
+      <Typography variant="body2">No image provided</Typography>
+    </Box>
+  ) : null;
+
+  const bioRows = isMobile ? 4 : 8;
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth> {/* Adjusted maxWidth */}
-       <form onSubmit={handleSubmit}>
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            {person ? `Edit ${person.name}` : "Add New Person"}
-            <IconButton onClick={onClose} edge="end">
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      fullScreen={isMobile}
+      className="actor-modal"
+    >
+       <form onSubmit={handleSubmit} style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+        <DialogTitle 
+          className="actor-modal-title"
+          sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        >
+            <Typography variant="h6">
+              {person ? `Edit ${person.name}` : "Add New Person"}
+            </Typography>
+            <IconButton onClick={onClose} edge="end" disabled={isLoading}>
                 <Close />
             </IconButton>
         </DialogTitle>
 
-        <DialogContent dividers> {/* Add dividers for better spacing */}
-            <Grid container spacing={2}>
-                {/* Image Preview and URL Input */}
-                <Grid item xs={12}>
+        <DialogContent className="actor-modal-content" dividers>
+            <div className="modal-grid-container">
+                {/* Left side - Image */}
+                <div className="modal-image-container">
+                    {imageUrl ? (
+                        <img src={imageUrl} alt="Preview" />
+                    ) : placeholderImage}
+                    
+                    <div className="modal-image-url-input">
+                        <TextField
+                            label="Profile Image URL"
+                            name="profile_image_url"
+                            value={imageUrl}
+                            onChange={handleInputChange}
+                            fullWidth
+                            variant="outlined"
+                            size="small"
+                            disabled={isLoading}
+                            placeholder="Enter image URL"
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Image fontSize="small" />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                    </div>
+                </div>
+                
+                {/* Right side - All Info */}
+                <div className="modal-details-container">
                     <TextField
-                        label="Profile Image URL"
-                        name="profile_image_url" // Matches backend schema
-                        value={formData.profile_image_url ?? ''} // Handle null value
+                        label="Full Name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        fullWidth
+                        required
+                        margin="normal"
+                        variant="outlined"
+                        disabled={isLoading}
+                    />
+                    
+                    <TextField
+                        label="Birth Date"
+                        name="birthday"
+                        type="date"
+                        value={formData.birthday ?? ''}
                         onChange={handleInputChange}
                         fullWidth
                         margin="normal"
-                        variant="outlined"
-                    />
-                    {formData.profile_image_url && (
-                    <div style={{ textAlign: 'center', marginTop: '10px' }}>
-                        <img
-                        src={formData.profile_image_url}
-                        alt="Preview"
-                        style={{
-                            maxWidth: '100%',
-                            maxHeight: 200, // Adjusted size
-                            objectFit: 'contain',
-                            borderRadius: '4px' // Optional styling
-                        }}
-                        />
-                    </div>
-                    )}
-                </Grid>
-
-                {/* Text Fields */}
-                <Grid item xs={12}>
-                    <TextField
-                    label="Full Name"
-                    name="name" // Matches backend schema
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    fullWidth
-                    required // Name is required in schema
-                    margin="dense" // Use dense margin
-                    variant="outlined"
-                    />
-                </Grid>
-
-                <Grid item xs={12}>
-                     <TextField
-                        label="Birth Date"
-                        name="birth_date" // Matches backend schema
-                        type="date"
-                        value={formData.birth_date ?? ''} // Handle null value
-                        onChange={handleInputChange}
-                        fullWidth
-                        // 'required' removed as birth_date is optional in input/schema
-                        margin="dense"
                         InputLabelProps={{ shrink: true }}
                         variant="outlined"
+                        disabled={isLoading}
                     />
-                </Grid>
-
-                <Grid item xs={12}>
+                    
                     <TextField
-                    label="Biography"
-                    name="bio" // Matches backend schema
-                    value={formData.bio ?? ''} // Handle null value
-                    onChange={handleInputChange}
-                    fullWidth
-                    multiline
-                    rows={4}
-                    margin="dense"
-                    variant="outlined"
+                        label="Biography"
+                        name="biography"
+                        value={formData.biography ?? ''}
+                        onChange={handleInputChange}
+                        fullWidth
+                        multiline
+                        rows={bioRows}
+                        margin="normal"
+                        variant="outlined"
+                        disabled={isLoading}
                     />
-                </Grid>
-
-                 {/* REMOVED Fields not in backend schema: type, deathDate, nationality, notableWorks */}
-
-            </Grid>
+                </div>
+            </div>
         </DialogContent>
 
-        <DialogActions sx={{ padding: '16px 24px' }}> {/* Add padding */}
-          <Button onClick={onClose} color="inherit">Cancel</Button>
+        <DialogActions className="actor-modal-actions">
+          <Button onClick={onClose} color="inherit" disabled={isLoading}>Cancel</Button>
           <Button
             type="submit"
             variant="contained"
             color="primary"
-            disabled={isLoading || !formData.name} // Disable if loading or name is empty
+            disabled={isLoading || !formData.name}
           >
             {isLoading ? <CircularProgress size={24} /> : person ? "Save Changes" : "Add Person"}
           </Button>
