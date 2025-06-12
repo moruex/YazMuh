@@ -15,6 +15,11 @@ const { typeDefs: commentTypeDefs, resolvers: commentResolvers } = require('./co
 const { typeDefs: newsTypeDefs, resolvers: newsResolvers } = require('./news');
 const { typeDefs: quizTypeDefs, resolvers: quizResolvers } = require('./quiz');
 const { typeDefs: fileTypeDefs, resolvers: fileResolvers } = require('./file');
+const { typeDefs: recommendationTypeDefs, resolvers: recommendationResolvers } = require('./recommendation');
+const { typeDefs: recommendationCollectionTypeDefs, resolvers: recommendationCollectionResolvers } = require('./recommendationCollection');
+
+// Import frontend-specific schemas
+const { typeDefs: recommendationsTypeDefs, resolvers: recommendationsResolvers } = require('../schema-frontend/recommendations'); // Adjust path as needed
 
 //  Base types
 const baseTypeDefs = gql`
@@ -38,6 +43,9 @@ const typeDefs = [
   newsTypeDefs,
   quizTypeDefs,
   fileTypeDefs,
+  recommendationTypeDefs,
+  recommendationCollectionTypeDefs,
+  recommendationsTypeDefs,
 ];
 
 // Merge resolvers
@@ -52,7 +60,10 @@ const resolvers = merge(
   commentResolvers,
   newsResolvers,
   quizResolvers,
-  fileResolvers
+  fileResolvers,
+  recommendationResolvers,
+  recommendationCollectionResolvers,
+  recommendationsResolvers
 );
 
 // Create schema
