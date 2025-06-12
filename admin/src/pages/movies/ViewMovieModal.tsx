@@ -3,6 +3,7 @@ import { Close } from "@mui/icons-material";
 import { Box, Dialog, DialogTitle, IconButton, DialogContent, Typography, Rating, Chip, DialogActions, Button, Grid } from "@mui/material";
 import { Movie } from "@interfaces/movie.interfaces"; // Corrected import path
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import { RetryableImage } from "./RetryableImage";
 
 interface ViewMovieModalProps {
   isOpen: boolean;
@@ -79,18 +80,15 @@ export const ViewMovieModal = ({
 
               {/* Left Column: Image */}
               <Grid className="view-poster-container" item xs={12} sm={4} md={3}>
-                <Box
-                  component="img"
-                  loading="lazy" 
+                <RetryableImage
                   src={movie.imageUrl || '/placeholder.png'}
                   alt={`Poster for ${movie.title}`}
-                  onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
-                  sx={{
+                  style={{
                     width: '100%',
                     height: 'auto',
-                    maxHeight: { xs: 350, sm: 450 },
+                    maxHeight: '450px',
                     objectFit: 'contain',
-                    borderRadius: 1,
+                    borderRadius: '4px',
                     display: 'block',
                   }}
                 />
@@ -191,7 +189,7 @@ export const ViewMovieModal = ({
                             width: '100%',
                             height: '100%',
                             cursor: 'pointer',
-                            backgroundImage: `url(${thumbnailUrl})`,
+                            backgroundImage: 'none', // Remove direct background image
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
                             display: 'flex',
@@ -218,6 +216,23 @@ export const ViewMovieModal = ({
                             }
                           }}
                         >
+                          {/* Absolute positioned image with retry mechanism */}
+                          {thumbnailUrl && (
+                            <Box sx={{ position: 'absolute', width: '100%', height: '100%', zIndex: 0 }}>
+                              <RetryableImage
+                                src={thumbnailUrl}
+                                alt={`${movie.title} trailer thumbnail`}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover',
+                                  position: 'absolute',
+                                  top: 0,
+                                  left: 0
+                                }}
+                              />
+                            </Box>
+                          )}
                           <Box 
                             className="play-icon"
                             sx={{
@@ -251,7 +266,9 @@ export const ViewMovieModal = ({
           </DialogActions>
         </>
       ) : (
-        <DialogContent><Typography>Loading movie data...</Typography></DialogContent>
+        <DialogContent>
+          <Typography>Loading...</Typography>
+        </DialogContent>
       )}
     </Dialog>
   );
