@@ -7,29 +7,9 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const path = require('path');
 const config = require('../config');
 const { s3Client } = require('../s3Client');
+const { rolesHierarchy } = require('../utils/authHelpers'); // Import rolesHierarchy
 
 // --- Helper Functions (Keep as is) ---
-// --- Helper Functions ---
-
-const _ensureLoggedIn = (context) => {
-    if (!context.getCurrentActor()) {
-        throw new GraphQLError('Authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
-    }
-};
-
-// Simplified Permission Check (Admin bypass)
-// NOTE: Object-level ownership checks are removed as metadata is gone.
-const checkAdminPermission = (actor, action = 'perform this action') => {
-    if (!actor) throw new GraphQLError('Authentication required.', { extensions: { code: 'UNAUTHENTICATED' } });
-    // Allow if actor is an admin with sufficient role
-    if (actor.role !== 'CONTENT_MODERATOR') {
-        return true;
-    }
-    // Deny for non-admins in this simplified check
-    console.warn(`Permission denied: Non-admin actor ${actor.id} (${actor.role}) attempted to ${action}.`);
-    throw new GraphQLError(`You do not have permission to ${action}. Admin privileges required.`, { extensions: { code: 'FORBIDDEN' } });
-};
-
 // Helper to check if an object exists (using HeadObject)
 // Returns true if exists, false if not found, throws on other errors.
 async function objectExists(key) {
@@ -44,7 +24,6 @@ async function objectExists(key) {
         if (err.name === 'NotFound' || err.name === 'NoSuchKey') {
             return false; // Object does not exist
         }
-        // Re-throw other errors (permissions, network, etc.)
         console.error(`Error checking existence for ${key}:`, err);
         throw new GraphQLError(`Failed to check item existence. ${err.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
     }
@@ -56,13 +35,11 @@ const typeDefs = gql`
 
   type FileType {
     name: String!
-    path: String!          # Full key in R2
+    path: String!          
     isDirectory: Boolean!
-    size: Float            # Size in bytes (null/0 for folders)
-    lastModified: DateTime # Last modification timestamp from R2
-    # NEW: Persistent public URL if configured and file is not a directory
+    size: Float            
+    lastModified: DateTime 
     publicUrl: String
-    # OLD: Temporary signed URL for download/access
     signedUrl(expiresIn: Int = ${config.r2.signedUrlExpiresIn}): String
   }
 
@@ -74,58 +51,75 @@ const typeDefs = gql`
   type FileOperationResult {
     success: Boolean!
     message: String
-    item: FileType # Return the item (will include publicUrl if applicable)
+    item: FileType 
   }
 
   extend type Query {
-    listFiles(directory: String): [FileType!]!
-    fileInfo(path: String!): FileType
-    # Renamed for clarity, generates a TEMPORARY link
+    # Add performingActorId for potential auth checks if needed in future for list/info
+    listFiles(performingActorId: ID, directory: String): [FileType!]!
+    fileInfo(performingActorId: ID, path: String!): FileType
     getSignedDownloadUrl(
+        performingActorId: ID, # Added for consistency, though public files might not need it strictly
         path: String!,
         expiresIn: Int = ${config.r2.signedUrlExpiresIn},
-        # NEW: Optional flag to suggest download disposition
         forceDownload: Boolean = false
     ): String
   }
 
   extend type Mutation {
+    # Requires performingAdminId with appropriate role
     generatePresignedUploadUrl(
+        performingAdminId: ID!,
         filename: String!,
         contentType: String!,
         directory: String
     ): PresignedUploadPayload!
 
-    createFolder(directory: String, name: String!): FileOperationResult!
-    deleteItem(path: String!): FileOperationResult!
-    renameItem(oldPath: String!, newPath: String!): FileOperationResult!
+    createFolder(performingAdminId: ID!, directory: String, name: String!): FileOperationResult!
+    deleteItem(performingAdminId: ID!, path: String!): FileOperationResult!
+    renameItem(performingAdminId: ID!, oldPath: String!, newPath: String!): FileOperationResult!
   }
 `;
 
 // --- Resolvers ---
+// Helper for admin permission check based on passed ID
+async function checkAdminPermissionById(db, adminId, requiredRole = 'CONTENT_MODERATOR', action = 'perform this action') {
+    if (!adminId) {
+        throw new GraphQLError('Admin ID required for this action.', { extensions: { code: 'UNAUTHENTICATED' } });
+    }
+    const { rows } = await db.query('SELECT role FROM admins WHERE id = $1', [adminId]);
+    if (rows.length === 0) {
+        throw new GraphQLError('Admin performing action not found.', { extensions: { code: 'FORBIDDEN' } });
+    }
+    const adminRole = rows[0].role;
+    const userLevel = rolesHierarchy[adminRole] || 0;
+    const requiredLevel = rolesHierarchy[requiredRole] || 0;
+
+    if (userLevel < requiredLevel) {
+        console.warn(`Permission denied: Admin ${adminId} (Role: ${adminRole}) attempted to ${action}. Required: ${requiredRole}.`);
+        throw new GraphQLError(`You do not have permission to ${action}. Requires ${requiredRole} role or higher.`, { extensions: { code: 'FORBIDDEN' } });
+    }
+    return true; // Permission granted
+}
+
 const resolvers = {
     Query: {
-        listFiles: async (_, { directory = '' }, context) => {
-            _ensureLoggedIn(context);
-            const prefix = directory ? (directory.endsWith('/') ? directory : `${directory}/`) : '';
+        listFiles: async (_, { performingActorId, directory = '' }, { db }) => {
+            // Auth: If performingActorId is provided, you could check if they are at least a basic user/admin
+            // For now, assuming listing is generally allowed if any actor ID is passed (or make it public)
+            if (!performingActorId) { /* Consider if public or requires some actor */ }
 
+            const prefix = directory ? (directory.endsWith('/') ? directory : `${directory}/`) : '';
             try {
                 const command = new ListObjectsV2Command({
                     Bucket: config.r2.bucketName, Prefix: prefix, Delimiter: '/'
                 });
                 const response = await s3Client.send(command);
-
-                // Map basic info. publicUrl and signedUrl resolved by FileType resolver.
                 const files = (response.Contents || [])
                     .filter(item => item.Key !== prefix && item.Size !== undefined)
-                    .map(item => ({
-                        name: path.basename(item.Key), path: item.Key, isDirectory: false, size: item.Size, lastModified: item.LastModified,
-                    }));
-                const folders = (response.CommonPrefixes || []).map(prefixData => ({
-                    name: prefixData.Prefix.split('/').slice(-2)[0], path: prefixData.Prefix, isDirectory: true, size: 0, lastModified: null,
-                }));
+                    .map(item => ({ name: path.basename(item.Key), path: item.Key, isDirectory: false, size: item.Size, lastModified: item.LastModified }));
+                const folders = (response.CommonPrefixes || []).map(prefixData => ({ name: prefixData.Prefix.split('/').slice(-2)[0], path: prefixData.Prefix, isDirectory: true, size: 0, lastModified: null }));
                 const items = [...folders, ...files].sort((a, b) => a.name.localeCompare(b.name));
-
                 return items;
             } catch (error) {
                 console.error(`Error listing files in '${prefix}':`, error);
@@ -133,14 +127,13 @@ const resolvers = {
             }
         },
 
-        fileInfo: async (_, { path: itemPath }, context) => {
-            _ensureLoggedIn(context);
+        fileInfo: async (_, { performingActorId, path: itemPath }, { db }) => {
+            // Auth: Similar to listFiles, check performingActorId if stricter access is needed.
+            if (!performingActorId) { /* Consider if public or requires some actor */ }
             try {
                 const command = new HeadObjectCommand({ Bucket: config.r2.bucketName, Key: itemPath });
                 const response = await s3Client.send(command);
                 const isDirectory = itemPath.endsWith('/');
-
-                // Return basic info. publicUrl/signedUrl resolved by FileType resolver.
                 return {
                     name: path.basename(itemPath.replace(/\/$/, '')), path: itemPath, isDirectory: isDirectory,
                     size: isDirectory ? 0 : response.ContentLength, lastModified: response.LastModified,
@@ -152,26 +145,21 @@ const resolvers = {
             }
         },
 
-        // Generates a temporary signed URL, potentially forcing download
-        getSignedDownloadUrl: async (_, { path: itemPath, expiresIn, forceDownload }, context) => {
-            _ensureLoggedIn(context);
+        getSignedDownloadUrl: async (_, { performingActorId, path: itemPath, expiresIn, forceDownload }, { db }) => {
+            // Auth: Check performingActorId if downloads need to be restricted.
+            // For now, assuming if an actor ID is passed, it's okay, or it could be public.
+            if (!performingActorId && !config.r2.publicUrl) { /* Potentially throw if not public and no actor */}
+
             if (itemPath.endsWith('/')) throw new GraphQLError('Cannot generate download URL for a directory.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             try {
                 const exists = await objectExists(itemPath);
-                if (!exists) throw new GraphQLError('Item not found.', { extensions: { code: 'BAD_USER_INPUT' } });
+                if (!exists) throw new GraphQLError('Item not found.', { extensions: { code: 'NOT_FOUND' } });
 
                 const commandArgs = { Bucket: config.r2.bucketName, Key: itemPath };
-
-                // If forceDownload, suggest a filename to the browser
                 if (forceDownload) {
-                    // NOTE: R2/S3 might handle Content-Disposition differently than standard S3.
-                    // This might require setting it on the object metadata itself *or*
-                    // it might work via signed URL parameters depending on the presigner version & R2 implementation.
-                    // Testing is needed. If this doesn't work, the best way is to proxy the download server-side.
                     commandArgs.ResponseContentDisposition = `attachment; filename="${path.basename(itemPath)}"`;
                 }
-
                 const command = new GetObjectCommand(commandArgs);
                 const url = await getSignedUrl(s3Client, command, { expiresIn: expiresIn || config.r2.signedUrlExpiresIn });
                 return url;
@@ -184,10 +172,8 @@ const resolvers = {
     },
 
     Mutation: {
-        // generatePresignedUploadUrl: unchanged - this is for PUTs
-        generatePresignedUploadUrl: async (_, { filename, contentType, directory }, context) => {
-           _ensureLoggedIn(context);
-           const actor = context.getCurrentActor();
+        generatePresignedUploadUrl: async (_, { performingAdminId, filename, contentType, directory }, { db }) => {
+           await checkAdminPermissionById(db, performingAdminId, 'CONTENT_MODERATOR', 'generate upload URL');
            const bucketName = config.r2.bucketName;
            const prefix = directory ? (directory.endsWith('/') ? directory : `${directory}/`) : '';
            const safeFilename = path.basename(filename);
@@ -199,18 +185,13 @@ const resolvers = {
 
            try {
                 const exists = await objectExists(fileKey);
-                if (exists) throw new GraphQLError(`File '${safeFilename}' already exists.`, { extensions: { code: 'BAD_USER_INPUT' } });
+                if (exists) throw new GraphQLError(`File '${safeFilename}' already exists at this path.`, { extensions: { code: 'BAD_USER_INPUT' } });
 
                const command = new PutObjectCommand({
-                   Bucket: bucketName,
-                   Key: fileKey,
-                   ContentType: contentType,
+                   Bucket: bucketName, Key: fileKey, ContentType: contentType,
                });
-
                const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: config.r2.signedUrlExpiresIn });
-               console.log(`Generated presigned PUT URL for ${fileKey} (User: ${actor?.id})`);
                return { url: signedUrl, path: fileKey };
-
            } catch (error) {
                console.error(`Error generating presigned upload URL for ${fileKey}:`, error);
                if (error instanceof GraphQLError) throw error;
@@ -218,192 +199,133 @@ const resolvers = {
            }
         },
 
-        // createFolder: unchanged logic, but returns FileOperationResult which includes FileType
-         createFolder: async (_, { directory = '', name }, context) => {
-            _ensureLoggedIn(context);
-            const actor = context.getCurrentActor();
-            checkAdminPermission(actor, 'create folder'); // Keep permission check
-
+         createFolder: async (_, { performingAdminId, directory = '', name }, { db }) => {
+            await checkAdminPermissionById(db, performingAdminId, 'CONTENT_MODERATOR', 'create folder');
             const prefix = directory ? (directory.endsWith('/') ? directory : `${directory}/`) : '';
             const folderKey = `${prefix}${name}/`;
             if (!name || name.includes('/')) throw new GraphQLError('Invalid folder name.', { extensions: { code: 'BAD_USER_INPUT' } });
 
             try {
                  const exists = await objectExists(folderKey);
-                 if (exists) throw new GraphQLError(`Item named '${name}' already exists.`, { extensions: { code: 'BAD_USER_INPUT' } });
-
-                const command = new PutObjectCommand({
-                    Bucket: config.r2.bucketName, Key: folderKey, Body: '', ContentLength: 0,
-                });
+                 if (exists) throw new GraphQLError(`Item named '${name}' already exists at this path.`, { extensions: { code: 'BAD_USER_INPUT' } });
+                const command = new PutObjectCommand({ Bucket: config.r2.bucketName, Key: folderKey, Body: '', ContentLength: 0 });
                 await s3Client.send(command);
-                 // Construct the item data to return - publicUrl/signedUrl will be null for folders
                  const createdFolderItem = { name: name, path: folderKey, isDirectory: true, size: 0, lastModified: new Date() };
                 return { success: true, message: `Folder '${name}' created.`, item: createdFolderItem };
             } catch (error) {
                 console.error(`Error creating folder '${folderKey}':`, error);
-                 if (error instanceof GraphQLError || error instanceof ForbiddenError) throw error;
+                 if (error instanceof GraphQLError) throw error;
                 throw new GraphQLError(`Failed to create folder. ${error.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
             }
         },
 
-        // deleteItem: unchanged logic
-        deleteItem: async (_, { path: itemPath }, context) => {
-             _ensureLoggedIn(context);
-             const actor = context.getCurrentActor();
-             checkAdminPermission(actor, 'delete item'); // Keep permission check
-
+        deleteItem: async (_, { performingAdminId, path: itemPath }, { db }) => {
+             await checkAdminPermissionById(db, performingAdminId, 'CONTENT_MODERATOR', 'delete item');
              const bucketName = config.r2.bucketName;
              if (!itemPath) throw new GraphQLError('Path required.', { extensions: { code: 'BAD_USER_INPUT' } });
 
              try {
                  const exists = await objectExists(itemPath);
-                 if (!exists) return { success: false, message: "Item not found." };
+                 if (!exists) return { success: false, message: "Item not found.", item: null };
 
                  if (itemPath.endsWith('/')) {
-                     // Recursive delete (simplified, needs pagination for >1000 items)
                      const listCommand = new ListObjectsV2Command({ Bucket: bucketName, Prefix: itemPath });
                      let isTruncated = true;
                      let continuationToken;
-                     console.log(`Deleting folder contents: ${itemPath}`);
                      while(isTruncated) {
                         const response = await s3Client.send(new ListObjectsV2Command({ Bucket: bucketName, Prefix: itemPath, ContinuationToken: continuationToken}));
                         const contents = response.Contents || [];
                         if (contents.length > 0) {
-                            console.log(`  Deleting batch of ${contents.length} items...`);
                             const deletePromises = contents.map(item => s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: item.Key })));
                             await Promise.all(deletePromises);
-                        } else {
-                            console.log("  No items found in this batch.");
                         }
                         isTruncated = response.IsTruncated;
                         continuationToken = response.NextContinuationToken;
                      }
-                     console.log(`Finished deleting contents of ${itemPath}. Deleting folder marker.`);
-                     // Delete folder marker itself (if it exists)
-                    try { await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: itemPath })); }
-                    catch (delErr){ if (delErr.name !== 'NotFound' && delErr.name !== 'NoSuchKey') console.error("Non-critical error deleting folder marker:", delErr); }
-
+                    try { await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: itemPath })); } // Delete the folder marker itself
+                    catch (delErr){ if (delErr.name !== 'NotFound' && delErr.name !== 'NoSuchKey') console.warn("Non-critical error deleting folder marker:", delErr.message); }
                  } else {
-                     // Delete single file
-                     console.log(`Deleting file: ${itemPath}`);
                      await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: itemPath }));
                  }
-                 return { success: true, message: `Item '${path.basename(itemPath.replace(/\/$/, ''))}' deleted.` };
+                 // For item, we can construct a basic representation since it's deleted
+                 const deletedItemRepresentation = { name: path.basename(itemPath.replace(/\/$/, '')), path: itemPath, isDirectory: itemPath.endsWith('/'), size: null, lastModified: null, publicUrl: null, signedUrl: null };
+                 return { success: true, message: `Item '${path.basename(itemPath.replace(/\/$/, ''))}' deleted.`, item: deletedItemRepresentation };
              } catch (error) {
                  console.error(`Error deleting item '${itemPath}':`, error);
-                 if (error instanceof GraphQLError || error instanceof ForbiddenError) throw error;
+                 if (error instanceof GraphQLError) throw error;
                  throw new GraphQLError(`Failed to delete item. ${error.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
              }
         },
 
-
-        // renameItem: logic unchanged, but returns FileType potentially including publicUrl
-        renameItem: async (_, { oldPath, newPath }, context) => {
-            _ensureLoggedIn(context);
-            const actor = context.getCurrentActor();
-            // checkAdminPermission(actor, 'rename item'); // Keep permission check
-
+        renameItem: async (_, { performingAdminId, oldPath, newPath }, { db }) => {
+            await checkAdminPermissionById(db, performingAdminId, 'CONTENT_MODERATOR', 'rename item');
             const bucketName = config.r2.bucketName;
             if (!oldPath || !newPath || oldPath === newPath) throw new GraphQLError('Valid old/new paths required.', { extensions: { code: 'BAD_USER_INPUT' } });
-            if (oldPath === '/' || newPath === '/' || newPath.startsWith(oldPath + (oldPath.endsWith('/') ? '' : '/'))) throw new GraphQLError('Invalid rename operation.', { extensions: { code: 'BAD_USER_INPUT' } });
+            if (oldPath === '/' || newPath === '/' || newPath.startsWith(oldPath + (oldPath.endsWith('/') ? '' : '/'))) throw new GraphQLError('Invalid rename operation (e.g. renaming to subpath of self).', { extensions: { code: 'BAD_USER_INPUT' } });
 
             try {
                  const sourceExists = await objectExists(oldPath);
-                 if (!sourceExists) throw new GraphQLError('Source item not found.', { extensions: { code: 'BAD_USER_INPUT' } });
-
+                 if (!sourceExists) throw new GraphQLError('Source item not found.', { extensions: { code: 'NOT_FOUND' } });
                  const destExists = await objectExists(newPath);
                  if (destExists) throw new GraphQLError('Destination path already exists.', { extensions: { code: 'BAD_USER_INPUT' } });
 
                  const isDirectory = oldPath.endsWith('/');
-                 if (isDirectory !== newPath.endsWith('/')) throw new GraphQLError("Cannot change item type during rename.", { extensions: { code: 'BAD_USER_INPUT' } });
+                 if (isDirectory !== newPath.endsWith('/')) throw new GraphQLError("Cannot change item type (file/folder) during rename.", { extensions: { code: 'BAD_USER_INPUT' } });
 
                  if (isDirectory) {
-                     // Recursive copy+delete (simplified, needs pagination for >1000 items)
-                     console.log(`Renaming folder: ${oldPath} -> ${newPath}`);
-                     const listCommand = new ListObjectsV2Command({ Bucket: bucketName, Prefix: oldPath });
-                     let isTruncated = true;
                      let continuationToken;
-                     while(isTruncated) {
+                     do {
                         const response = await s3Client.send(new ListObjectsV2Command({ Bucket: bucketName, Prefix: oldPath, ContinuationToken: continuationToken}));
                         const contents = response.Contents || [];
                          if (contents.length > 0) {
-                             console.log(`  Copy/Deleting batch of ${contents.length} items...`);
                              const copyDeletePromises = contents.map(async (item) => {
                                 const itemNewKey = item.Key.replace(oldPath, newPath);
                                 await s3Client.send(new CopyObjectCommand({ Bucket: bucketName, CopySource: `${bucketName}/${item.Key}`, Key: itemNewKey }));
                                 await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: item.Key }));
                              });
                              await Promise.all(copyDeletePromises);
-                         } else {
-                            console.log("  No items found in this batch.");
                          }
-                        isTruncated = response.IsTruncated;
                         continuationToken = response.NextContinuationToken;
+                     } while(continuationToken);
+                     // Ensure the old folder marker itself is copied if it exists as a distinct object and then deleted.
+                     if (await objectExists(oldPath)) { // Check if old folder marker (0-byte object) exists
+                        await s3Client.send(new CopyObjectCommand({ Bucket: bucketName, CopySource: `${bucketName}/${oldPath}`, Key: newPath }));
+                        await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: oldPath }));
                      }
-                     console.log(`Finished renaming contents of ${oldPath}. Renaming marker.`);
-                     // Rename folder marker itself (copy then delete)
-                     try {
-                         if (await objectExists(oldPath)) { // Double check marker exists
-                            await s3Client.send(new CopyObjectCommand({ Bucket: bucketName, CopySource: `${bucketName}/${oldPath}`, Key: newPath }));
-                            await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: oldPath }));
-                         }
-                     } catch (markerErr) { console.warn("Non-critical issue renaming folder marker:", markerErr.message); }
-
                  } else {
-                     // Rename file (copy then delete)
-                     console.log(`Renaming file: ${oldPath} -> ${newPath}`);
                      await s3Client.send(new CopyObjectCommand({ Bucket: bucketName, CopySource: `${bucketName}/${oldPath}`, Key: newPath }));
                      await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: oldPath }));
                  }
-
-                 // Fetch info of the newly renamed item for the payload using the Query resolver
-                 console.log(`Fetching info for new item: ${newPath}`);
-                 const newItemInfo = await resolvers.Query.fileInfo(_, { path: newPath }, context);
-                 if (!newItemInfo) { // Should exist, but handle edge case
-                    console.warn(`Could not fetch info for renamed item at ${newPath}`);
-                    // Return a basic representation if fetch fails
-                    return { success: true, message: 'Item renamed, but failed to fetch updated info.', item: { name: path.basename(newPath.replace(/\/$/, '')), path: newPath, isDirectory: newPath.endsWith('/'), size: null, lastModified: new Date() } };
-                 }
-
-                 return { success: true, message: 'Item renamed.', item: newItemInfo };
+                 
+                 const newItemInfo = await resolvers.Query.fileInfo(_, { path: newPath }, { db });
+                 return { success: true, message: 'Item renamed successfully.', item: newItemInfo };
             } catch (error) {
                  console.error(`Error renaming '${oldPath}' to '${newPath}':`, error);
-                 if (error instanceof GraphQLError || error instanceof ForbiddenError) throw error;
+                 if (error instanceof GraphQLError) throw error;
                  throw new GraphQLError(`Failed to rename item. ${error.message}`, { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
             }
         },
     },
 
-    // FileType field resolvers
     FileType: {
-        // NEW: Resolve public URL
         publicUrl: (file) => {
-            // Only return for files, and only if public URL base is configured
-            if (file.isDirectory || !config.r2.publicUrl || !file.path) {
-                return null;
-        }
-            // Construct the public URL
-            const baseUrl = config.r2.publicUrl.replace(/\/$/, ''); // Remove trailing slash if exists
-            const filePath = file.path.replace(/^\//, ''); // Remove leading slash if exists
+            if (file.isDirectory || !config.r2.publicUrl || !file.path) return null;
+            const baseUrl = config.r2.publicUrl.replace(/\/$/, '');
+            const filePath = file.path.replace(/^\//, '');
             return `${baseUrl}/${filePath}`;
         },
-        // OLD: Resolve temporary signed URL
-        signedUrl: async (file, { expiresIn }, context) => {
+        signedUrl: async (file, { expiresIn }) => {
             if (file.isDirectory || !file.path) return null;
              try {
                  const command = new GetObjectCommand({ Bucket: config.r2.bucketName, Key: file.path });
-                 // Use the specific expiresIn requested, or the default from config
                  const expiry = expiresIn || config.r2.signedUrlExpiresIn;
                  const url = await getSignedUrl(s3Client, command, { expiresIn: expiry });
                  return url;
              } catch (error) {
-                 // Don't throw error for resolver failure, just return null
                  console.error(`Error in FileType.signedUrl resolver for ${file.path}:`, error.message);
                  return null;
              }
         },
-        // publicUrl resolver now handles this logic. This specific resolver is removed.
-        // publicUrl: (file) => { ... } // REMOVE THIS if you had a direct one before
     },
 };
 
