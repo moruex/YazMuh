@@ -1,4 +1,8 @@
+import { useTranslation } from 'react-i18next';
+
 const Footer = () => {
+  const { t } = useTranslation();
+
   return (
     <footer className="footer">
       <div className="footer-container">
@@ -7,44 +11,42 @@ const Footer = () => {
             Mov<span className="accent">i</span>e
             <span className="accent">Q</span>
           </p>
-          <p>The social platform for sharing your taste in movie.</p>
+          <p>{t('footerTagline')}</p>
         </div>
         <div className="footer-section">
-          <h4>Navigation</h4>
+          <h4>{t('navigation')}</h4>
           <ul className="footer-navigation">
-            <li><a href="/home">Home</a></li>
-            <li><a href="/movies">Movies</a></li>
-            <li><a href="/recommended">Recommended</a></li>
-            <li><a href="/news">News</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/contacts">Contacts</a></li>
+            <li><a href="/home">{t('home')}</a></li>
+            <li><a href="/movies">{t('movies')}</a></li>
+            <li><a href="/about">{t('about')}</a></li>
+            <li><a href="/contacts">{t('contacts')}</a></li>
           </ul>
         </div>
         <div className="footer-section">
-          <h4>Legal</h4>
+          <h4>{t('legal')}</h4>
           <ul>
-            <li>Terms of Service</li>
-            <li>Privacy Policy</li>
-            <li>Cookie Policy</li>
+            <li>{t('termsOfService')}</li>
+            <li>{t('privacyPolicy')}</li>
+            <li>{t('cookiePolicy')}</li>
           </ul>
         </div>
         <div className="footer-section">
-          <h4>Connect</h4>
+          <h4>{t('connect')}</h4>
           <div className="social-links">
             <span>
-              <img src="/x.svg" alt="X" /> @movieq
+              <img src="/x.svg" alt={t('socialXAlt')} /> @movieq
             </span>
             <span>
-              <img src="/f.svg" alt="Facebook" /> movieq
+              <img src="/f.svg" alt={t('socialFacebookAlt')} /> @movieq
             </span>
             <span>
-              <img src="/i.svg" alt="Instagram" /> @movieq
+              <img src="/i.svg" alt={t('socialInstagramAlt')} /> @movieq
             </span>
           </div>
         </div>
       </div>
       <div className="footer-bottom">
-        <p>© {new Date().getFullYear()} MovieQ. All rights reserved.</p>
+        <p>{t('footerBottom', { year: new Date().getFullYear() })}</p>
       </div>
     </footer>
   );
