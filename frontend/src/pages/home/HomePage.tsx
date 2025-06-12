@@ -1,301 +1,12 @@
-import { useState } from "react";
-// import { Movie } from '@src/types/Movie'; // Remove unused import
-
-import MovieSection from "./MovieSection";
+import { useState, useEffect } from "react";
 import Footer from "@components/app/Footer";
 import './HomePage.css'
 import MovieCard1 from "./MovieCard1";
+import MovieCardPlaceholder from "./MovieCardPlaceholder";
 import MovieCarousel from "./MovieCarousel";
-
-const mockMovies = [
-  {
-    id: 1,
-    title: "The Shawshank Redemption",
-    year: 1994,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_FMjpg_UX1000_.jpg",
-    rating: 9.3,
-    genres: ["Drama"],
-    director: "Frank Darabont",
-    runtime: 142,
-    language: "English"
-  },
-  {
-    id: 2,
-    title: "The Godfather",
-    year: 1972,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-    rating: 9.2,
-    genres: ["Crime", "Drama"],
-    director: "Francis Ford Coppola",
-    runtime: 175,
-    language: "English"
-  },
-  {
-    id: 3,
-    title: "Pulp Fiction",
-    year: 1994,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-    rating: 8.9,
-    genres: ["Crime", "Drama"],
-    director: "Quentin Tarantino",
-    runtime: 154,
-    language: "English"
-  },
-  {
-    id: 6,
-    title: "Inception",
-    year: 2010,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.8,
-    genres: ["Action", "Adventure", "Sci-Fi"],
-    director: "Christopher Nolan",
-    runtime: 148,
-    language: "English"
-  },
-  {
-    id: 7,
-    title: "Interstellar",
-    year: 2014,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.6,
-    genres: ["Adventure", "Drama", "Sci-Fi"],
-    director: "Christopher Nolan",
-    runtime: 169,
-    language: "English"
-  },
-  {
-    id: 9,
-    title: "The Dark Knight",
-    year: 2008,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_FMjpg_UX1000_.jpg",
-    rating: 9.0,
-    genres: ["Action", "Crime", "Drama"],
-    director: "Christopher Nolan",
-    runtime: 152,
-    language: "English"
-  },
-  {
-    id: 10,
-    title: "Fight Club",
-    year: 1999,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BMmEzNTkxYjQtZTc0MC00YTVjLTg5ZTEtZWMwOWVlYzY0NWIwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.8,
-    genres: ["Drama"],
-    director: "David Fincher",
-    runtime: 139,
-    language: "English"
-  },
-  {
-    id: 11,
-    title: "Naruto: The Last",
-    year: 2014,
-    posterUrl: "https://static.hdrezka.ac/i/2022/9/28/d3abc7fdf9382ef67g21p.jpg",
-    rating: 8.2,
-    genres: ["Animation", "Action", "Adventure"],
-    director: "Tsuneo Kobayashi",
-    runtime: 112,
-    language: "Japanese"
-  },
-  {
-    id: 12,
-    title: "Attack on Titan: Chronicle",
-    year: 2020,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BMTY5ODk1NzUyMl5BMl5BanBnXkFtZTgwMjUyNzEyMTE@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.5,
-    genres: ["Animation", "Action", "Drama"],
-    director: "Tetsurō Araki",
-    runtime: 120,
-    language: "Japanese"
-  },
-  {
-    id: 13,
-    title: "The Matrix",
-    year: 1999,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
-    rating: 8.7,
-    genres: ["Action", "Sci-Fi"],
-    director: "Lana & Lilly Wachowski",
-    runtime: 136,
-    language: "English"
-  },
-  {
-    id: 15,
-    title: "Parasite",
-    year: 2019,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.6,
-    genres: ["Comedy", "Drama", "Thriller"],
-    director: "Bong Joon-ho",
-    runtime: 132,
-    language: "Korean"
-  },
-  {
-    id: 17,
-    title: "Spirited Away",
-    year: 2001,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BMjlmZmI5MDctNDE2YS00YWE0LWE5ZWItZDBhYWQ0NTcxNWRhXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.6,
-    genres: ["Animation", "Adventure", "Family"],
-    director: "Hayao Miyazaki",
-    runtime: 125,
-    language: "Japanese"
-  },
-  {
-    id: 18,
-    title: "The Avengers",
-    year: 2012,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.0,
-    genres: ["Action", "Adventure", "Sci-Fi"],
-    director: "Joss Whedon",
-    runtime: 143,
-    language: "English"
-  },
-  {
-    id: 19,
-    title: "Breaking Bad (TV Series)",
-    year: 2008,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BYmQ4YWMxYjUtNjZmYi00MDQ1LWFjMjMtNjA5ZDdiYjdiODU5XkEyXkFqcGdeQXVyMTMzNDExODE5._V1_FMjpg_UX1000_.jpg",
-    rating: 9.5,
-    genres: ["Crime", "Drama", "Thriller"],
-    runtime: 45, 
-    language: "English"
-  },
-  {
-    id: 21,
-    title: "Blade Runner 2049",
-    year: 2017,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BNzA1Njg4NzYxOV5BMl5BanBnXkFtZTgwODk5NjU3MzI@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.0,
-    genres: ["Sci-Fi", "Thriller"],
-    director: "Denis Villeneuve",
-    runtime: 164,
-    language: "English"
-  },
-  {
-    id: 23,
-    title: "Demon Slayer: Mugen Train",
-    year: 2020,
-    posterUrl: "https://pics.blokino.org/anime/05/0530/prev.jpg",
-    rating: 8.3,
-    genres: ["Animation", "Action", "Adventure"],
-    director: "Haruo Sotozaki",
-    runtime: 117,
-    language: "Japanese"
-  },
-  {
-    id: 24,
-    title: "Dune",
-    year: 2021,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BN2FjNmEyNWMtYzM0ZS00NjIyLTg5YzYtYThlMGVjNzE1OGViXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.0,
-    genres: ["Sci-Fi", "Adventure"],
-    director: "Denis Villeneuve",
-    runtime: 155,
-    language: "English"
-  },
-  {
-    id: 26,
-    title: "The Witcher (TV Series)",
-    year: 2019,
-    posterUrl: "https://static.hdrezka.ac/i/2023/4/26/od101a5553311dy48a81e.jpg",
-    rating: 8.2,
-    genres: ["Action", "Adventure", "Fantasy"],
-    runtime: 60,
-    language: "English"
-  },
-  {
-    id: 28,
-    title: "Tenet",
-    year: 2020,
-    posterUrl: "https://m.media-amazon.com/images/M/MV5BYzg0NGM2NjAtNmIxOC00MDJmLTg5ZmYtYzM0MTE4NWE2NzlhXkEyXkFqcGdeQXVyMTA4NjE0NjEy._V1_FMjpg_UX1000_.jpg",
-    rating: 7.5,
-    genres: ["Action", "Sci-Fi", "Thriller"],
-    director: "Christopher Nolan",
-    runtime: 150,
-    language: "English"
-  },
-  {
-    id: 29,
-    title: "One Piece: Red",
-    year: 2022,
-    posterUrl: "https://static.hdrezka.ac/i/2023/5/5/oc9b75b78b731er75w38t.jpg",
-    rating: 7.3,
-    genres: ["Animation", "Action", "Adventure"],
-    director: "Gorō Taniguchi",
-    runtime: 115,
-    language: "Japanese"
-  },
-]
-
-
-const myMovieDataRaw = [
-  {
-      id: 'm1',
-      title: "Interstellar",
-      year: 2014,
-      genres: ["Sci-Fi", "Drama", "Adventure"],
-      posterUrl: "https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg", // Use your actual paths
-      reviewQuote: "Visually stunning and emotionally resonant.",
-      imdbRating: 8.7,
-      movieQRating: 9.5,
-      kinopoiskRating: 8.6,
-      topComment: { 
-          avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Tom_Holland_by_Gage_Skidmore.jpg/330px-Tom_Holland_by_Gage_Skidmore.jpg", // Use your actual paths
-          username: "SpaceFanatic",
-          text: "Mind-blowing! The scale, the music, the feels... Cooper!",
-          likes: 245
-      }
-  },
-  {
-      id: 'm2',
-      title: "The Grand Budapest Hotel",
-      year: 2014,
-      genres: ["Comedy", "Drama", "Adventure"],
-      posterUrl: "https://m.media-amazon.com/images/M/MV5BMzM5NjUxOTEyMl5BMl5BanBnXkFtZTgwNjEyMDM0MDE@._V1_.jpg",
-      imdbRating: 8.1,
-      movieQRating: 8.8,
-      kinopoiskRating: 7.9,
-      topComment: { 
-        avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Tom_Holland_by_Gage_Skidmore.jpg/330px-Tom_Holland_by_Gage_Skidmore.jpg", // Use your actual paths
-        username: "SpaceFanatic",
-        text: "Mind-blowing! The scale, the music, the feels... Cooper!",
-        likes: 245
-    }
-},
-  {
-      id: 'm3',
-      title: "Parasite",
-      year: 2019,
-      genres: ["Thriller", "Comedy", "Drama"],
-      posterUrl: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_FMjpg_UX1000_.jpg",
-      imdbRating: 8.5,
-      movieQRating: 9.2,
-      kinopoiskRating: 8.0,
-       topComment: { 
-          avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Tom_Holland_by_Gage_Skidmore.jpg/330px-Tom_Holland_by_Gage_Skidmore.jpg",
-          username: "FilmBuff_Kim",
-          text: "Absolutely brilliant script and direction. The tension builds perfectly. Deserved all the awards.",
-          likes: 199
-      }
-  },
-  
-];
-
-
-const myMovieData = myMovieDataRaw.map((movie, index) => ({
-  ...movie,
-  id: parseInt(movie.id.replace('m', ''), 10) || index, 
-  rating: movie.movieQRating ?? movie.imdbRating ?? 0 
-}));
-
-const mockMoviesSections = {
-  popular: mockMovies,
-  newReleases: mockMovies,
-  recommended: mockMovies,
-  recentlyAdded: mockMovies,
-};
-
+import { getNews, Movie, NewsItem, getRecommendationSections, PublicRecommendationSection } from "@src/services/movieNewsService";
+import { useTranslation } from 'react-i18next';
+// import CircularLoader from '@components/app/CircularLoader';
 
 interface NewsCardProps {
   title: string;
@@ -306,85 +17,256 @@ interface NewsCardProps {
 
 const NewsCard = ({ title, posterUrl, description, date }: NewsCardProps) => (
   <div className="movie-news-card">
-    <a href={`/newsd`} className="hm-movie-card-link">
-      <div className="movie-news-image">
-        <img src={posterUrl} alt={title} />
-      </div>
+    <div className="movie-news-image">
+      <img src={posterUrl} alt={title} />
+    </div>
+    <div className="movie-news-content">
       <h3>{title}</h3>
       <p>{description}</p>
       <span className="movie-news-date">{date}</span>
-    </a>
+    </div>
   </div>
 );
 
-const HomePage = () => {
-  const [popularMovies] = useState(mockMoviesSections.popular);
-  const [newReleases] = useState(mockMoviesSections.newReleases);
-  const [recommendedMovies] = useState(mockMoviesSections.recommended);
-  const [recentlyAdded] = useState(mockMoviesSections.recentlyAdded);
+interface HomePageSection extends PublicRecommendationSection {
+  movies: Movie[];
+}
 
-  const newsItems = [
-    {
-      title: "New Spider-Man Film Announced",
-      posterUrl: "https://resizing.flixster.com/iBPi8jYYfJgouPuxoKHMcg6vme4=/206x305/v2/https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p29821_p_v13_ai.jpg",
-      description: "Marvel Studios reveals plans for the next Spider-Man trilogy.",
-      date: "2 days ago"
-    },
-    {
-      title: "Oscar Nominations 2023",
-      posterUrl: "https://resizing.flixster.com/IYgCjgZpp_oGzLKpijsO1UHEgKg=/206x305/v2/https://resizing.flixster.com/-uSBmd4p_jdBa2PC4imW3wZdkkk=/ems.cHJkLWVtcy1hc3NldHMvbW92aWVzLzQzZDZlZWE1LTJkZjQtNDU1Yy1hNTFmLWMwMTQ0OTVhMDcxNi5qcGc=",
-      description: "See the full list of nominees for this year's Academy Awards.",
-      date: "1 week ago"
-    },
-    {
-      title: "Director's Cut Coming Soon",
-      posterUrl: "https://resizing.flixster.com/8iRXoIshaUVw7IAK7k4iCFTxECE=/206x305/v2/https://resizing.flixster.com/YM8JrZLwpJeRLWpZW9Onngrjahc=/ems.cHJkLWVtcy1hc3NldHMvbW92aWVzL2MzMGIyNzNmLTcxZjYtNDEwOC1iMGUyLWZhNTg5YWI2ZmRhNS5qcGc=",
-      description: "Extended version of popular sci-fi film to be released next month.",
-      date: "3 days ago"
-    }
+// Helper function to get number of cards per row based on screen width
+const getCardsPerRow = () => {
+  if (typeof window === 'undefined') return 5; // Default for SSR
+  
+  const width = window.innerWidth;
+  if (width >= 1024) return 5; // Desktop
+  if (width >= 768) return 4;  // Tablet
+  if (width >= 640) return 3;  // Mobile Large
+  if (width >= 480) return 2;  // Mobile
+  return 1; // Mobile Small
+};
+
+// Helper function to fill row with placeholders
+const fillRowWithPlaceholders = (movies: Movie[], cardsPerRow: number) => {
+  const totalCards = movies.length;
+  const remainder = totalCards % cardsPerRow;
+  
+  if (remainder === 0) return movies;
+  
+  const placeholdersNeeded = cardsPerRow - remainder;
+  const placeholders = Array(placeholdersNeeded).fill(null);
+  
+  return [...movies, ...placeholders];
+};
+
+const HomePage = () => {
+  const [carouselMovies, setCarouselMovies] = useState<Movie[]>([]);
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [sections, setSections] = useState<Record<string, HomePageSection>>({});
+  const [loadingSections, setLoadingSections] = useState<Record<string, boolean>>({});
+  const [errorSections, setErrorSections] = useState<Record<string, string | null>>({});
+  const [loadingNews, setLoadingNews] = useState(true);
+  const [errorNews, setErrorNews] = useState<string | null>(null);
+  const [cardsPerRow, setCardsPerRow] = useState(5);
+
+  // New state for all fetched recommendation sections
+  const [allRecommendationSections, setAllRecommendationSections] = useState<PublicRecommendationSection[]>([]);
+  const [loadingAllRecSections, setLoadingAllRecSections] = useState(true);
+  const [errorAllRecSections, setErrorAllRecSections] = useState<string | null>(null);
+
+  const { t } = useTranslation();
+
+  const SECTION_CONFIGS = [
+    { key: 'LATEST', title: t('latestMovies'), sectionType: 'LATEST' },
+    { key: 'POPULAR', title: t('popularMovies'), sectionType: 'POPULAR' },
+    { key: 'MOST_RATED', title: t('mostRated'), sectionType: 'MOST_RATED' },
   ];
+  
+
+  // Handle window resize for responsive grid
+  useEffect(() => {
+    const handleResize = () => {
+      setCardsPerRow(getCardsPerRow());
+    };
+
+    // Set initial value
+    setCardsPerRow(getCardsPerRow());
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Effect to fetch all recommendation sections once
+  useEffect(() => {
+    setLoadingAllRecSections(true);
+    // Fetch up to 10 sections, each with up to 8 movies. Adjust as needed.
+    getRecommendationSections(true, 10, 0, 8)
+      .then(fetchedSections => {
+        setAllRecommendationSections(fetchedSections || []);
+        setLoadingAllRecSections(false);
+      })
+      .catch(err => {
+        setErrorAllRecSections(err.message || 'Failed to fetch recommendation sections');
+        setAllRecommendationSections([]);
+        setLoadingAllRecSections(false);
+      });
+  }, []);
+
+  // Effect to set carousel movies from allRecommendationSections
+  useEffect(() => {
+    if (!loadingAllRecSections && allRecommendationSections.length > 0) {
+      const latestSection = allRecommendationSections.find(s => s.section_type === 'LATEST');
+      if (latestSection && latestSection.movies) {
+        setCarouselMovies(latestSection.movies.slice(0, 5));
+      } else {
+        setCarouselMovies([]);
+        console.warn("Carousel: 'LATEST' section not found or has no movies.");
+      }
+    }
+  }, [allRecommendationSections, loadingAllRecSections]);
+
+  // Effect to populate individual page sections from allRecommendationSections
+  useEffect(() => {
+    if (loadingAllRecSections) {
+      // Initialize loading state for all sections configured
+      const initialLoading: Record<string, boolean> = {};
+      SECTION_CONFIGS.forEach(config => {
+        initialLoading[config.key] = true;
+      });
+      setLoadingSections(initialLoading);
+      return;
+    }
+
+    if (errorAllRecSections) {
+      const newErrorState: Record<string, string | null> = {};
+       SECTION_CONFIGS.forEach(config => {
+        newErrorState[config.key] = errorAllRecSections;
+      });
+      setErrorSections(newErrorState);
+      setLoadingSections({}); // No longer loading if master fetch failed
+      return;
+    }
+    
+    const newSectionsState: Record<string, HomePageSection> = {};
+    const newLoadingState: Record<string, boolean> = {};
+    const newErrorState: Record<string, string | null> = {};
+
+    SECTION_CONFIGS.forEach(config => {
+      const foundSection = allRecommendationSections.find(s => s.section_type === config.sectionType);
+      if (foundSection) {
+        newSectionsState[config.key] = {
+          ...foundSection,
+          movies: foundSection.movies || [],
+        };
+        newErrorState[config.key] = null;
+      } else {
+        newSectionsState[config.key] = {
+          id: config.key, title: config.title, section_type: config.sectionType, movies: [],
+          description: null, display_order: 0, is_public: true, created_at: '', updated_at: ''
+        };
+        newErrorState[config.key] = `Section type "${config.sectionType}" not found.`;
+      }
+      newLoadingState[config.key] = false;
+    });
+
+    setSections(newSectionsState);
+    setLoadingSections(newLoadingState);
+    setErrorSections(newErrorState);
+
+  }, [allRecommendationSections, loadingAllRecSections, errorAllRecSections]);
+
+  // Effect for fetching news (remains unchanged)
+  useEffect(() => {
+    setLoadingNews(true);
+    getNews(4)
+      .then(newsData => {
+        setNews(newsData || []);
+        setLoadingNews(false);
+      })
+      .catch(err => {
+        setErrorNews(err.message || 'Failed to fetch news');
+        setLoadingNews(false);
+      });
+  }, []);
+
+  const newsItemsForDisplay = news.map((item) => ({
+    title: item.title,
+    posterUrl: item.image_url || '',
+    description: item.short_content || '',
+    date: item.published_at ? new Date(item.published_at).toLocaleDateString() : '',
+  }));
 
   return (
     <div className="movie-page">
       <div className="movie-container">
-      <MovieCarousel 
-            movies={myMovieData} 
+        {/* Carousel Loading/Error/Display Logic */} 
+        {loadingAllRecSections && carouselMovies.length === 0 && <div className="loading-message">{t('loadingCarousel')}</div>}
+        {!loadingAllRecSections && errorAllRecSections && carouselMovies.length === 0 && <div className="error-message">{t('errorLoadingCarousel')}: {errorAllRecSections}</div>}
+        {carouselMovies.length > 0 && (
+          <MovieCarousel 
+            movies={carouselMovies.map(movie => ({
+              ...movie,
+              id: String(movie.id),
+              posterUrl: movie.poster_url || '',
+              rating: movie.movieq_rating ?? movie.imdb_rating ?? 0,
+              year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
+              genres: movie.genres ? movie.genres.map(g => ({ id: String(g.id), name: g.name })) : [],
+              reviewQuote: movie.plot_summary || '',
+              imdbRating: typeof movie.imdb_rating === 'number' ? movie.imdb_rating : undefined,
+              movieQRating: typeof movie.movieq_rating === 'number' ? movie.movieq_rating : undefined,
+            }))} 
             autoPlayInterval={8000} 
           />
+        )}
+
         <section className="movie-news-section">
-          <h2>Latest Movie News</h2>
-          <div className="movie-news-grid">
-            {newsItems.map((news, index) => (
-              <NewsCard key={index} {...news} />
-            ))}
-          </div>
+          <h2>{t('latestNews')}</h2>
+          {loadingNews && <div className="loading-message">{t('loadingNews')}</div>}
+          {errorNews && <div className="error-message">{t('errorFetchingNews')}: {errorNews}</div>}
+          {!loadingNews && !errorNews && news.length > 0 && (
+            <div className="movie-news-grid">
+              {newsItemsForDisplay.map((newsItem, index) => (
+                <NewsCard key={index} {...newsItem} />
+              ))}
+            </div>
+          )}
+          {!loadingNews && !errorNews && news.length === 0 && <p className="empty-message">{t('noNewsToDisplay')}</p>}
         </section>
 
-        <MovieSection title="New Releases" link="/films/new">
-          {newReleases.map((movie) => (
-            <MovieCard1 key={movie.id} {...movie} />
-          ))}
-        </MovieSection>
-
-        <MovieSection title="Popular This Week" link="/films/popular">
-          {popularMovies.map((movie) => (
-            <MovieCard1 key={movie.id} {...movie} />
-          ))}
-        </MovieSection>
-
-        <div className="movie-two-column">
-          <MovieSection title="Recently Added" link="/films/recent">
-            {recentlyAdded.map((movie) => (
-              <MovieCard1 key={movie.id} {...movie} />
-            ))}
-          </MovieSection>
-
-          <MovieSection title="Recommended" link="/films/recommended">
-            {recommendedMovies.map((movie) => (
-              <MovieCard1 key={movie.id} {...movie} />
-            ))}
-          </MovieSection>
-        </div>
+        {SECTION_CONFIGS.map(config => {
+          const sectionMovies = sections[config.key]?.movies || [];
+          const moviesWithPlaceholders = fillRowWithPlaceholders(sectionMovies, cardsPerRow);
+          
+          return (
+            <section key={config.key} className="movie-section">
+              <h2 className="movie-section-title">{config.title}</h2>
+              {loadingAllRecSections && loadingSections[config.key] && <div className="loading-message">{t('loadingMovies')}</div>}
+              {errorSections[config.key] && <div className="error-message">{t('error')}: {errorSections[config.key]}</div>}
+              {/* Render movies with placeholders */}
+              {!loadingSections[config.key] && !errorSections[config.key] && sectionMovies.length > 0 && (
+                <div className="movie-grid">
+                  {moviesWithPlaceholders.map((movie, index) => {
+                    if (movie === null) {
+                      return <MovieCardPlaceholder key={`placeholder-${config.key}-${index}`} />;
+                    }
+                    
+                    const mappedMovie = {
+                      id: String(movie.id),
+                      title: movie.title,
+                      posterUrl: movie.poster_url || '',
+                      rating: movie.movieq_rating ?? movie.imdb_rating ?? 0,
+                      year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
+                      genres: movie.genres ? movie.genres.map((g: { id: any; name: any; }) => ({ id: String(g.id), name: g.name })) : [],
+                    };
+                    return <MovieCard1 key={`${movie.id}-${config.key}`} {...mappedMovie} />;
+                  })}
+                </div>
+              )}
+              {/* Display message if no movies for the section */}
+              {!loadingSections[config.key] && !errorSections[config.key] && sectionMovies.length === 0 && (
+                <p className="empty-message">{t('noMoviesToDisplayInThisSection')}</p>
+              )}
+            </section>
+          );
+        })}
       </div>
       <Footer />
     </div>
