@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './QuizPage.css';
 import Footer from "@src/components/app/Footer";
+import { useTranslation } from 'react-i18next';
 
 interface Option {
   id: string;
@@ -25,6 +26,8 @@ const QuizPage: React.FC = () => {
   const [userAnswers, setUserAnswers] = useState<Answer[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [quizCompleted, setQuizCompleted] = useState(false);
+
+  const { t } = useTranslation();
 
   const questions: Question[] = [
     {
@@ -163,12 +166,12 @@ const QuizPage: React.FC = () => {
     if (quizCompleted) {
       return (
         <div className="quiz-results">
-          <h2>Your Movie Preferences</h2>
+          <h2>{t('yourMoviePreferences')}</h2>
           {userAnswers.map((answer, index) => {
             const question = questions.find(q => q.id === answer.questionId);
             return (
               <div key={index} className="result-item">
-                <h3>{question?.text}</h3>
+                <h3>{question?.text || ''}</h3>
                 <div className="selected-options">
                   {answer.selectedOptions.map((optionId, optIndex) => (
                     <span key={optIndex} className="selected-option">
@@ -180,7 +183,7 @@ const QuizPage: React.FC = () => {
             );
           })}
           <button className="restart-button" onClick={handleRestartQuiz}>
-            Restart Quiz
+            {t('restartQuiz')}
           </button>
         </div>
       );
@@ -189,8 +192,8 @@ const QuizPage: React.FC = () => {
     const currentQuestion = questions[currentQuestionIndex];
     const isLastQuestion = currentQuestionIndex === questions.length - 1;
     const instructionText = currentQuestion.allowMultiple
-      ? "Select all that apply"
-      : "Select one option";
+      ? t('selectAllThatApply')
+      : t('selectOneOption');
 
     return (
       <div className="quiz-question">
@@ -219,12 +222,9 @@ const QuizPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="option-no-image">
-                    <span>{option.text}</span>
+                    <span className="option-text">{option.text}</span>
                   </div>
                 )}
-                <div className="option-text">
-                  <span>{option.text}</span>
-                </div>
               </div>
             );
           })}
@@ -235,14 +235,14 @@ const QuizPage: React.FC = () => {
             onClick={handlePreviousQuestion}
             disabled={currentQuestionIndex === 0}
           >
-            Previous
+            <span>{t('previous')}</span>
           </button>
           <button
             className="next-button"
             onClick={handleNextQuestion}
             disabled={selectedOptions.length === 0}
           >
-            {isLastQuestion ? 'See Results' : 'Next'}
+            {isLastQuestion ? t('seeResults') : t('next')}
           </button>
         </div>
       </div>
