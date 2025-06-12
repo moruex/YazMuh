@@ -4,7 +4,8 @@ import logo from "@assets/logo2.svg";
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import { SidebarItem } from './SidebarItem';
 import { LucideSquareDashedBottomCode, Film, Users, UserCog, Newspaper, MessageSquare, Settings, List, LucideNotebookText, MessageCircleQuestionIcon, Server, VenetianMask } from 'lucide-react';
-import { AdminRole } from '@interfaces/index';
+import { AdminRole } from '@interfaces/enums';
+// import { AdminRole } from '@interfaces/index';
 
 
 interface MobileSidebarProps {
