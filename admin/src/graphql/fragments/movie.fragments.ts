@@ -9,14 +9,15 @@ export const MOVIE_CORE_FIELDS = gql`
   fragment MovieCoreFields on Movie {
     id
     title
+    slug
     poster_url
     release_date
-    avg_rating
+    movieq_rating
     duration_minutes
-    genres { # REMOVED (limit: 3) argument here
-        id
-        name
-        # You might want is_collection here too if relevant for lists
+    genres {
+      id
+      name
+      is_collection
     }
   }
 `;
@@ -26,28 +27,58 @@ export const MOVIE_DETAIL_FIELDS = gql`
   fragment MovieDetailFields on Movie {
     id
     title
-    release_date
+    slug
     plot_summary
-    poster_url
+    release_date
     duration_minutes
+    poster_url
     trailer_url
-    avg_rating
-    created_at
+    movieq_rating
+    imdb_rating
+    letterboxd_rating
     updated_at
-    genres { # No limit argument here either (matches schema)
+    genres {
       id
       name
-      is_collection # Assuming Genre has this field
+      is_collection
     }
-    persons { # Movie-person links (roles)
+    cast(limit: 10) {
       id
-      role_type
       character_name
-      person { # Nested person details
+      cast_order
+      person {
         id
         name
-        profile_image_url
       }
+    }
+    crew(limit: 10) {
+      id
+      job
+      department
+      person {
+        id
+        name
+      }
+    }
+  }
+`;
+
+/**
+ * Fields for movie images
+ */
+export const MOVIE_IMAGES_FIELDS = gql`
+  fragment MovieImagesFields on MovieImages {
+    backdrops {
+      file_path
+      aspect_ratio
+      height
+      width
+    }
+    posters {
+      file_path
+      aspect_ratio
+      height
+      width
     }
   }
 `;

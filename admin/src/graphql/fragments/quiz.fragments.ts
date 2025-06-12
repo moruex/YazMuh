@@ -8,7 +8,6 @@ export const QUIZ_CHOICE_FIELDS = gql`
         question_id # Link back to parent question
         choice_text
         image_url
-        created_at
     }
 `;
 
@@ -19,7 +18,6 @@ export const QUIZ_QUESTION_FIELDS = gql`
         id
         question_text
         allowed_choices_count
-        created_at
         choices { # All available choices for this question
             ...QuizChoiceFields
         }

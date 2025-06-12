@@ -2,11 +2,11 @@
 import { gql } from '@apollo/client';
 import { ADMIN_FIELDS } from '../fragments';
 
-/** Fetches the currently authenticated admin user based on the context (e.g., JWT). */
+/** Fetches the currently authenticated admin user. */
 export const GET_CURRENT_ADMIN = gql`
     ${ADMIN_FIELDS}
-    query GetCurrentAdmin {
-        meAdmin {
+    query GetCurrentAdmin($id: ID!) {
+        admin(id: $id) {
             ...AdminFields
         }
     }

@@ -1,25 +1,27 @@
-
-// src/graphql/mutations/recommendation.mutations.ts
+// src/graphql/queries/recommendation.queries.ts
 import { gql } from '@apollo/client';
 import { RECOMMENDATION_SECTION_FIELDS } from '@graphql/fragments';
 
-
-// Add Movie to Section
-export const ADD_MOVIE_TO_SECTION = gql`
+/**
+ * Get all recommendation sections
+ */
+export const GET_RECOMMENDATION_SECTIONS = gql`
   ${RECOMMENDATION_SECTION_FIELDS}
-  mutation AddMovieToSection($sectionId: ID!, $movieId: ID!, $displayOrder: Int) {
-     addMovieToSection(sectionId: $sectionId, movieId: $movieId, displayOrder: $displayOrder) {
-        ...RecommendationSectionFields # Return updated section
-     }
+  query GetRecommendationSections($onlyActive: Boolean = true) {
+    recommendations: recommendationSections(onlyActive: $onlyActive) {
+       ...RecommendationSectionFields
+    }
   }
 `;
 
-// Remove Movie from Section
-export const REMOVE_MOVIE_FROM_SECTION = gql`
-   ${RECOMMENDATION_SECTION_FIELDS}
-   mutation RemoveMovieFromSection($sectionId: ID!, $movieId: ID!) {
-      removeMovieFromSection(sectionId: $sectionId, movieId: $movieId) {
-          ...RecommendationSectionFields # Return updated section
-      }
-   }
+/**
+ * Get a single recommendation section by ID
+ */
+export const GET_RECOMMENDATION_SECTION = gql`
+  ${RECOMMENDATION_SECTION_FIELDS}
+  query GetRecommendationSection($id: ID!) {
+    recommendationSection(id: $id) {
+       ...RecommendationSectionFields
+    }
+  }
 `;

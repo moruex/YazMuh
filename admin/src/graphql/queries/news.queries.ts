@@ -2,37 +2,53 @@
 import { gql } from '@apollo/client';
 import { NEWS_FIELDS } from '../fragments';
 
-/** Fetches a list of news articles with pagination, movie filter, and search. */
-export const GET_NEWS_LIST = gql`
-  ${NEWS_FIELDS} # Ensure this fragment includes all needed fields for the table/view
-  query GetNewsList(
-      $limit: Int,
-      $offset: Int,
-      $movieId: ID,
-      $search: String # Add search variable
+/** Fetches a list of news articles with pagination and filters. */
+export const GET_NEWS_ARTICLES = gql`
+  ${NEWS_FIELDS}
+  query GetNewsArticles(
+    $limit: Int = 10,
+    $offset: Int = 0,
+    $authorId: ID,
+    $search: String,
+    $sortBy: String = "published_at",
+    $sortOrder: String = "DESC"
+  ) {
+    newsArticles(
+      limit: $limit,
+      offset: $offset,
+      authorId: $authorId,
+      search: $search,
+      sortBy: $sortBy,
+      sortOrder: $sortOrder
     ) {
-    newsList(
-        limit: $limit,
-        offset: $offset,
-        movieId: $movieId,
-        search: $search # Pass search variable
-    ) {
-        ...NewsFields
+      ...NewsFields
     }
-    # Fetch total count using the same filters
-    newsCount(
-        movieId: $movieId,
-        search: $search
-    ) # Returns Int!
+    
+    newsArticleCount(
+      authorId: $authorId,
+      search: $search
+    )
   }
 `;
 
 /** Fetches a single news article by ID. */
-export const GET_NEWS = gql`
+export const GET_NEWS_ARTICLE = gql`
   ${NEWS_FIELDS}
-  query GetNews($id: ID!) {
-    newsArticle(id: $id) { # Query name matches backend
-        ...NewsFields
+  query GetNewsArticle($id: ID!) {
+    newsArticle(id: $id) {
+      ...NewsFields
     }
   }
 `;
+
+/** Fetches news categories. */
+// export const GET_NEWS_CATEGORIES = gql`
+//   query GetNewsCategories($limit: Int = 50, $offset: Int = 0) {
+//     newsCategories(limit: $limit, offset: $offset) {
+//       id
+//       name
+//       // slug
+//       description
+//     }
+//   }
+// `;

@@ -13,7 +13,7 @@ export const GET_COMMENTS = gql`
       $search: String
     ) {
     comments(
-        movie_id: $movieId,
+        movieId: $movieId,
         limit: $limit,
         offset: $offset,
         include_censored: $includeCensored,

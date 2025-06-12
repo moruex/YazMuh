@@ -1,14 +1,23 @@
 import { gql } from '@apollo/client';
 
-/** Core fields for a Person, matching backend schema. */
-export const PERSON_FIELDS = gql`
-  fragment PersonFields on Person {
+/** Core fields for a person */
+export const PERSON_CORE_FIELDS = gql`
+  fragment PersonCoreFields on Person {
     id
     name
-    bio
-    birth_date
     profile_image_url
-    created_at
-    # updated_at # Only include if added to backend schema/table
+    slug
+  }
+`;
+
+/** Detailed fields for a person */
+export const PERSON_DETAIL_FIELDS = gql`
+  fragment PersonDetailFields on Person {
+    id
+    name
+    biography
+    birthday
+    profile_image_url
+    slug
   }
 `;

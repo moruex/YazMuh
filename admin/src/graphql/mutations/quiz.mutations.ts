@@ -12,7 +12,7 @@ import { QUIZ_QUESTION_FIELDS } from '../fragments'; // Adjust path if needed
 export const CREATE_QUIZ_QUESTION = gql`
   ${QUIZ_QUESTION_FIELDS}
   mutation CreateQuizQuestion($input: CreateQuizQuestionInput!) {
-    createQuizQuestion(input: $input) {
+    createQuizQuestion(performingAdminId: "1", input: $input) {
         ...QuizQuestionFields
     }
   }
@@ -21,9 +21,9 @@ export const CREATE_QUIZ_QUESTION = gql`
 /** Updates an existing quiz question. (ASSUMED MUTATION) */
 export const UPDATE_QUIZ_QUESTION = gql`
   ${QUIZ_QUESTION_FIELDS}
-  # Assume input type is UpdateQuizQuestionInput, similar to Create but might allow partial updates
-  mutation UpdateQuizQuestion($id: ID!, $input: CreateQuizQuestionInput!) { # Using Create input type as placeholder
-    updateQuizQuestion(id: $id, input: $input) {
+  # Using the correct UpdateQuizQuestionInput type 
+  mutation UpdateQuizQuestion($id: ID!, $input: UpdateQuizQuestionInput!) {
+    updateQuizQuestion(performingAdminId: "1", id: $id, input: $input) {
       ...QuizQuestionFields
     }
   }
@@ -33,7 +33,7 @@ export const UPDATE_QUIZ_QUESTION = gql`
 export const DELETE_QUIZ_QUESTION = gql`
   mutation DeleteQuizQuestion($id: ID!) {
     # Assume mutation name 'deleteQuizQuestion' and returns Boolean or ID
-    deleteQuizQuestion(id: $id)
+    deleteQuizQuestion(performingAdminId: "1", id: $id)
     # Example if it returns payload: { success message }
     # deleteQuizQuestion(id: $id) { success message }
   }

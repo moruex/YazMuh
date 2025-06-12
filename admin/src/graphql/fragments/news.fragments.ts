@@ -1,25 +1,28 @@
 // src/graphql/fragments/news.fragments.ts
 import { gql } from '@apollo/client';
 
-/** Detailed fields for a News article, including author and basic associated movie info. */
+/** Detailed fields for a News article, including author. */
 export const NEWS_FIELDS = gql`
-  fragment NewsFields on News {
+  fragment NewsFields on NewsArticle {
     id
     title
-    short_content
+    # slug # Removed slug
     content
-    image_url
+    excerpt # Mapped from short_content in resolver
+    featured_image_url # Mapped from image_url in resolver
+    # status # Removed status
     published_at
-    created_at
+    # created_at # Removed created_at
     updated_at
-    author { # Basic author info
+    # view_count # Removed view_count
+    # tags # Removed tags
+    author {
       id
       username
     }
-    movies { # Basic associated movie info
-      id
-      title
-      # ...MovieCoreFields # Optional: Expand movie details here
-    }
+    # category { # Removed category block
+    #   id
+    #   name
+    # }
   }
 `;

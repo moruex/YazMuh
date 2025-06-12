@@ -8,6 +8,7 @@ export const GENRE_FIELDS = gql`
     name
     description
     image_url
+    slug
     is_collection
   }
 `;

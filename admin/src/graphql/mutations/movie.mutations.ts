@@ -1,34 +1,120 @@
 // src/graphql/mutations/movie.mutations.ts
 import { gql } from '@apollo/client';
-import { MOVIE_DETAIL_FIELDS } from '../fragments';
+import { MOVIE_CORE_FIELDS, MOVIE_DETAIL_FIELDS } from '../fragments';
 
-/** Creates a new movie. Assumes input type handles relationships as needed. */
+/**
+ * Creates a new movie
+ */
 export const CREATE_MOVIE = gql`
   ${MOVIE_DETAIL_FIELDS}
-  mutation CreateMovie($input: MovieInput!) {
-    # Assumes mutation name 'createMovie' and input type 'MovieInput!'
-    createMovie(input: $input) {
+  mutation CreateMovie($performingAdminId: ID!, $input: CreateMovieInput!) {
+    createMovie(performingAdminId: $performingAdminId, input: $input) {
       ...MovieDetailFields
     }
   }
 `;
 
-/** Updates an existing movie. Verify 'MovieUpdateInput!' schema for relationship handling. */
+/**
+ * Updates an existing movie
+ */
 export const UPDATE_MOVIE = gql`
   ${MOVIE_DETAIL_FIELDS}
-  mutation UpdateMovie($id: ID!, $input: MovieUpdateInput!) {
-    # Assumes mutation name 'updateMovie' and input type 'MovieUpdateInput!'
-    # Relationship updates (genres, persons) depend heavily on the schema definition of MovieUpdateInput!
-    updateMovie(id: $id, input: $input) {
+  mutation UpdateMovie($performingAdminId: ID!, $id: ID!, $input: UpdateMovieInput!) {
+    updateMovie(performingAdminId: $performingAdminId, id: $id, input: $input) {
       ...MovieDetailFields
     }
   }
 `;
 
-/** Deletes a movie by ID. */
+/**
+ * Deletes a movie
+ */
 export const DELETE_MOVIE = gql`
-  mutation DeleteMovie($id: ID!) {
-    # Assumes mutation name 'deleteMovie' and it returns Boolean! directly
-    deleteMovie(id: $id)
+  mutation DeleteMovie($performingAdminId: ID!, $id: ID!) {
+    deleteMovie(performingAdminId: $performingAdminId, id: $id)
+  }
+`;
+
+/**
+ * Adds a genre to a movie
+ */
+export const ADD_GENRE_TO_MOVIE = gql`
+  ${MOVIE_CORE_FIELDS}
+  mutation AddGenreToMovie($performingAdminId: ID!, $movieId: ID!, $genreId: ID!) {
+    addGenreToMovie(performingAdminId: $performingAdminId, movieId: $movieId, genreId: $genreId) {
+      ...MovieCoreFields
+    }
+  }
+`;
+
+/**
+ * Removes a genre from a movie
+ */
+export const REMOVE_GENRE_FROM_MOVIE = gql`
+  ${MOVIE_CORE_FIELDS}
+  mutation RemoveGenreFromMovie($performingAdminId: ID!, $movieId: ID!, $genreId: ID!) {
+    removeGenreFromMovie(performingAdminId: $performingAdminId, movieId: $movieId, genreId: $genreId) {
+      ...MovieCoreFields
+    }
+  }
+`;
+
+/**
+ * Removes a cast member (actor) from a movie
+ */
+export const REMOVE_CAST_MEMBER = gql`
+  mutation RemoveCastMember($performingAdminId: ID!, $movieId: ID!, $personId: ID!) {
+    removeCastMemberFromMovie(performingAdminId: $performingAdminId, movieId: $movieId, personId: $personId)
+  }
+`;
+
+/**
+ * Removes a crew member (director) from a movie
+ */
+export const REMOVE_CREW_MEMBER = gql`
+  mutation RemoveCrewMember($performingAdminId: ID!, $movieId: ID!, $personId: ID!) {
+    removeCrewMemberFromMovie(performingAdminId: $performingAdminId, movieId: $movieId, personId: $personId)
+  }
+`;
+
+/** Add a cast member to a movie */
+export const ADD_CAST_MEMBER = gql`
+  mutation AddCastMember($performingAdminId: ID!, $movieId: ID!, $personId: ID!, $characterName: String, $castOrder: Int) {
+    addCastMemberToMovie(
+      performingAdminId: $performingAdminId, 
+      movieId: $movieId, 
+      personId: $personId, 
+      characterName: $characterName, 
+      castOrder: $castOrder
+    ) {
+      id
+      person {
+        id
+        name
+      }
+      character_name
+      cast_order
+    }
+  }
+`;
+
+/** Add a crew member to a movie */
+export const ADD_CREW_MEMBER = gql`
+  mutation AddCrewMember($performingAdminId: ID!, $movieId: ID!, $personId: ID!, $job: String!, $department: String!) {
+    addCrewMemberToMovie(
+      performingAdminId: $performingAdminId, 
+      movieId: $movieId, 
+      personId: $personId, 
+      job: $job, 
+      department: $department
+    ) {
+      id
+      person {
+        id
+        name
+      }
+      job
+      department
+    }
   }
 `;

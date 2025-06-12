@@ -1,29 +1,29 @@
 import { gql } from '@apollo/client';
-import { PERSON_FIELDS } from '../fragments';
+import { PERSON_DETAIL_FIELDS } from '../fragments/person.fragments';
 
 /** Creates a new person. */
 export const CREATE_PERSON = gql`
-  ${PERSON_FIELDS}
-  mutation CreatePerson($input: PersonInput!) {
-    createPerson(input: $input) {
-      ...PersonFields
+  ${PERSON_DETAIL_FIELDS}
+  mutation CreatePerson($performingAdminId: ID!, $input: CreatePersonInput!) {
+    createPerson(performingAdminId: $performingAdminId, input: $input) {
+      ...PersonDetailFields
     }
   }
 `;
 
-/** Updates an existing person. Uses PersonInput as per schema */
+/** Updates an existing person. */
 export const UPDATE_PERSON = gql`
-  ${PERSON_FIELDS}
-  mutation UpdatePerson($id: ID!, $input: PersonInput!) { # Changed input type name
-    updatePerson(id: $id, input: $input) {
-      ...PersonFields
+  ${PERSON_DETAIL_FIELDS}
+  mutation UpdatePerson($performingAdminId: ID!, $id: ID!, $input: UpdatePersonInput!) {
+    updatePerson(performingAdminId: $performingAdminId, id: $id, input: $input) {
+      ...PersonDetailFields
     }
   }
 `;
 
-/** Deletes a person by ID. Returns Boolean! as per schema */
+/** Deletes a person by ID. */
 export const DELETE_PERSON = gql`
-  mutation DeletePerson($id: ID!) {
-    deletePerson(id: $id) # Changed return structure
+  mutation DeletePerson($performingAdminId: ID!, $id: ID!) {
+    deletePerson(performingAdminId: $performingAdminId, id: $id)
   }
 `;

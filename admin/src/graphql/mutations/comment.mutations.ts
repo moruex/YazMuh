@@ -4,16 +4,16 @@ import { COMMENT_FIELDS } from '../fragments'; // Import fragment
 
 /** Deletes a comment by ID (Requires Ownership or Admin Role) */
 export const DELETE_COMMENT = gql`
-  mutation DeleteComment($id: ID!) {
-    deleteComment(id: $id) # Returns Boolean!
+  mutation DeleteComment($performingActorId: ID!, $commentId: ID!) {
+    deleteComment(performingActorId: $performingActorId, commentId: $commentId)
   }
 `;
 
 /** Censors a comment (Admin Role Required) */
 export const CENSOR_COMMENT = gql`
   ${COMMENT_FIELDS} # Return the updated comment
-  mutation CensorComment($id: ID!, $input: CensorCommentInput!) {
-    censorComment(id: $id, input: $input) {
+  mutation CensorComment($performingAdminId: ID!, $commentId: ID!, $input: CensorCommentInput!) {
+    censorComment(performingAdminId: $performingAdminId, commentId: $commentId, input: $input) {
       ...CommentFields
     }
   }
@@ -22,8 +22,8 @@ export const CENSOR_COMMENT = gql`
 /** Uncensors a comment (Admin Role Required) */
 export const UNCENSOR_COMMENT = gql`
   ${COMMENT_FIELDS} # Return the updated comment
-  mutation UncensorComment($id: ID!) {
-    uncensorComment(id: $id) {
+  mutation UncensorComment($performingAdminId: ID!, $commentId: ID!) {
+    uncensorComment(performingAdminId: $performingAdminId, commentId: $commentId) {
       ...CommentFields
     }
   }
@@ -33,8 +33,8 @@ export const UNCENSOR_COMMENT = gql`
 // Example UPDATE_COMMENT
 export const UPDATE_COMMENT = gql`
    ${COMMENT_FIELDS}
-    mutation UpdateComment($id: ID!, $input: CommentUpdateInput!) {
-        updateComment(id: $id, input: $input) {
+    mutation UpdateComment($performingActorId: ID!, $commentId: ID!, $input: CommentUpdateInput!) {
+        updateComment(performingActorId: $performingActorId, commentId: $commentId, input: $input) {
             ...CommentFields
         }
     }

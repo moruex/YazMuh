@@ -46,3 +46,16 @@ export const GET_GENRE = gql`
     }
   }
 `;
+
+/**
+ * Fetches all genres for use in dropdowns (no pagination)
+ */
+export const GET_ALL_GENRES = gql`
+  query GetAllGenres {
+    genres {
+      id
+      name
+      is_collection
+    }
+  }
+`;

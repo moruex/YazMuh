@@ -1,41 +1,70 @@
 import { gql } from '@apollo/client';
-import { MOVIE_CORE_FIELDS, PERSON_FIELDS } from '../fragments'; // Assuming fragments are in correct relative path
+import { PERSON_CORE_FIELDS, PERSON_DETAIL_FIELDS } from '../fragments/person.fragments';
 
-/** Fetches a list of persons with pagination and search. */
+/**
+ * Fetches persons for use in dropdowns with optional filtering
+ */
 export const GET_PERSONS = gql`
- ${PERSON_FIELDS}
- query GetPersons($limit: Int, $offset: Int, $search: String) {
-    persons(limit: $limit, offset: $offset, search: $search) {
-        ...PersonFields
+  ${PERSON_DETAIL_FIELDS}
+  query GetPersons($search: String, $limit: Int = 20, $offset: Int = 0, $sortBy: String, $sortOrder: String) {
+    people(search: $search, limit: $limit, offset: $offset, sortBy: $sortBy, sortOrder: $sortOrder) {
+      ...PersonDetailFields
     }
- }
+    peopleCount(search: $search)
+  }
 `;
 
-/** Fetches the total count of persons for pagination. */
-export const GET_PERSON_COUNT = gql`
- query GetPersonCount($search: String) {
-    personCount(search: $search)
- }
-`;
-
-
-/** Fetches a single person by ID, including their movie roles (if needed elsewhere). */
-// Keep GET_PERSON if you need detailed view later, otherwise it's not used by ActorsPage
-// import { MOVIE_CORE_FIELDS } from '../fragments'; // Add if GET_PERSON is used and needs movie details
+/**
+ * Fetches a single person by ID
+ */
 export const GET_PERSON = gql`
-  ${PERSON_FIELDS}
-  # ${MOVIE_CORE_FIELDS} # Uncomment if needed
+  ${PERSON_DETAIL_FIELDS}
   query GetPerson($id: ID!) {
     person(id: $id) {
-      ...PersonFields
-      # movie_roles { # Example: Fetch roles if needed on a detail page
-      #   id
-      #   role_type
-      #   character_name
-      #   movie {
-      #       ...MovieCoreFields
-      #   }
-      # }
+      ...PersonDetailFields
+      actor_roles(limit: 10) {
+        movie {
+          id
+          title
+          release_date
+          poster_url
+        }
+        character_name
+      }
+      director_roles(limit: 10) {
+        movie {
+          id
+          title
+          release_date
+          poster_url
+        }
+        job
+        department
+      }
+    }
+  }
+`;
+
+/**
+ * Fetches actors that can be added to a movie
+ */
+export const GET_ACTORS = gql`
+  ${PERSON_CORE_FIELDS}
+  query GetActors($search: String, $limit: Int = 20) {
+    people(search: $search, limit: $limit) {
+      ...PersonCoreFields
+    }
+  }
+`;
+
+/**
+ * Fetches directors that can be added to a movie
+ */
+export const GET_DIRECTORS = gql`
+  ${PERSON_CORE_FIELDS}
+  query GetDirectors($search: String, $limit: Int = 20) {
+    people(search: $search, limit: $limit) {
+      ...PersonCoreFields
     }
   }
 `;

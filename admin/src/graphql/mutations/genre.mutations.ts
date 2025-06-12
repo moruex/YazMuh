@@ -5,9 +5,8 @@ import { GENRE_FIELDS } from '../fragments';
 /** Creates a new genre. */
 export const CREATE_GENRE = gql`
   ${GENRE_FIELDS}
-  mutation CreateGenre($input: GenreInput!) {
-    # Assumes mutation name 'createGenre' and input type 'GenreInput!'
-    createGenre(input: $input) {
+  mutation CreateGenre($performingAdminId: ID!, $input: CreateGenreInput!) {
+    createGenre(performingAdminId: $performingAdminId, input: $input) {
       ...GenreFields
     }
   }
@@ -16,9 +15,8 @@ export const CREATE_GENRE = gql`
 /** Updates an existing genre. */
 export const UPDATE_GENRE = gql`
   ${GENRE_FIELDS}
-  mutation UpdateGenre($id: ID!, $input: GenreUpdateInput!) {
-    # Assumes mutation name 'updateGenre' and input type 'GenreUpdateInput!' (or GenreInput!)
-    updateGenre(id: $id, input: $input) {
+  mutation UpdateGenre($performingAdminId: ID!, $id: ID!, $input: UpdateGenreInput!) {
+    updateGenre(performingAdminId: $performingAdminId, id: $id, input: $input) {
       ...GenreFields
     }
   }
@@ -26,11 +24,7 @@ export const UPDATE_GENRE = gql`
 
 /** Deletes a genre by ID. */
 export const DELETE_GENRE = gql`
-  mutation DeleteGenre($id: ID!) {
-    # Assumes mutation name 'deleteGenre' and returns a payload { success, message }
-    deleteGenre(id: $id) {
-        success
-        message
-    }
+  mutation DeleteGenre($performingAdminId: ID!, $id: ID!) {
+    deleteGenre(performingAdminId: $performingAdminId, id: $id) # Returns Boolean!
   }
 `;

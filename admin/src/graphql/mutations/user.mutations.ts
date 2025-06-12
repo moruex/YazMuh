@@ -2,23 +2,12 @@
 import { gql } from '@apollo/client';
 import { USER_FIELDS } from '@graphql/fragments';
 
-// Create this fragment if you don't have it
-export const AUTH_PAYLOAD_FIELDS = gql`
-  ${USER_FIELDS}
-  fragment AuthPayloadFields on AuthPayload {
-    token
-    user   {
-      ...UserFields
-    }
-  }
-`;
-
-/** Register a new user. Returns token and user object. */
+/** Register a new user. Returns the user object directly (no token). */
 export const REGISTER_USER = gql`
-  ${AUTH_PAYLOAD_FIELDS}
+  ${USER_FIELDS}
   mutation RegisterUser($input: UserInput!) {
     registerUser(input: $input) {
-      ...AuthPayloadFields
+      ...UserFields
     }
   }
 `;
@@ -26,8 +15,8 @@ export const REGISTER_USER = gql`
 /** Update the currently logged-in user's profile. */
 export const UPDATE_LOGGED_IN_USER = gql`
   ${USER_FIELDS}
-  mutation UpdateLoggedInUser($input: UserUpdateInput!) {
-    updateUser(input: $input) { # This is for self-update in user.js
+  mutation UpdateLoggedInUser($userId: ID!, $input: UserUpdateInput!) {
+    updateUser(userId: $userId, input: $input) {
       ...UserFields
     }
   }
@@ -36,8 +25,8 @@ export const UPDATE_LOGGED_IN_USER = gql`
 /** Allows an admin to update another user's profile details. */
 export const ADMIN_UPDATE_USER = gql`
   ${USER_FIELDS}
-  mutation AdminUpdateUser($id: ID!, $input: AdminUserUpdateInput!) { # Use the correct input type
-    adminUpdateUser(id: $id, input: $input) {
+  mutation AdminUpdateUser($performingAdminId: ID!, $id: ID!, $input: AdminUserUpdateInput!) {
+    adminUpdateUser(performingAdminId: $performingAdminId, id: $id, input: $input) {
       ...UserFields
     }
   }
@@ -45,9 +34,31 @@ export const ADMIN_UPDATE_USER = gql`
 
 /** Allows a SUPER_ADMIN to delete a user. */
 export const ADMIN_DELETE_USER = gql`
-  mutation AdminDeleteUser($id: ID!) {
-    adminDeleteUser(id: $id) # Returns Boolean!
+  mutation AdminDeleteUser($performingAdminId: ID!, $id: ID!) {
+    adminDeleteUser(performingAdminId: $performingAdminId, id: $id) # Returns Boolean!
   }
+`;
+
+export const UPDATE_USER_PROFILE = gql`
+    ${USER_FIELDS}
+    mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
+        updateUserProfile(input: $input) {
+            success
+            message
+            user {
+                ...UserFields
+            }
+        }
+    }
+`;
+
+export const CHANGE_PASSWORD = gql`
+    mutation ChangePassword($input: ChangePasswordInput!) {
+        changePassword(input: $input) {
+            success
+            message
+        }
+    }
 `;
 
 // --- Mutations missing in user.js for Admin management ---

@@ -9,8 +9,6 @@ export const ADMIN_FIELDS = gql`
     id
     username
     role
-    createdAt
-    updatedAt
     user {
       ...UserFields
     }

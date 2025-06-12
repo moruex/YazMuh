@@ -1,33 +1,45 @@
 // src/apolloClient.ts
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloLink } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
+
+// Determine the backend URL based on environment
+const backendUrl = import.meta.env.VITE_API_URL;
+
+if (!backendUrl) {
+  throw new Error('VITE_API_URL is not set. Please check your .env file.');
+}
+
+console.log('Using backend URL:', backendUrl);
 
 // HTTP connection to your GraphQL API
 const httpLink = createHttpLink({
-  // uri: 'YOUR_GRAPHQL_ENDPOINT', // Replace with your API endpoint URL
-  uri: 'https://movieq-backend.netlify.app/graphql', // Example using Vite env var
+  uri: backendUrl,
 });
 
-// Middleware link to set the Authorization header dynamically
-const authLink = setContext((_, { headers }) => {
+// Authorization link to add auth token from local storage if available
+const authLink = new ApolloLink((operation, forward) => {
   // Get the authentication token from local storage if it exists
-  const token = localStorage.getItem('jwt_token'); // Use the same key as in App.tsx/LoginPage.tsx
-
-  // Return the headers to the context so httpLink can read them
-  return {
+  const token = localStorage.getItem('authToken');
+  const adminId = localStorage.getItem('adminId');
+  
+  // Debug
+  console.log(`Apollo auth: Adding token to request: ${token ? 'Yes' : 'No'}, AdminID: ${adminId || 'None'}`);
+  
+  // Add the authorization header
+  operation.setContext(({ headers = {} }) => ({
     headers: {
-      ...headers, // Spread existing headers
-      authorization: token ? `Bearer ${token}` : "", // Add the Authorization header
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+      // Also add admin ID directly in header for simplicity
+      'x-admin-id': adminId || "",
     }
-  }
-});
+  }));
 
-// Chain the links: authLink runs before httpLink
-const link = ApolloLink.from([authLink, httpLink]);
+  return forward(operation);
+});
 
 // Create the Apollo Client instance
 const client = new ApolloClient({
-  link: link,
+  link: authLink.concat(httpLink), // Use combined links
   cache: new InMemoryCache(),
   connectToDevTools: true, // Enable DevTools integration
 });

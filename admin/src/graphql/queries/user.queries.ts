@@ -6,11 +6,10 @@ import { USER_FIELDS } from '../fragments';
 /** Fetches a list of users with optional pagination and search. */
 export const GET_USERS = gql`
   ${USER_FIELDS}
-  query GetUsers($limit: Int = 10, $offset: Int = 0, $search: String) {
-    users(limit: $limit, offset: $offset, search: $search) {
+  query GetUsers($performingAdminId: ID!, $limit: Int = 10, $offset: Int = 0, $search: String) {
+    users(performingAdminId: $performingAdminId, limit: $limit, offset: $offset, search: $search) {
       ...UserFields
     }
-     # userCount(search: $search) # Add if schema supports count
   }
 `;
 
@@ -27,9 +26,9 @@ export const GET_USER = gql`
   }
 `;
 
-/** Fetches the total count of admin users. */
+/** Fetches the total count of users. */
 export const GET_USER_COUNT = gql`
-    query GetUserCount {
-        userCount
+    query GetUserCount($performingAdminId: ID!, $search: String) {
+        userCount(performingAdminId: $performingAdminId, search: $search)
     }
 `;

@@ -20,12 +20,28 @@ export const LOGIN_USER = gql`
 export const ADMIN_LOGIN = gql`
     ${ADMIN_FIELDS} # Include admin details on success
     mutation AdminLogin($input: AdminLoginInput!) {
-        # Assumes mutation name is 'adminLogin' and input type is 'AdminLoginInput!'
         adminLogin(input: $input) {
-            token
+            # token // REMOVED: No JWT
             admin {
                 ...AdminFields
             }
+            success
+            message
+        }
+    }
+`;
+
+/** Admin user registration mutation. */
+export const ADMIN_REGISTER = gql`
+    ${ADMIN_FIELDS} # Include admin details on success
+    mutation AdminRegister($input: AdminRegisterInput!) {
+        adminRegister(input: $input) {
+            # token // REMOVED: No JWT
+            admin {
+                ...AdminFields
+            }
+            success
+            message
         }
     }
 `;
@@ -41,18 +57,19 @@ export const FORGOT_PASSWORD = gql`
   }
 `;
 
-/** Admin logout mutation (invalidates current token). */
+/** Admin logout mutation (invalidates current session on server). */
 export const ADMIN_LOGOUT = gql`
     mutation AdminLogout {
         # Assumes mutation name is 'adminLogout' and returns Boolean!
+        # This might need to be adapted if the backend logout changes due to no JWTs
         adminLogout
     }
 `;
 
-/** Admin logout specific session mutation (using JWT ID). */
-export const ADMIN_LOGOUT_SESSION = gql`
-    mutation AdminLogoutSession($jti: String!) { # Takes JTI (JWT ID) as input
-        # Assumes mutation name is 'adminLogoutSession' and returns Boolean!
-        adminLogoutSession(jti: $jti)
-    }
-`;
+/** Admin logout specific session mutation (using JWT ID) - LIKELY OBSOLETE WITHOUT JWTs. */
+// export const ADMIN_LOGOUT_SESSION = gql`
+//     mutation AdminLogoutSession($jti: String!) { # Takes JTI (JWT ID) as input
+//         # Assumes mutation name is 'adminLogoutSession' and returns Boolean!
+//         adminLogoutSession(jti: $jti)
+//     }
+// `;
