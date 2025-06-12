@@ -1,0 +1,62 @@
+# GraphQL schema for MovieQ (partial, for frontend tooling)
+
+type Genre {
+  id: ID!
+  name: String!
+  description: String
+  image_url: String
+  is_collection: Boolean
+  slug: String!
+}
+
+type Person {
+  id: ID!
+  name: String!
+  bio: String
+  birth_date: String
+  profile_image_url: String
+  slug: String!
+}
+
+type Movie {
+  id: ID!
+  title: String!
+  release_date: String
+  plot_summary: String
+  poster_url: String
+  duration_minutes: Int
+  trailer_url: String
+  movieq_rating: Float
+  imdb_rating: Float
+  letterboxd_rating: Float
+  updated_at: String
+  slug: String!
+  genres: [Genre!]
+  directors: [Person!]
+  actors: [Person!]
+  
+  # User-specific fields that require userId argument
+  user_rating(userId: ID!): Int
+  is_favorited_by_me(userId: ID!): Boolean
+  is_watched_by_me(userId: ID!): Boolean
+  is_watchlisted_by_me(userId: ID!): Boolean
+}
+
+type News {
+  id: ID!
+  title: String!
+  short_content: String
+  content: String!
+  author: Person
+  image_url: String
+  published_at: String
+  updated_at: String
+  movies: [Movie!]
+}
+
+type Query {
+  movies: [Movie!]!
+  movie(id: ID!): Movie
+  news: [News!]!
+  newsItem(id: ID!): News
+} 
