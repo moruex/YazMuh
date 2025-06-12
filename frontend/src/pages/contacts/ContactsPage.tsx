@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './ContactsPage.css';
 import Footer from '@components/app/Footer';
+import { useTranslation } from 'react-i18next';
 
 const ContactsPage: React.FC = () => {
     const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ const ContactsPage: React.FC = () => {
     });
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false); 
+    const { t } = useTranslation();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -39,19 +41,19 @@ const ContactsPage: React.FC = () => {
         <>
             <div className="contact-page">
                 <div className="contact-container">
-                    <h1 className="contact-heading">Contact Us</h1>
+                    <h1 className="contact-heading">{t('contactUs')}</h1>
                     <p className="contact-intro">
-                        Have questions, suggestions, or feedback? We'd love to hear from you! Fill out the form below, and we'll get back to you as soon as possible.
+                        {t('contactIntro')}
                     </p>
 
                     {isSubmitted ? (
                         <div className="contact-thank-you">
-                            Thank you for your message! We'll be in touch soon.
+                            {t('contactThankYou')}
                         </div>
                     ) : (
                         <form className="contact-form" onSubmit={handleSubmit}>
                             <div className="contact-form-group">
-                                <label htmlFor="name">Name</label>
+                                <label htmlFor="name">{t('name')}</label>
                                 <input
                                     type="text"
                                     id="name"
@@ -59,11 +61,11 @@ const ContactsPage: React.FC = () => {
                                     value={formData.name}
                                     onChange={handleChange}
                                     required
-                                    placeholder="Your Name"
+                                    placeholder={t('yourName')}
                                 />
                             </div>
                             <div className="contact-form-group">
-                                <label htmlFor="email">Email</label>
+                                <label htmlFor="email">{t('email')}</label>
                                 <input
                                     type="email"
                                     id="email"
@@ -71,11 +73,11 @@ const ContactsPage: React.FC = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     required
-                                    placeholder="your.email@example.com"
+                                    placeholder={t('yourEmail')}
                                 />
                             </div>
                             <div className="contact-form-group">
-                                <label htmlFor="subject">Subject</label>
+                                <label htmlFor="subject">{t('subject')}</label>
                                 <input
                                     type="text"
                                     id="subject"
@@ -83,11 +85,11 @@ const ContactsPage: React.FC = () => {
                                     value={formData.subject}
                                     onChange={handleChange}
                                     required
-                                    placeholder="What is this regarding?"
+                                    placeholder={t('subjectPlaceholder')}
                                 />
                             </div>
                             <div className="contact-form-group">
-                                <label htmlFor="message">Message</label>
+                                <label htmlFor="message">{t('message')}</label>
                                 <textarea
                                     id="message"
                                     name="message"
@@ -95,21 +97,20 @@ const ContactsPage: React.FC = () => {
                                     value={formData.message}
                                     onChange={handleChange}
                                     required
-                                    placeholder="Your detailed message..."
+                                    placeholder={t('messagePlaceholder')}
                                 />
                             </div>
                             <button type="submit" className="contact-submit-button" disabled={isSubmitting}>
-                                {isSubmitting ? 'Sending...' : 'Send Message'}
+                                {isSubmitting ? t('sending') : t('sendMessage')}
                             </button>
                         </form>
                     )}
 
                     <div className="contact-alternative">
-                        <h2>Other Ways to Reach Us</h2>
+                        <h2>{t('otherWaysToReachUs')}</h2>
                         <p>
-                            For general inquiries, you can also reach out to us at: <a href="mailto:support@movieq.com">movieq3231@gmail.com</a>
+                            {t('generalInquiries')} <a href="mailto:support@movieq.com">movieq3231@gmail.com</a>
                         </p>
-                        {}
                     </div>
                 </div>
             </div>
