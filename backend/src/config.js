@@ -10,10 +10,6 @@ module.exports = {
     port: process.env.PORT || 4000,
     databaseUrl: process.env.DATABASE_URL,
     nodeEnv: process.env.NODE_ENV || 'development',
-    jwtSecret: process.env.JWT_SECRET || 'YOUR_REALLY_SECRET_KEY_PLEASE_CHANGE',
-    jwtExpiration: process.env.JWT_EXPIRATION || '1d',
-    adminJwtSecret: process.env.ADMIN_JWT_SECRET || 'default_insecure_admin_secret_change_me',
-    adminJwtExpiresIn: process.env.ADMIN_JWT_EXPIRES_IN || '1h',
     bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10),
 
     // R2 Configuration
