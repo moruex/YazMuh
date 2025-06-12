@@ -5,6 +5,7 @@ import './Users.css'; // Keep your existing styles
 import { Button, CircularProgress, Box, Alert } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useQuery, useMutation, ApolloError, Reference } from '@apollo/client';
+import { useAuth } from '@contexts/AuthContext'; // Import auth context
 
 // Import the actual mutations and queries
 import { AddEditUserModal } from './AddEditUserModal';
@@ -51,6 +52,9 @@ interface AdminUserUpdateInput {
 }
 
 export const UsersPage: React.FC = () => {
+  // Get current admin from auth context
+  const { admin } = useAuth();
+
   // State (keep pagination, filter, modal states)
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [searchTerm, setSearchTerm] = useState('');
@@ -79,6 +83,7 @@ export const UsersPage: React.FC = () => {
     GET_USERS,
     {
       variables: {
+        performingAdminId: admin?.id, // Pass current admin ID
         limit: pagination.pageSize,
         offset: pagination.pageIndex * pagination.pageSize,
         search: appliedFilter
@@ -86,15 +91,20 @@ export const UsersPage: React.FC = () => {
       fetchPolicy: 'cache-and-network',
       notifyOnNetworkStatusChange: true,
       onError: (err) => console.error("Error fetching users:", err),
+      skip: !admin?.id, // Skip if no admin ID available
     }
   );
 
   const { data: countData, loading: loadingCount, refetch: refetchCount } = useQuery<{ userCount: number }>(
     GET_USER_COUNT,
     {
-      variables: { search: appliedFilter },
+      variables: { 
+        performingAdminId: admin?.id, // Pass current admin ID
+        search: appliedFilter 
+      },
       fetchPolicy: 'cache-and-network',
       onError: (err) => console.error("Error fetching user count:", err),
+      skip: !admin?.id, // Skip if no admin ID available
     }
   );
 
@@ -212,6 +222,11 @@ export const UsersPage: React.FC = () => {
 
   const handleEditSubmit = async (formData: UserFormData) => {
     if (!selectedUser) return;
+    if (!admin?.id) {
+      setMutationError("You need to be logged in as an admin to update users");
+      return;
+    }
+    
     setMutationError(null);
     try {
       // Map UserFormData to AdminUserUpdateInput, EXCLUDING password
@@ -232,7 +247,13 @@ export const UsersPage: React.FC = () => {
       }
 
       console.log("Updating user ID:", selectedUser.id, "with input:", input);
-      await adminUpdateUserMutation({ variables: { id: selectedUser.id, input } });
+      await adminUpdateUserMutation({ 
+        variables: { 
+          performingAdminId: admin.id, // Pass current admin ID 
+          id: selectedUser.id, 
+          input 
+        } 
+      });
     } catch (e: unknown) { 
       /* Error handled by onError */ 
       console.error("Edit submit catch:", e);
@@ -241,11 +262,21 @@ export const UsersPage: React.FC = () => {
 
   // --- Delete Handler ---
   const handleDeleteUser = async (userId: string) => {
+    if (!admin?.id) {
+      alert("You need to be logged in as an admin to delete users");
+      return;
+    }
+    
     // Add confirmation dialog
     if (window.confirm(`Are you sure you want to delete user ID: ${userId}? This action cannot be undone.`)) {
       try {
         // Call the actual delete mutation
-        await adminDeleteUserMutation({ variables: { id: userId } });
+        await adminDeleteUserMutation({ 
+          variables: { 
+            performingAdminId: admin.id, // Pass current admin ID
+            id: userId 
+          } 
+        });
       } catch (e: unknown) { 
         /* Error handled by onError */ 
         console.error("Delete catch:", e);
@@ -278,7 +309,7 @@ export const UsersPage: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={() => openModal('add')}
-            disabled={isMutating}
+            disabled={isMutating || !admin?.id}
             startIcon={<Add />}
           >
             Add User
@@ -288,6 +319,7 @@ export const UsersPage: React.FC = () => {
         {/* Loading/Error States */}
         {queryLoading && !usersData && <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress /></Box>}
         {usersError && <Alert severity="error" sx={{ mb: 2 }}>Error loading users: {usersError.message}</Alert>}
+        {!admin && <Alert severity="warning">You must be logged in as an admin to manage users.</Alert>}
 
         {/* Table */}
         <div className="users-table-wrapper">

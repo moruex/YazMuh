@@ -6,17 +6,16 @@ import './Users.css'; // Reuse the same CSS file if styles are similar
 import { Button, CircularProgress, Box, Alert } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useQuery, useMutation, ApolloError, Reference } from '@apollo/client';
-import { AdminRole } from '@interfaces/index';
+import { AdminRole } from '@interfaces/enums';
 import { CREATE_ADMIN, DELETE_ADMIN, GET_ADMIN_COUNT, GET_ADMINS, UPDATE_ADMIN } from '@graphql/index';
-import { AddEditAdminModal } from './AddEditAminModal';
+import { AddEditAdminModal } from './AddEditAdminModal';
+import { useAuth } from '@contexts/AuthContext'; // Add auth context import
 
 // Interface matching the GraphQL Admin type from fragments/schema
 interface Admin {
   id: string;
   username: string;
   role: AdminRole;
-  createdAt?: string | null;
-  updatedAt?: string | null;
   user?: {
     id: string;
     username: string;
@@ -48,6 +47,9 @@ export const AdminsPage: React.FC = () => {
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('view');
   const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);
+
+  // Add auth context to get the current admin ID
+  const { admin } = useAuth();
 
   // Ref for search input to implement "search on Enter"
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -170,6 +172,11 @@ export const AdminsPage: React.FC = () => {
   };
 
   const handleAddSubmit = async (formData: AdminFormData) => {
+    if (!admin?.id) {
+      setMutationError("You need to be logged in as an admin to perform this action");
+      return;
+    }
+
     setMutationError(null);
     try {
       const input = {
@@ -178,7 +185,12 @@ export const AdminsPage: React.FC = () => {
         role: formData.role,
         userId: formData.userId!     // Required for create
       };
-      await createAdminMutation({ variables: { input } });
+      await createAdminMutation({ 
+        variables: { 
+          performingAdminId: admin.id, // Pass current admin ID
+          input 
+        } 
+      });
     } catch (e: unknown) {
       console.error("Caught submission error:", e);
       if (e instanceof Error) {
@@ -191,6 +203,11 @@ export const AdminsPage: React.FC = () => {
 
   const handleEditSubmit = async (formData: AdminFormData) => {
     if (!selectedAdmin) return;
+    if (!admin?.id) {
+      setMutationError("You need to be logged in as an admin to perform this action");
+      return;
+    }
+    
     setMutationError(null);
     try {
       const originalAdmin = sortedAdmins.find(a => a.id === selectedAdmin.id);
@@ -208,7 +225,13 @@ export const AdminsPage: React.FC = () => {
         return;
       }
 
-      await updateAdminMutation({ variables: { id: selectedAdmin.id, input: finalInput } });
+      await updateAdminMutation({ 
+        variables: { 
+          performingAdminId: admin.id, // Pass current admin ID
+          id: selectedAdmin.id, 
+          input: finalInput 
+        } 
+      });
     } catch (e: unknown) {
       console.error("Caught submission error:", e);
       if (e instanceof Error) {
@@ -220,9 +243,19 @@ export const AdminsPage: React.FC = () => {
   };
 
   const handleDeleteAdmin = async (adminId: string) => {
+    if (!admin?.id) {
+      alert("You need to be logged in as an admin to delete another admin");
+      return;
+    }
+    
     if (window.confirm(`Are you sure you want to delete admin ID ${adminId}? This cannot be undone.`)) {
       try {
-        await deleteAdminMutation({ variables: { id: adminId } });
+        await deleteAdminMutation({ 
+          variables: { 
+            performingAdminId: admin.id, // Pass current admin ID
+            id: adminId 
+          } 
+        });
       } catch (e: unknown) {
         console.error("Caught delete error:", e);
         if (e instanceof Error) {
@@ -260,7 +293,7 @@ export const AdminsPage: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={() => openModal('add')}
-            disabled={isMutating}
+            disabled={isMutating || !admin?.id}
             startIcon={<Add />}
           >
             Add Admin
@@ -270,6 +303,7 @@ export const AdminsPage: React.FC = () => {
         {/* Loading/Error States */}
         {isLoading && !adminsData && <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress /></Box>}
         {adminsError && <Alert severity="error">Error loading admins: {adminsError.message}</Alert>}
+        {!admin && <Alert severity="warning">You must be logged in as an admin to manage admin accounts.</Alert>}
 
         {/* Table */}
         <div className="users-table-wrapper">
@@ -279,15 +313,14 @@ export const AdminsPage: React.FC = () => {
                 <th>Admin Username</th>
                 <th>Role</th>
                 <th>Linked User</th>
-                <th className="mhide">Created At</th>
                 <th className='column-center'>Actions</th>
               </tr>
             </thead>
             <tbody>
               {isLoading && adminsData ? (
-                <tr><td colSpan={5} className="users-loading-cell">Updating...</td></tr>
+                <tr><td colSpan={4} className="users-loading-cell">Updating...</td></tr>
               ) : !isLoading && sortedAdmins.length === 0 ? (
-                <tr><td colSpan={5} className="users-no-data">No admins found</td></tr>
+                <tr><td colSpan={4} className="users-no-data">No admins found</td></tr>
               ) : (
                 sortedAdmins.map(admin => (
                   <tr key={admin.id}>
@@ -296,7 +329,6 @@ export const AdminsPage: React.FC = () => {
                       <span className={`admin-chip ${admin.role.toLowerCase().replace('_', '-')}`}>{admin.role.replace('_', ' ')}</span>
                     </td>
                     <td>{admin.user ? `${admin.user.username} (${admin.user.email})` : <span style={{ color: 'grey' }}>Not Linked</span>}</td>
-                    <td className="mhide">{admin.createdAt ? new Date(admin.createdAt).toLocaleDateString() : 'N/A'}</td>
                     <td className="column-actions">
                       <div className="main-action-buttons">
                         <button
