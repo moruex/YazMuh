@@ -2,50 +2,48 @@
 import React from 'react';
 import './AboutPage.css';
 import Footer from '@components/app/Footer';
+import { useTranslation } from 'react-i18next';
 
 const AboutPage: React.FC = () => {
+    const { t } = useTranslation();
     return (
         <>
             <div className="about-page">
                 <div className="about-container">
-                    <h1 className="about-heading">About MovieQ</h1>
+                    <h1 className="about-heading">{t('aboutMovieQ')}</h1>
 
                     <section className="about-section">
-                        <h2>Our Mission</h2>
-                        <p>
-                            MovieQ is a user-friendly movie review platform designed for film enthusiasts. Our goal is to create a space where you can discover, discuss, and organize your cinematic journey.
-                        </p>
+                        <h2>{t('ourMission')}</h2>
+                        <p>{t('aboutMissionText')}</p>
                     </section>
 
                     <section className="about-section">
-                        <h2>What We Offer</h2>
+                        <h2>{t('whatWeOffer')}</h2>
                         <ul>
-                            <li>Stay updated on both new releases and classic films.</li>
-                            <li>Rate movies and read reviews from fellow users.</li>
-                            <li>Leave your own comments and engage in discussions.</li>
-                            <li>Build and manage your personal watchlist.</li>
-                            <li>Mark films you've already seen.</li>
-                            <li>Curate a list of your favorite movies.</li>
-                            <li>Follow the latest movie news and developments.</li>
-                            <li>Easily find films using our advanced filtering system.</li>
+                            <li>{t('aboutOffer1')}</li>
+                            <li>{t('aboutOffer2')}</li>
+                            <li>{t('aboutOffer3')}</li>
+                            <li>{t('aboutOffer4')}</li>
+                            <li>{t('aboutOffer5')}</li>
+                            <li>{t('aboutOffer6')}</li>
+                            <li>{t('aboutOffer7')}</li>
+                            <li>{t('aboutOffer8')}</li>
                         </ul>
-                        <p>
-                            If you're a movie lover, we believe you'll find MovieQ a valuable and enjoyable tool!
-                        </p>
+                        <p>{t('aboutEnjoyTool')}</p>
                     </section>
 
                     <section className="about-section">
-                        <h2>Project Details</h2>
-                        <p><strong>Category:</strong> Film Platform & Community</p>
-                        <p><strong>Inspired By:</strong> <a href="https://imdb.com" target="_blank" rel="noopener noreferrer">imdb.com</a>, <a href="https://rottentomatoes.com" target="_blank" rel="noopener noreferrer">rottentomatoes.com</a>, <a href="https://rezka.ag" target="_blank" rel="noopener noreferrer">rezka.ag</a></p>
-                        <p><strong>Website:</strong> movieq.com.tr</p>
+                        <h2>{t('projectDetails')}</h2>
+                        <p><strong>{t('category')}</strong> {t('categoryValue')}</p>
+                        <p><strong>{t('inspiredBy')}</strong> <a href="https://imdb.com" target="_blank" rel="noopener noreferrer">imdb.com</a>, <a href="https://rottentomatoes.com" target="_blank" rel="noopener noreferrer">rottentomatoes.com</a>, <a href="https://rezka.ag" target="_blank" rel="noopener noreferrer">rezka.ag</a></p>
+                        <p><strong>{t('website')}</strong> movieq.com.tr</p>
                     </section>
 
                     <section className="about-section">
-                        <h2>Created By</h2>
+                        <h2>{t('createdBy')}</h2>
                         <div className='university'>
                             <img src="/sdu.svg" alt="Suleyman Demirel University Logo" className="ab-logo" />
-                            Suleyman Demirel University
+                            {t('sduName')}
                         </div>
                         <ul>
                             <li><a href='https://github.com/crusinistaken'>Semih Çantal</a></li>
