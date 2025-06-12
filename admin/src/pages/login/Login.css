@@ -13,18 +13,6 @@
   backdrop-filter: blur(10px);
 }
 
-a.breadcrumb-link.home-link {
-  color: var(--tp-green-blue);
-}
-
-li.breadcrumb-separator {
-  color: #fff;
-}
-
-span.breadcrumb-text {
-  color: #fff;
-}
-
 /* Background Elements */
 .background-container {
   position: fixed;
@@ -138,8 +126,6 @@ span.breadcrumb-text {
 }
 
 .login-button:hover {
-  background-color: var(--mui-accent-hf);
-  transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
