@@ -2,29 +2,50 @@
 // const { gql } = require('@apollo/server');
 const gql = require('graphql-tag');
 const { GraphQLError } = require('graphql');
-const { ensureAdmin } = require('../utils/authHelpers'); // Import helper
+const { rolesHierarchy } = require('../utils/authHelpers'); // For role validation
+
+// Helper for admin permission check (can be centralized later)
+async function checkAdminPermissionById(db, adminId, requiredRole = 'CONTENT_MODERATOR', action = 'perform this action') {
+    if (!adminId) {
+        throw new GraphQLError('Admin ID required for this action.', { extensions: { code: 'UNAUTHENTICATED' } });
+    }
+    const { rows } = await db.query('SELECT role FROM admins WHERE id = $1', [adminId]);
+    if (rows.length === 0) {
+        throw new GraphQLError('Admin performing action not found.', { extensions: { code: 'FORBIDDEN' } });
+    }
+    const adminRole = rows[0].role;
+    const userLevel = rolesHierarchy[adminRole] || 0;
+    const requiredLevel = rolesHierarchy[requiredRole] || 0;
+
+    if (userLevel < requiredLevel) {
+        console.warn(`Permission denied: Admin ${adminId} (Role: ${adminRole}) attempted to ${action}. Required: ${requiredRole}.`);
+        throw new GraphQLError(`You do not have permission to ${action}. Requires ${requiredRole} role or higher.`, { extensions: { code: 'FORBIDDEN' } });
+    }
+    return true; // Permission granted
+}
 
 // --- GraphQL Definitions ---
 const typeDefs = gql`
   type Genre {
     id: ID!
     name: String!
+    slug: String!
     description: String
     image_url: String
     is_collection: Boolean
-    movies: [Movie!] # Assumes Movie type is defined elsewhere
-    movieCount: Int # Optional: Add count if needed frequently
+    # Connections
+    movies(limit: Int = 10, offset: Int = 0): [Movie!]
+    movie_count: Int!
   }
 
-  input GenreInput {
+  input CreateGenreInput {
     name: String!
     description: String
     image_url: String
-    is_collection: Boolean # Ensure this is handled in input
+    is_collection: Boolean!
   }
 
-  # Input type for updates (could be different if needed, but GenreInput often suffices)
-  input GenreUpdateInput {
+  input UpdateGenreInput {
     name: String
     description: String
     image_url: String
@@ -33,183 +54,151 @@ const typeDefs = gql`
 
   # --- Extend the base Query type ---
   extend type Query {
-    genre(id: ID!): Genre
-    genres(
-        limit: Int,
-        offset: Int,
-        search: String,
-        isCollection: Boolean # Filter: null/undefined = all, true = collections, false = genres
-    ): [Genre!]! # Still returns a list of genres
-    genreCount(
-        search: String,
-        isCollection: Boolean
-    ): Int! # Returns the total count matching filters
+    genre(id: ID, slug: String): Genre
+    genres(limit: Int = 20, offset: Int = 0, search: String, isCollection: Boolean): [Genre!]
+    genreCount(search: String, isCollection: Boolean): Int!
   }
 
   # --- Extend the base Mutation type ---
   extend type Mutation {
-    # Requires admin auth
-    createGenre(input: GenreInput!): Genre!
-    updateGenre(id: ID!, input: GenreUpdateInput!): Genre # Use specific update input
-    deleteGenre(id: ID!): Boolean!
+    createGenre(performingAdminId: ID!, input: CreateGenreInput!): Genre!
+    updateGenre(performingAdminId: ID!, id: ID!, input: UpdateGenreInput!): Genre!
+    deleteGenre(performingAdminId: ID!, id: ID!): Boolean!
   }
 `;
 
 // --- Resolvers ---
 const resolvers = {
   Query: {
-    genre: async (_, { id }, context) => {
-      const result = await context.db.query('SELECT * FROM genres WHERE id = $1', [id]);
-      return result.rows[0] || null;
+    genre: async (_, { id, slug }, { db }) => {
+      if (!id && !slug) throw new GraphQLError('Either id or slug must be provided.', { extensions: { code: 'BAD_USER_INPUT' } });
+      let query = 'SELECT * FROM genres WHERE ';
+      const params = [];
+      if (id) {
+        query += 'id = $1';
+        params.push(id);
+      } else if (slug) {
+        query += 'slug = $1';
+        params.push(slug);
+      }
+      const { rows } = await db.query(query, params);
+      if (rows.length === 0) throw new GraphQLError('Genre not found.', { extensions: { code: 'NOT_FOUND' } });
+      return rows[0];
     },
-    // Updated genres resolver with filtering and pagination
-    genres: async (_, { limit, offset, search, isCollection }, context) => {
+    genres: async (_, { limit, offset, search, isCollection }, { db }) => {
       let query = 'SELECT * FROM genres';
-      const values = [];
+      const params = [];
       const conditions = [];
-      let paramCounter = 1;
+      let placeholderCount = 1;
 
       if (search) {
-        conditions.push(`(name ILIKE $${paramCounter} OR description ILIKE $${paramCounter})`);
-        values.push(`%${search}%`);
-        paramCounter++;
+        conditions.push(`name ILIKE $${placeholderCount++}`);
+        params.push(`%${search}%`);
       }
       if (isCollection !== undefined && isCollection !== null) {
-        conditions.push(`is_collection = $${paramCounter}`);
-        values.push(isCollection);
-        paramCounter++;
+        conditions.push(`is_collection = $${placeholderCount++}`);
+        params.push(isCollection);
       }
 
       if (conditions.length > 0) {
-        query += ` WHERE ${conditions.join(' AND ')}`;
+        query += ' WHERE ' + conditions.join(' AND ');
       }
 
-      query += ' ORDER BY name'; // Default sorting
-
-      if (limit !== undefined && limit !== null) {
-        query += ` LIMIT $${paramCounter}`;
-        values.push(limit);
-        paramCounter++;
-      }
-      if (offset !== undefined && offset !== null) {
-        query += ` OFFSET $${paramCounter}`;
-        values.push(offset);
-        paramCounter++;
-      }
-
-      // console.log("Executing Genres Query:", query, values); // Debugging
-      const result = await context.db.query(query, values);
-      return result.rows;
+      query += ` ORDER BY name ASC LIMIT $${placeholderCount++} OFFSET $${placeholderCount++}`;
+      params.push(limit, offset);
+      const { rows } = await db.query(query, params);
+      return rows;
     },
-    // Resolver for genreCount
-    genreCount: async (_, { search, isCollection }, context) => {
-        let query = 'SELECT COUNT(*) FROM genres';
-        const values = [];
+    genreCount: async (_, { search, isCollection }, { db }) => {
+        let query = 'SELECT COUNT(*) AS count FROM genres';
+        const params = [];
         const conditions = [];
-        let paramCounter = 1;
+        let placeholderCount = 1;
 
         if (search) {
-            conditions.push(`(name ILIKE $${paramCounter} OR description ILIKE $${paramCounter})`);
-            values.push(`%${search}%`);
-            paramCounter++;
+            conditions.push(`name ILIKE $${placeholderCount++}`);
+            params.push(`%${search}%`);
         }
         if (isCollection !== undefined && isCollection !== null) {
-            conditions.push(`is_collection = $${paramCounter}`);
-            values.push(isCollection);
-            paramCounter++;
+            conditions.push(`is_collection = $${placeholderCount++}`);
+            params.push(isCollection);
         }
 
         if (conditions.length > 0) {
-            query += ` WHERE ${conditions.join(' AND ')}`;
+            query += ' WHERE ' + conditions.join(' AND ');
         }
-
-        // console.log("Executing Genre Count Query:", query, values); // Debugging
-        const result = await context.db.query(query, values);
-        return parseInt(result.rows[0].count, 10); // Ensure it's an integer
+        const { rows } = await db.query(query, params);
+        return parseInt(rows[0].count, 10);
     },
   },
   Mutation: {
-    createGenre: async (_, { input }, { admin, db }) => {
-      ensureAdmin(admin);
+    createGenre: async (_, { performingAdminId, input }, { db }) => {
+      await checkAdminPermissionById(db, performingAdminId, 'CONTENT_MODERATOR', 'create genre');
       const { name, description, image_url, is_collection } = input;
-      // Explicitly default is_collection if not provided or null
-      const isCollectionValue = is_collection === true;
-      const query = `
-        INSERT INTO genres (name, description, image_url, is_collection)
-        VALUES ($1, $2, $3, $4) RETURNING *`;
-      const values = [name, description, image_url, isCollectionValue];
-      try {
-        const result = await db.query(query, values);
-        return result.rows[0];
-      } catch (error) {
-        console.error("Error creating genre:", error);
-        if (error.code === '23505') { // Unique violation for name
-          throw new GraphQLError('Genre name already exists.', { extensions: { code: 'BAD_USER_INPUT' } });
-        }
-        throw new Error("Failed to create genre.");
-      }
+      const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const { rows } = await db.query(
+        'INSERT INTO genres (name, slug, description, image_url, is_collection) VALUES ($1, $2, $3, $4, $5 ) RETURNING *',
+        [name, slug, description, image_url, is_collection]
+      );
+      return rows[0];
     },
-
-    updateGenre: async (_, { id, input }, { admin, db }) => {
-      ensureAdmin(admin);
+    updateGenre: async (_, { performingAdminId, id, input }, { db }) => {
+      await checkAdminPermissionById(db, performingAdminId, 'CONTENT_MODERATOR', 'update genre');
+      const { name, description, image_url, is_collection } = input;
       const updates = [];
-      const values = [];
-      let paramCounter = 1;
+      const params = [];
+      let placeholderCount = 1;
 
-      // Check each field in the input and add to query if present
-      if (input.name !== undefined && input.name !== null) { updates.push(`name = $${paramCounter++}`); values.push(input.name); }
-      if (input.description !== undefined) { updates.push(`description = $${paramCounter++}`); values.push(input.description); } // Allow null description
-      if (input.image_url !== undefined) { updates.push(`image_url = $${paramCounter++}`); values.push(input.image_url); } // Allow null image_url
-      if (input.is_collection !== undefined && input.is_collection !== null) { updates.push(`is_collection = $${paramCounter++}`); values.push(input.is_collection); }
-
-      if (updates.length === 0) {
-        // No fields to update, just fetch and return existing
-        const existing = await db.query('SELECT * FROM genres WHERE id = $1', [id]);
-        return existing.rows[0] || null;
+      if (name !== undefined) {
+        updates.push(`name = $${placeholderCount++}`);
+        params.push(name);
+        const newSlug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        updates.push(`slug = $${placeholderCount++}`);
+        params.push(newSlug);
+      }
+      if (description !== undefined) {
+        updates.push(`description = $${placeholderCount++}`);
+        params.push(description);
+      }
+      if (image_url !== undefined) {
+        updates.push(`image_url = $${placeholderCount++}`);
+        params.push(image_url);
+      }
+      if (is_collection !== undefined) {
+        updates.push(`is_collection = $${placeholderCount++}`);
+        params.push(is_collection);
       }
 
-      values.push(id); // Add the ID for the WHERE clause
-      const query = `UPDATE genres SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${paramCounter} RETURNING *`;
-      // console.log("Executing Update Genre Query:", query, values); // Debugging
-      const result = await db.query(query, values);
-      if (result.rows.length === 0) {
-        throw new GraphQLError(`Genre with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
-      }
-      return result.rows[0];
+      if (updates.length === 0) throw new GraphQLError('No update fields provided.', { extensions: { code: 'BAD_USER_INPUT' } });
+
+      params.push(id);
+      const query = `UPDATE genres SET ${updates.join(', ')} WHERE id = $${placeholderCount} RETURNING *`;
+      const { rows } = await db.query(query, params);
+      if (rows.length === 0) throw new GraphQLError('Genre not found or no changes made.', { extensions: { code: 'NOT_FOUND' } });
+      return rows[0];
     },
-
-    deleteGenre: async (_, { id }, { admin, db }) => {
-      ensureAdmin(admin);
-       // BEFORE deleting, check if any movies are using this genre
-      const movieCheck = await db.query('SELECT 1 FROM movie_genres WHERE genre_id = $1 LIMIT 1', [id]);
-      if (movieCheck.rowCount > 0) {
-          throw new Error(`Cannot delete genre (ID: ${id}) because it is still associated with movies.`);
-          // Or you could decide to detach movies first, depending on desired behavior
-      }
-
-      const result = await db.query('DELETE FROM genres WHERE id = $1 RETURNING id', [id]);
-      if (result.rowCount === 0) {
-        throw new GraphQLError(`Genre with ID ${id} not found.`, { extensions: { code: 'BAD_USER_INPUT' } });
-      }
+    deleteGenre: async (_, { performingAdminId, id }, { db }) => {
+      await checkAdminPermissionById(db, performingAdminId, 'ADMIN', 'delete genre');
+      const { rowCount } = await db.query('DELETE FROM genres WHERE id = $1', [id]);
+      if (rowCount === 0) throw new GraphQLError('Genre not found.', { extensions: { code: 'NOT_FOUND' } });
       return true;
     },
   },
-  // --- Field Resolvers for Genre ---
   Genre: {
-    // Resolve the 'movies' field for a Genre
-    movies: async (genre, _, context) => {
-      // Add LIMIT if needed for performance in specific views
-      const result = await context.db.query(
-        `SELECT m.* FROM movies m JOIN movie_genres mg ON m.id = mg.movie_id WHERE mg.genre_id = $1`,
-         [genre.id]
+    movies: async (genre, { limit, offset }, { db }) => {
+      const { rows } = await db.query(
+        'SELECT m.* FROM movies m JOIN movie_genres mg ON m.id = mg.movie_id WHERE mg.genre_id = $1 ORDER BY m.release_date DESC, m.title ASC LIMIT $2 OFFSET $3',
+        [genre.id, limit, offset]
       );
-      return result.rows;
+      return rows;
     },
-     // Optional: Resolve movieCount dynamically if not stored on genre table
-     movieCount: async (genre, _, context) => {
-        const result = await context.db.query('SELECT COUNT(*) FROM movie_genres WHERE genre_id = $1', [genre.id]);
-        return parseInt(result.rows[0].count, 10);
-     }
+    movie_count: async (genre, _, { db }) => {
+        const { rows } = await db.query(
+            'SELECT COUNT(*) AS count FROM movie_genres WHERE genre_id = $1',
+            [genre.id]
+        );
+        return parseInt(rows[0].count, 10);
+    },
   },
 };
 
