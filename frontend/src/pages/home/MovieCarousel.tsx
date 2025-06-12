@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import "./MovieCarousel.css";
 import { Movie } from "@src/types/Movie";
 import { FaHeart } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 // --- Base Movie Type (Ensure this exists in @src/types/Movie) ---
 // Example:
@@ -23,7 +24,9 @@ interface TopComment {
 }
 
 // --- Extend Movie type for carousel-specific data ---
-interface CarouselMovie extends Movie {
+// This interface is used by HomePage to adapt data before passing to MovieCarousel
+export interface CarouselMovie extends Movie {
+  year?: number;
   reviewQuote?: string;
   imdbRating?: number;
   movieQRating?: number;
@@ -64,6 +67,8 @@ const MovieCarousel: React.FC<MovieCarouselProps> = ({
   const isMountedRef = useRef(true);
 
   const isTransitioningRef = useRef(isTransitioning);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     isTransitioningRef.current = isTransitioning;
@@ -215,7 +220,7 @@ const MovieCarousel: React.FC<MovieCarouselProps> = ({
               <div className="mc-slide-content">
                 <div className="mc-poster-container">
                   <img
-                    src={movie.posterUrl || "/placeholder-poster.jpg"}
+                    src={movie.poster_url || "/placeholder-poster.jpg"}
                     alt={`Poster for ${movie.title}`}
                     className="mc-poster-img"
                     loading={
@@ -232,7 +237,7 @@ const MovieCarousel: React.FC<MovieCarouselProps> = ({
                       {movie.year}
                       {movie.genres &&
                         movie.genres.length > 0 &&
-                        ` | ${movie.genres.join(", ")}`}
+                        ` | ${movie.genres.map(g => g.name).join(", ")}`}
                     </p>
                   </div>
 
@@ -272,7 +277,7 @@ const MovieCarousel: React.FC<MovieCarouselProps> = ({
                   )}
 
                   <div className="mc-ratings-section">
-                    <h4 className="mc-ratings-heading">Ratings</h4>
+                    <h4 className="mc-ratings-heading">{t("ratings")}</h4>
                     <div className="mc-ratings-grid">
                       <div className="mc-rating-item">
                         <span className="mc-rating-source">IMDb</span>
@@ -293,7 +298,7 @@ const MovieCarousel: React.FC<MovieCarouselProps> = ({
                       </div>
 
                       <div className="mc-rating-item">
-                        <span className="mc-rating-source">KinoPoisk</span>
+                        <span className="mc-rating-source">LTB</span>
                         <span className="mc-rating-value">
                           {movie.kinopoiskRating?.toFixed(1) ?? (
                             <span className="mc-rating-na">N/A</span>
