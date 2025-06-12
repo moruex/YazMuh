@@ -3,6 +3,7 @@ import React, { useCallback, memo } from "react";
 import { Movie } from "@interfaces/movie.interfaces";
 import { Edit, Info, Trash2 } from "lucide-react";
 import { CircularProgress, Typography, TablePagination } from "@mui/material";
+import { RetryableImage } from "./RetryableImage";
 
 interface MovieTableProps {
   movies: Movie[];
@@ -54,12 +55,10 @@ const MovieRow = memo(({
   return (
     <tr>
       <td className="td-image">
-        <img
+        <RetryableImage
           src={movie.imageUrl || '/placeholder.png'}
           alt={movie.title}
           className="main-image"
-          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
-          loading="lazy"
         />
       </td>
       <td>{movie.title}</td>
