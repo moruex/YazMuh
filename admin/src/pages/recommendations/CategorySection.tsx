@@ -1,141 +1,260 @@
-// src/pages/recommendations/CategorySection.tsx (Example Structure)
+// src/pages/recommendations/CategorySection.tsx
 import React from 'react';
-// Import necessary MUI components (Box, Typography, Button, Checkbox, Grid, Card, etc.)
-import { Box, Typography, Button, Checkbox, Grid, Card, CardMedia, CardContent, IconButton } from '@mui/material';
-import { Delete, PlaylistAddCheck, PlaylistRemove, Visibility } from '@mui/icons-material'; // Example icons
+import { Box, Typography, Button, Checkbox, Grid, Card, CardMedia, CardContent, IconButton, Tooltip } from '@mui/material';
+import { Delete, PlaylistAddCheck, PlaylistRemove, Visibility, Add, ExpandMore, ExpandLess, PlaylistAdd } from '@mui/icons-material';
 // Use API types
 import type { ApiRecommendationSection } from '@interfaces/recommendation.interfaces';
 import type { ApiMovieCore } from '@interfaces/movie.interfaces';
 
 interface CategorySectionProps {
-    // Expect ApiRecommendationSection
-    category: ApiRecommendationSection;
-    // Keep other props as they are, ensure types match if needed
-    loadedMovies: { [key: string]: number }; // Use section ID as key
-    selectedMovies: { [key: string]: ApiMovieCore[] }; // Use section ID as key, hold ApiMovieCore
-    areAllSelected: (categoryId: string) => boolean; // Use section ID
-    handleAddMovies: (category: ApiRecommendationSection) => void; // Pass full section
-    handleToggleSelectAll: (categoryId: string, isSelected: boolean) => void; // Use section ID
-    handleViewDetails: (categoryId: string) => void; // Use section ID
-    handleOpenDeleteConfirmationBulk: (category: ApiRecommendationSection) => void; // Pass full section
-    toggleMovieSelection: (category: ApiRecommendationSection, movie: ApiMovieCore) => void; // Pass section and movie
-    handleShowLess: (category: ApiRecommendationSection) => void; // Pass full section
-    handleLoadMore: (category: ApiRecommendationSection) => void; // Pass full section
-    handleLoadAll: (category: ApiRecommendationSection) => void; // Pass full section
-    handleOpenDeleteConfirmationSingle: (category: ApiRecommendationSection, movie: ApiMovieCore) => void; // Pass section and movie
+    // Updated props matching RecommendationsPage
+    section: ApiRecommendationSection;
+    selectedMovies: ApiMovieCore[];
+    loadedMoviesCount: number;
+    areAllSelected: boolean;
+    disabled?: boolean;
+    onAddMovie: () => void;
+    onDeleteMovie: (movie: ApiMovieCore) => void;
+    onDeleteSelected: () => void;
+    onViewDetails: () => void;
+    onToggleSelect: (movie: ApiMovieCore) => void;
+    onToggleSelectAll: () => void;
+    onShowLess: () => void;
+    onLoadMore: () => void;
+    onLoadAll: () => void;
 }
 
 const CategorySection: React.FC<CategorySectionProps> = ({
-    category,
-    loadedMovies,
+    section,
     selectedMovies,
+    loadedMoviesCount,
     areAllSelected,
-    handleAddMovies,
-    handleToggleSelectAll,
-    handleViewDetails,
-    handleOpenDeleteConfirmationBulk,
-    toggleMovieSelection,
-    handleShowLess,
-    handleLoadMore,
-    handleLoadAll,
-    handleOpenDeleteConfirmationSingle,
+    disabled = false,
+    onAddMovie,
+    onDeleteMovie,
+    onDeleteSelected,
+    onViewDetails,
+    onToggleSelect,
+    onToggleSelectAll,
+    onShowLess,
+    onLoadMore,
+    onLoadAll,
 }) => {
-    const displayLimit = loadedMovies[category.id] || 10;
-    const moviesToShow = category.movies.slice(0, displayLimit);
-    const currentSelected = selectedMovies[category.id] || [];
+    const moviesToShow = section.movies.slice(0, loadedMoviesCount);
+    const hasMoreMovies = loadedMoviesCount < section.movieCount;
+    const hasLessMovies = loadedMoviesCount > 5;
+    const hasMovies = section.movies.length > 0;
 
     return (
-        // Keep existing outer container structure and class names
-        <Box className="category-section" sx={{ mb: 4, p: 2, border: '1px solid var(--border)', borderRadius: 2 }}>
+        <Box className="category-section" sx={{ mb: 4, p: 3, border: '1px solid rgba(0, 0, 0, 0.12)', borderRadius: 2, boxShadow: 1 }}>
             {/* Header */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5">{category.title} ({category.movieCount})</Typography>
-                <Button variant="contained" onClick={() => handleAddMovies(category)}>
+                <Box>
+                    <Typography variant="h5" sx={{ fontWeight: 'medium' }}>
+                        {section.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        {section.section_type} • {section.movieCount} movies
+                    </Typography>
+                </Box>
+                <Button 
+                    variant="contained" 
+                    color="primary"
+                    onClick={onAddMovie}
+                    startIcon={<Add />}
+                    disabled={disabled}
+                >
                     Add Movies
                 </Button>
             </Box>
 
+            {section.description && (
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                    {section.description}
+                </Typography>
+            )}
+
             {/* Bulk Actions */}
-            <div className="category-actions">
+            <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
                 <Button
-                    className='select-button-rec'
-                    variant="contained"
-                    color={areAllSelected(category.id) ? "secondary" : "primary"}
-                    startIcon={areAllSelected(category.id) ? <PlaylistRemove /> : <PlaylistAddCheck />}
-                    onClick={() => handleToggleSelectAll(category.id, areAllSelected(category.id))}
-                    sx={{ mr: 1 }}
+                    variant="outlined"
+                    color={areAllSelected ? "secondary" : "primary"}
+                    startIcon={areAllSelected ? <PlaylistRemove /> : <PlaylistAddCheck />}
+                    onClick={onToggleSelectAll}
+                    disabled={!hasMovies || disabled}
+                    size="small"
                 >
-                    {areAllSelected(category.id) ? "Deselect All" : "Select All"}
+                    {areAllSelected ? "Deselect All" : "Select All"}
                 </Button>
                 <Button
-                    className='view-button-rec'
-                    variant="contained"
-                    color='info'
-                    onClick={() => handleViewDetails(category.id)}
-                    disabled={currentSelected.length === 0}
+                    variant="outlined"
+                    color="primary"
+                    onClick={onViewDetails}
+                    disabled={selectedMovies.length === 0 || disabled}
                     startIcon={<Visibility />}
+                    size="small"
                 >
-                    View Details
+                    View Selected ({selectedMovies.length})
                 </Button>
                 <Button
-                    className='delete-button-rec'
-                    variant="contained"
+                    variant="outlined"
                     color="error"
-                    onClick={() => handleOpenDeleteConfirmationBulk(category)}
-                    disabled={currentSelected.length === 0}
+                    onClick={onDeleteSelected}
+                    disabled={selectedMovies.length === 0 || disabled}
                     startIcon={<Delete />}
+                    size="small"
                 >
-                    Delete Selected
+                    Remove Selected
                 </Button>
-            </div>
+            </Box>
 
-            {/* Movie Grid - Keep existing structure */}
-            <Grid container spacing={2} mt={1}>
-                {moviesToShow.map(movie => (
-                    <Grid className='movie-grid' item key={movie.id} xs={6} sm={4} md={3} lg={2}> {/* Adjust grid sizing as needed */}
-                        <Card
-                            className="movie-card"
-                            onClick={() => toggleMovieSelection(category, movie)}
-                        >
-                            <Checkbox
-                                className='rec-checkbox'
-                                checked={currentSelected.some(m => m.id === movie.id)}
-                                onChange={() => toggleMovieSelection(category, movie)}
-                            />
-                            {/* Use poster_url */}
-                            <CardMedia
-                                component="img"
-                                height="140"
-                                image={movie.poster_url ?? 'https://via.placeholder.com/150x225?text=No+Image'}
-                                alt={movie.title}
-                                sx={{ objectFit: 'cover' }}
-                            />
-                            <CardContent className='movie-card-content'>
-                                <Typography className='title-rec selectable' variant="body1">{movie.title}</Typography>
-
-                                {/* Single Delete Button */}
-                                <IconButton
-                                    className='delete-button-rec'
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleOpenDeleteConfirmationSingle(category, movie);
+            {/* Movie Grid */}
+            {hasMovies ? (
+                <Grid container spacing={2}>
+                    {moviesToShow.map(movie => (
+                        <Grid item key={movie.id} xs={6} sm={4} md={3} lg={2}>
+                            <Card 
+                                sx={{ 
+                                    position: 'relative',
+                                    transition: 'all 0.2s',
+                                    border: selectedMovies.some(m => m.id === movie.id) 
+                                        ? '2px solid #3f51b5' 
+                                        : '2px solid transparent',
+                                    '&:hover': {
+                                        transform: 'translateY(-4px)',
+                                        boxShadow: 3
+                                    }
+                                }}
+                            >
+                                <Checkbox
+                                    checked={selectedMovies.some(m => m.id === movie.id)}
+                                    onChange={() => onToggleSelect(movie)}
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        zIndex: 1,
+                                        m: 0.5,
+                                        bgcolor: 'rgba(255,255,255,0.7)',
+                                        borderRadius: '50%',
+                                        '&:hover': {
+                                            bgcolor: 'rgba(255,255,255,0.9)',
+                                        }
                                     }}
-                                >
-                                    <Delete color="error" />
-                                </IconButton>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                ))}
-                {category.movies.length === 0 && (
-                    <Grid item xs={12}><Typography sx={{ textAlign: 'center', p: 3 }}>No movies in this section yet.</Typography></Grid>
-                )}
-            </Grid>
-            <div className="category-footer">
-                <Button onClick={() => handleShowLess(category)} variant="contained">Show Less</Button>
-                <Button onClick={() => handleLoadMore(category)} variant="contained">Load More</Button>
-                <Button onClick={() => handleLoadAll(category)} variant="contained">Load All</Button>
-            </div>
+                                    disabled={disabled}
+                                />
+                                <Box sx={{ position: 'relative' }} onClick={() => onToggleSelect(movie)}>
+                                    <CardMedia
+                                        component="img"
+                                        height="160"
+                                        image={movie.poster_url || '/placeholder-poster.jpg'}
+                                        alt={movie.title}
+                                        sx={{ cursor: 'pointer' }}
+                                    />
+                                    <IconButton
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDeleteMovie(movie);
+                                        }}
+                                        disabled={disabled}
+                                        sx={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            right: 0,
+                                            m: 0.5,
+                                            bgcolor: 'rgba(255,255,255,0.7)',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(255,255,255,0.9)',
+                                                color: 'error.main'
+                                            }
+                                        }}
+                                    >
+                                        <Delete fontSize="small" />
+                                    </IconButton>
+                                </Box>
+                                <CardContent sx={{ p: 1.5, pb: '8px !important' }}>
+                                    <Tooltip title={movie.title}>
+                                        <Typography 
+                                            variant="body2" 
+                                            component="div" 
+                                            sx={{ 
+                                                fontWeight: 'medium',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: 'vertical',
+                                                lineHeight: 1.2,
+                                                height: '2.4em'
+                                            }}
+                                        >
+                                            {movie.title}
+                                        </Typography>
+                                    </Tooltip>
+                                    {movie.release_date && (
+                                        <Typography variant="caption" color="text.secondary">
+                                            {new Date(movie.release_date).getFullYear()}
+                                        </Typography>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+            ) : (
+                <Box sx={{ p: 4, textAlign: 'center', bgcolor: 'background.paper', borderRadius: 1 }}>
+                    <Typography variant="body1" color="text.secondary" gutterBottom>
+                        No movies in this section yet
+                    </Typography>
+                    <Button 
+                        variant="outlined" 
+                        startIcon={<PlaylistAdd />} 
+                        onClick={onAddMovie}
+                        sx={{ mt: 1 }}
+                        disabled={disabled}
+                    >
+                        Add your first movie
+                    </Button>
+                </Box>
+            )}
+
+            {/* Footer Pagination Controls */}
+            {hasMovies && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+                    {hasLessMovies && (
+                        <Button 
+                            onClick={onShowLess} 
+                            variant="outlined" 
+                            size="small"
+                            startIcon={<ExpandLess />}
+                            disabled={disabled}
+                        >
+                            Show Less
+                        </Button>
+                    )}
+                    {hasMoreMovies && (
+                        <Button 
+                            onClick={onLoadMore} 
+                            variant="outlined" 
+                            size="small"
+                            startIcon={<ExpandMore />}
+                            disabled={disabled}
+                        >
+                            Load More
+                        </Button>
+                    )}
+                    {hasMoreMovies && (
+                        <Button 
+                            onClick={onLoadAll} 
+                            variant="outlined" 
+                            size="small"
+                            disabled={disabled}
+                        >
+                            Load All ({section.movieCount})
+                        </Button>
+                    )}
+                </Box>
+            )}
         </Box>
     );
 };

@@ -82,7 +82,7 @@ export const QuizPage = () => {
     ) => {
         setMutationError(null);
         if (id) {
-            updateQuestion({ variables: { id, input: formData } });
+            updateQuestion({ variables: { id, input: formData as ApiUpdateQuizQuestionInput } });
         } else {
             createQuestion({ variables: { input: formData as ApiCreateQuizQuestionInput } });
         }

@@ -1,8 +1,8 @@
 // --- START OF FILE AddMovieModal.tsx ---
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLazyQuery } from '@apollo/client';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Autocomplete, Box, Grid, Card, CardMedia, CardContent, Typography, IconButton, CircularProgress, Alert } from '@mui/material';
-import { Delete } from '@mui/icons-material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Autocomplete, Box, Grid, Card, CardMedia, CardContent, Typography, IconButton, CircularProgress, Alert, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Delete, AutoAwesome } from '@mui/icons-material';
 import EmptyPlaceholder from '@components/EmptyPlaceholder'; // Adjust path
 // Use API movie types
 import type { ApiMovieCore } from '@interfaces/movie.interfaces';
@@ -22,6 +22,9 @@ interface AddMovieModalProps {
     isConfirming: boolean;
 }
 
+// Define sort options for auto-add
+type SortOption = 'POPULARITY_DESC' | 'RELEASE_DATE_DESC' | 'VOTE_AVERAGE_DESC' | 'REVENUE_DESC';
+
 const AddMovieModal: React.FC<AddMovieModalProps> = ({
     open,
     onClose,
@@ -37,6 +40,8 @@ const AddMovieModal: React.FC<AddMovieModalProps> = ({
     const [autocompleteSelection, setAutocompleteSelection] = useState<ApiMovieCore | null>(null);
     // Auto add count - keeping local state as it doesn't directly interact with API here
     const [autoAddCount, setAutoAddCount] = useState(1);
+    // Add sort option for auto-add
+    const [autoAddSortBy, setAutoAddSortBy] = useState<SortOption>('POPULARITY_DESC');
 
     // --- Movie Search Query ---
     const [fetchMovies, { data: movieData, loading: loadingMovies, error: movieError }] = useLazyQuery<{ movies: ApiMovieCore[], movieCount: number }>(
@@ -50,6 +55,41 @@ const AddMovieModal: React.FC<AddMovieModalProps> = ({
                 // This filtering logic is complex for a basic query and might be better done client-side
                 // on the returned results, or requires backend support.
             },
+        }
+    );
+
+    // Separate query for auto-add functionality
+    const [fetchMoviesForAutoAdd, { loading: loadingAutoAdd }] = useLazyQuery<{ movies: ApiMovieCore[], movieCount: number }>(
+        GET_MOVIES,
+        {
+            fetchPolicy: 'network-only',
+            variables: {
+                limit: 50, // Higher limit for auto-add pool
+                sortBy: autoAddSortBy, // Use sort option
+                // No search term for auto-add (get popular/recent)
+            },
+            onCompleted: (data) => {
+                if (data?.movies && selectedSection) {
+                    // Filter out movies already in the section or selected for addition
+                    const existingMovieIds = new Set([
+                        ...selectedSection.movies.map(m => m.id),
+                        ...moviesForAddition.map(m => m.id)
+                    ]);
+                    
+                    const availableMovies = data.movies.filter(movie => !existingMovieIds.has(movie.id));
+                    
+                    // Either shuffle or keep the sort order from the API
+                    // const shuffled = [...availableMovies].sort(() => 0.5 - Math.random());
+                    // Or keep API sort order:
+                    const moviesToAdd = availableMovies.slice(0, Math.min(autoAddCount, availableMovies.length));
+                    
+                    setMoviesForAddition(prev => [...prev, ...moviesToAdd]);
+                }
+            },
+            onError: (error) => {
+                console.error("Failed to fetch movies for auto-add:", error);
+                alert("Failed to auto-add movies. Please try again.");
+            }
         }
     );
 
@@ -80,6 +120,7 @@ const AddMovieModal: React.FC<AddMovieModalProps> = ({
             setMoviesForAddition([]);
             setAutocompleteSelection(null);
             setAutoAddCount(1);
+            setAutoAddSortBy('POPULARITY_DESC');
         }
     }, [open, selectedSection]);
 
@@ -107,41 +148,18 @@ const AddMovieModal: React.FC<AddMovieModalProps> = ({
         }
     };
 
-     // Auto Add - requires fetching more movies and filtering
-     const handleAutoAddMovies = async () => {
-         if (!selectedSection || autoAddCount <= 0) return;
-
-         // Fetch a larger list of movies (e.g., 50 popular/recent ones)
-         // This requires a potentially different query or using GET_MOVIES with sorting
-         // For simplicity, we'll just use the current search mechanism if needed,
-         // but a dedicated "fetch candidates" query would be better.
-         // Using current search results (limited to 5) is not ideal for auto-add.
-
-         // Placeholder: This needs a proper implementation based on how you want to source
-         // movies for auto-add (e.g., fetch top rated, fetch random, etc.)
-         alert("Auto-add functionality requires fetching a suitable pool of movies (not fully implemented in this example).");
-
-         // --- Example using a separate fetch (if you had a query like GET_POPULAR_MOVIES) ---
-         /*
-         try {
-             const { data: popularMoviesData } = await fetchPopularMovies({ variables: { limit: 50 } }); // Assume this query exists
-             if (popularMoviesData) {
-                 const existingMovieIds = new Set([
-                     ...selectedSection.movies.map(m => m.id),
-                     ...moviesForAddition.map(m => m.id)
-                 ]);
-                 const availableMovies = popularMoviesData.popularMovies.filter(movie => !existingMovieIds.has(movie.id));
-                 const shuffled = [...availableMovies].sort(() => 0.5 - Math.random());
-                 const moviesToAdd = shuffled.slice(0, Math.min(autoAddCount, shuffled.length));
-                 setMoviesForAddition(prev => [...prev, ...moviesToAdd]);
+     // Auto Add - implemented using our query
+     const handleAutoAddMovies = () => {
+         if (!selectedSection || autoAddCount <= 0 || loadingAutoAdd) return;
+         
+         // Use the separate query with appropriate variables
+         fetchMoviesForAutoAdd({
+             variables: {
+                 limit: Math.max(50, autoAddCount * 2), // Fetch enough movies to ensure we have candidates
+                 sortBy: autoAddSortBy
              }
-         } catch (error) {
-             console.error("Failed to fetch movies for auto-add:", error);
-             alert("Failed to auto-add movies.");
-         }
-         */
+         });
      };
-
 
     const handleConfirm = () => {
         if (selectedSection && moviesForAddition.length > 0) {
@@ -223,10 +241,10 @@ const AddMovieModal: React.FC<AddMovieModalProps> = ({
                      {movieError && <Alert severity="error" sx={{ mt: 1 }}>Error searching movies: {movieError.message}</Alert>}
                 </Box>
 
-                {/* Auto Add Section - Keep existing structure */}
+                {/* Enhanced Auto Add Section */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                     <TextField
-                        label="Auto Add Movie Count"
+                        label="Auto Add Count"
                         value={autoAddCount}
                         onChange={(e) => setAutoAddCount(Math.max(1, parseInt(e.target.value) || 1))}
                         variant="outlined"
@@ -235,75 +253,96 @@ const AddMovieModal: React.FC<AddMovieModalProps> = ({
                         sx={{ mr: 2 }}
                         size="small"
                     />
+                    <FormControl size="small" sx={{ minWidth: 150, mr: 2 }}>
+                        <InputLabel id="auto-add-sort-label">Sort By</InputLabel>
+                        <Select
+                            labelId="auto-add-sort-label"
+                            value={autoAddSortBy}
+                            label="Sort By"
+                            onChange={(e) => setAutoAddSortBy(e.target.value as SortOption)}
+                        >
+                            <MenuItem value="POPULARITY_DESC">Most Popular</MenuItem>
+                            <MenuItem value="RELEASE_DATE_DESC">Newest</MenuItem>
+                            <MenuItem value="VOTE_AVERAGE_DESC">Highest Rated</MenuItem>
+                            <MenuItem value="REVENUE_DESC">Highest Revenue</MenuItem>
+                        </Select>
+                    </FormControl>
                     <Button
                         variant="contained"
                         color="primary"
                         onClick={handleAutoAddMovies}
                         size="medium"
+                        disabled={loadingAutoAdd}
+                        startIcon={<AutoAwesome />}
                     >
-                        Auto Add (Example)
+                        {loadingAutoAdd ? "Adding..." : "Auto Add Movies"}
                     </Button>
                 </Box>
 
-                {/* Selected Movies Display - Keep existing structure */}
+                {/* Selected Movies Display */}
                 <Box sx={{ mb: 2 }}>
                     <Typography variant="h6" sx={{ mb: 1 }}>Selected For Addition ({moviesForAddition.length})</Typography>
-                    <Grid container spacing={2}>
-                        {moviesForAddition.map((movie: ApiMovieCore) => (
-                            // Keep existing classes
-                            <Grid className="movie-grid1" item xs={6} sm={4} md={3} key={movie.id}>
-                                <Card className="movie-card1" sx={{ position: 'relative', height: '100%' }}>
-                                     {/* Use poster_url */}
-                                    <CardMedia component="img" height="140" image={movie.poster_url ?? 'https://via.placeholder.com/150?text=No+Image'} alt={movie.title} />
-                                    <CardContent className='movie-card1-content' sx={{ pt: 1, pb: '0 !important' }}> {/* Adjust padding */}
-                                        {/* Keep existing class */}
-                                        <Typography className='title-rec selectable' variant="body2" sx={{ mb: 1, fontWeight: 500, lineHeight: 1.2, height: '3.6em', overflow: 'hidden' }}>
-                                            {movie.title}
-                                        </Typography>
-                                        {/* Keep existing class */}
-                                        <IconButton
-                                            className='delete-button-rec'
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleRemoveFromAddition(movie);
-                                            }}
-                                            size="small"
-                                            sx={{ position: 'absolute', top: 4, right: 4, backgroundColor: 'rgba(255, 255, 255, 0.7)' }}
-                                        >
-                                            <Delete fontSize="inherit" color="error" />
-                                        </IconButton>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        ))}
-                        {moviesForAddition.length === 0 && (
-                            <Grid item xs={12}>
-                                <EmptyPlaceholder title='No movies selected.' />
-                            </Grid>
-                        )}
-                    </Grid>
+                    
+                    {moviesForAddition.length > 0 ? (
+                        <Grid container spacing={2}>
+                            {moviesForAddition.map((movie) => (
+                                <Grid item xs={12} sm={6} md={4} key={movie.id}>
+                                    <Card sx={{ display: 'flex', height: '100%', flexDirection: 'column' }}>
+                                        <Box sx={{ position: 'relative' }}>
+                                            <CardMedia
+                                                component="img"
+                                                height="140"
+                                                image={movie.poster_url || '/placeholder-poster.jpg'}
+                                                alt={movie.title}
+                                            />
+                                            <IconButton
+                                                onClick={() => handleRemoveFromAddition(movie)}
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: 5,
+                                                    right: 5,
+                                                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.95)' }
+                                                }}
+                                                size="small"
+                                            >
+                                                <Delete />
+                                            </IconButton>
+                                        </Box>
+                                        <CardContent sx={{ flexGrow: 1 }}>
+                                            <Typography variant="subtitle1" component="div" sx={{ fontWeight: 'bold' }}>
+                                                {movie.title}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                {movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}
+                                                {movie.duration_minutes ? ` • ${movie.duration_minutes} min` : ''}
+                                            </Typography>
+                                            {movie.genres && movie.genres.length > 0 && (
+                                                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                                    {movie.genres.map(g => g.name).join(', ')}
+                                                </Typography>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    ) : (
+                        <EmptyPlaceholder title="No movies selected for addition" />
+                    )}
                 </Box>
             </DialogContent>
-            {/* Keep existing DialogActions structure */}
             <DialogActions className='dialog-actions'>
-                <Button onClick={onClose} disabled={isConfirming}>
+                <Button onClick={onClose} color="primary" disabled={isConfirming}>
                     Cancel
                 </Button>
-                <Button
-                    onClick={handleConfirm}
-                    variant="contained"
-                    color="primary"
-                    disabled={isConfirming || moviesForAddition.length === 0}
-                    // Keep existing sx styles
-                    sx={{
-                        borderRadius: '6px',
-                        fontWeight: 500,
-                        textTransform: 'none',
-                        minWidth: '100px',
-                        boxShadow: 2
-                    }}
+                <Button 
+                    onClick={handleConfirm} 
+                    color="primary" 
+                    variant="contained" 
+                    disabled={moviesForAddition.length === 0 || isConfirming}
                 >
-                    {isConfirming ? <CircularProgress size={24} /> : `Confirm Add (${moviesForAddition.length})`}
+                    {isConfirming ? 'Adding...' : `Add ${moviesForAddition.length} Movie${moviesForAddition.length !== 1 ? 's' : ''}`}
                 </Button>
             </DialogActions>
         </Dialog>

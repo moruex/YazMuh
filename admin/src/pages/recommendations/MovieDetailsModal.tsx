@@ -1,134 +1,247 @@
 // --- START OF FILE MovieDetailsModal.tsx ---
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, CardMedia, Box, MobileStepper } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, CardMedia, Box, MobileStepper, Chip, Divider, CircularProgress, useTheme } from '@mui/material';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 // Use API types
 import type { ApiMovieCore } from '@interfaces/movie.interfaces';
-import type { ApiRecommendationSection } from '@interfaces/recommendation.interfaces';
+import { useQuery } from '@apollo/client';
+import { GET_MOVIE } from '@graphql/queries/movie.queries';
 // Optional: Query for full details if needed
 // import { useQuery } from '@apollo/client';
 // import { GET_MOVIE } from '@graphql/queries/movie.queries';
 // import type { ApiMovieDetail } from '@interfaces/movie.interfaces';
 
-interface MovieDetailsModalProps { // Renamed interface
+interface MovieDetailsModalProps {
     open: boolean;
     onClose: () => void;
-    currentSectionId: string | null; // Use ID
-    // Pass the map of selected movies using section ID as key
-    selectedMoviesMap: { [key: string]: ApiMovieCore[] };
-    detailsActiveStep: number;
-    handleNext: () => void;
-    handleBack: () => void;
-    // Pass all sections to find the title
-    sections: ApiRecommendationSection[];
+    movies: ApiMovieCore[];
+    activeStep: number;
+    onNext: () => void;
+    onBack: () => void;
 }
 
-const MovieDetailsModalComponent: React.FC<MovieDetailsModalProps> = ({ // Renamed component
+const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
     open,
     onClose,
-    currentSectionId,
-    selectedMoviesMap,
-    detailsActiveStep,
-    handleNext,
-    handleBack,
-    sections,
+    movies,
+    activeStep,
+    onNext,
+    onBack,
 }) => {
-    const selectedMovies = currentSectionId ? selectedMoviesMap[currentSectionId] ?? [] : [];
-    const currentMovie = selectedMovies.length > detailsActiveStep ? selectedMovies[detailsActiveStep] : null;
-    const section = sections.find(s => s.id === currentSectionId);
+    const theme = useTheme();
+    const currentMovie = movies.length > activeStep ? movies[activeStep] : null;
 
-    // --- Optional: Fetch full details if ApiMovieCore is not enough ---
-    /*
-    const { data: detailData, loading: loadingDetails, error: detailError } = useQuery<{ movie: ApiMovieDetail }>(
+    // Fetch detailed movie information if we have a movie selected
+    const { data: movieDetailData, loading: loadingDetails } = useQuery(
         GET_MOVIE,
         {
             variables: { id: currentMovie?.id },
-            skip: !currentMovie, // Only run query if there's a movie ID
+            skip: !currentMovie || !open, // Skip if no movie or modal is closed
+            fetchPolicy: 'cache-first', // Use cache if available
         }
     );
-    const movieDetails = detailData?.movie;
-    */
-    // If using the above, replace 'currentMovie?.fieldName' below with 'movieDetails?.fieldName'
-    // and handle loading/error states for the detail query.
-    // For this example, we assume ApiMovieCore is sufficient.
+
+    const movieDetail = movieDetailData?.movie;
+
+    // Helper function to format release date
+    const formatReleaseDate = (dateString?: string | null) => {
+        if (!dateString) return 'N/A';
+        try {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return dateString;
+        }
+    };
 
     return (
-        // Keep existing class name
         <Dialog
-            className='movie-detail-dialog'
             open={open}
             onClose={onClose}
             fullWidth
             maxWidth="md"
+            PaperProps={{
+                sx: {
+                    borderRadius: 2,
+                    overflow: 'hidden'
+                }
+            }}
         >
-            {/* Check if there's a movie */}
-            {currentMovie && section ? (
+            {currentMovie ? (
                 <>
-                    <DialogTitle>
-                        {currentMovie.title} ({detailsActiveStep + 1} of {selectedMovies.length})
+                    <DialogTitle sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        borderBottom: `1px solid ${theme.palette.divider}`
+                    }}>
+                        <Typography variant="h5" component="div">
+                            {currentMovie.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            {activeStep + 1} of {movies.length}
+                        </Typography>
                     </DialogTitle>
-                    <DialogContent dividers>
-                         {/* Optional: Loading/Error for detail fetch */}
-                         {/* {loadingDetails && <CircularProgress />} */}
-                         {/* {detailError && <Alert severity="error">Error loading details: {detailError.message}</Alert>} */}
-                         {/* {!loadingDetails && !detailError && movieDetails && ( */}
 
-                        {/* Keep existing layout */}
-                        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
-                            <Box sx={{ flexShrink: 0, width: { xs: '100%', md: 300 } }}>
-                                <CardMedia
-                                    component="img"
-                                    // Use poster_url
-                                    image={currentMovie.poster_url ?? 'https://via.placeholder.com/300x450?text=No+Image'}
-                                    alt={currentMovie.title}
-                                    // Keep existing sx
-                                    sx={{
-                                        borderRadius: 1,
-                                        height: { xs: 200, md: 400 },
-                                        objectFit: 'cover'
-                                    }}
-                                />
+                    <DialogContent sx={{ p: 0 }}>
+                        {loadingDetails ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                                <CircularProgress />
                             </Box>
+                        ) : (
+                            <Box>
+                                <Box sx={{ 
+                                    display: 'flex', 
+                                    flexDirection: { xs: 'column', md: 'row' }
+                                }}>
+                                    {/* Movie Poster */}
+                                    <Box sx={{ 
+                                        width: { xs: '100%', md: '35%' },
+                                        minHeight: { xs: 200, md: 'auto' }
+                                    }}>
+                                        <CardMedia
+                                            component="img"
+                                            image={currentMovie.poster_url || '/placeholder-poster.jpg'}
+                                            alt={currentMovie.title}
+                                            sx={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                                objectPosition: 'center top'
+                                            }}
+                                        />
+                                    </Box>
 
-                            <Box sx={{ flex: 1 }}>
-                                {/* Keep existing class name */}
-                                <Typography className='selectable' variant="h4" gutterBottom>{currentMovie.title}</Typography>
-                                <Typography className='selectable' variant="body1" paragraph>
-                                     {/* Use plot_summary (if available on ApiMovieCore, else fetch details) */}
-                                     {/* {movieDetails?.plot_summary || 'No description available.'} */}
-                                     {'Description would be here if fetched.'}
-                                </Typography>
-                                <Box sx={{ mt: 3 }}>
-                                    <Typography variant="subtitle1" fontWeight="bold">Details:</Typography>
-                                    {/* Keep existing class names */}
-                                    <Typography className='selectable' variant="body2">
-                                        • ID: {currentMovie.id}
-                                    </Typography>
-                                    <Typography className='selectable' variant="body2">
-                                        • Section: {section.title}
-                                    </Typography>
-                                     {/* Display more fields from ApiMovieCore/ApiMovieDetail */}
-                                     <Typography className='selectable' variant="body2">
-                                        • Release: {currentMovie.release_date ? new Date(currentMovie.release_date).toLocaleDateString() : 'N/A'}
-                                     </Typography>
-                                     <Typography className='selectable' variant="body2">
-                                        • Rating: {currentMovie.avg_rating?.toFixed(1) ?? 'N/A'}
-                                     </Typography>
-                                     <Typography className='selectable' variant="body2">
-                                        • Duration: {currentMovie.duration_minutes ? `${currentMovie.duration_minutes} min` : 'N/A'}
-                                     </Typography>
+                                    {/* Movie Details */}
+                                    <Box sx={{ 
+                                        flex: 1, 
+                                        p: 3,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 2
+                                    }}>
+                                        <Typography variant="h4" component="h1" gutterBottom>
+                                            {currentMovie.title}
+                                            {currentMovie.release_date && (
+                                                <Typography 
+                                                    component="span" 
+                                                    color="text.secondary" 
+                                                    sx={{ ml: 1, fontSize: '0.6em' }}
+                                                >
+                                                    ({new Date(currentMovie.release_date).getFullYear()})
+                                                </Typography>
+                                            )}
+                                        </Typography>
+
+                                        {/* Movie Metadata */}
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                            {movieDetail?.duration_minutes && (
+                                                <Chip 
+                                                    label={`${movieDetail.duration_minutes} min`} 
+                                                    size="small" 
+                                                    variant="outlined" 
+                                                />
+                                            )}
+                                            {currentMovie.genres?.map(genre => (
+                                                <Chip 
+                                                    key={genre.id} 
+                                                    label={genre.name} 
+                                                    size="small" 
+                                                    color={genre.is_collection ? "secondary" : "primary"}
+                                                    variant="outlined"
+                                                />
+                                            ))}
+                                        </Box>
+
+                                        <Divider />
+
+                                        {/* Movie Summary */}
+                                        <Box>
+                                            <Typography variant="h6" gutterBottom>
+                                                Overview
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                {movieDetail?.plot_summary || currentMovie.plot_summary || 'No overview available.'}
+                                            </Typography>
+                                        </Box>
+
+                                        {/* Additional Details */}
+                                        <Box sx={{ mt: 'auto' }}>
+                                            <Typography variant="h6" gutterBottom>
+                                                Details
+                                            </Typography>
+                                            <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', rowGap: 1, columnGap: 2 }}>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Release Date:
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    {formatReleaseDate(currentMovie.release_date)}
+                                                </Typography>
+
+                                                {(movieDetail?.movieq_rating || movieDetail?.imdb_rating || movieDetail?.letterboxd_rating) && (
+                                                    <>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Ratings:
+                                                        </Typography>
+                                                        <Box sx={{ display: 'flex', gap: 2 }}>
+                                                            {movieDetail?.movieq_rating && (
+                                                                <Chip 
+                                                                    label={`MovieQ: ${movieDetail.movieq_rating.toFixed(1)}`}
+                                                                    size="small"
+                                                                    variant="filled"
+                                                                />
+                                                            )}
+                                                            {movieDetail?.imdb_rating && (
+                                                                <Chip 
+                                                                    label={`IMDB: ${movieDetail.imdb_rating.toFixed(1)}`}
+                                                                    size="small"
+                                                                    variant="filled"
+                                                                />
+                                                            )}
+                                                            {movieDetail?.letterboxd_rating && (
+                                                                <Chip 
+                                                                    label={`Letterboxd: ${movieDetail.letterboxd_rating.toFixed(1)}`}
+                                                                    size="small"
+                                                                    variant="filled"
+                                                                />
+                                                            )}
+                                                        </Box>
+                                                    </>
+                                                )}
+
+                                                {movieDetail?.trailer_url && (
+                                                    <>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Trailer:
+                                                        </Typography>
+                                                        <Button 
+                                                            variant="outlined" 
+                                                            size="small" 
+                                                            href={movieDetail.trailer_url} 
+                                                            target="_blank"
+                                                            sx={{ justifyContent: 'flex-start', width: 'fit-content' }}
+                                                        >
+                                                            Watch Trailer
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    </Box>
                                 </Box>
                             </Box>
-                        </Box>
-                        {/* )} End optional detail fetch block */}
+                        )}
                     </DialogContent>
-                    {/* Keep existing DialogActions structure */}
+
                     <DialogActions>
                         <MobileStepper
-                            variant="text"
-                            steps={selectedMovies.length}
+                            variant="dots"
+                            steps={movies.length}
                             position="static"
-                            activeStep={detailsActiveStep}
+                            activeStep={activeStep}
                             sx={{
                                 flexGrow: 1,
                                 backgroundColor: 'transparent',
@@ -137,8 +250,8 @@ const MovieDetailsModalComponent: React.FC<MovieDetailsModalProps> = ({ // Renam
                             nextButton={
                                 <Button
                                     size="small"
-                                    onClick={handleNext}
-                                    disabled={detailsActiveStep === selectedMovies.length - 1}
+                                    onClick={onNext}
+                                    disabled={activeStep === movies.length - 1}
                                 >
                                     Next <KeyboardArrowRight />
                                 </Button>
@@ -146,24 +259,39 @@ const MovieDetailsModalComponent: React.FC<MovieDetailsModalProps> = ({ // Renam
                             backButton={
                                 <Button
                                     size="small"
-                                    onClick={handleBack}
-                                    disabled={detailsActiveStep === 0}
+                                    onClick={onBack}
+                                    disabled={activeStep === 0}
                                 >
                                     <KeyboardArrowLeft /> Previous
                                 </Button>
                             }
                         />
-                        <Button onClick={onClose} variant="contained"> Close </Button>
+                        <Button 
+                            onClick={onClose} 
+                            variant="contained"
+                            sx={{ ml: 2 }}
+                        >
+                            Close
+                        </Button>
                     </DialogActions>
                 </>
             ) : (
-                 // Handle case where no movie/section is found (shouldn't usually happen if opened correctly)
-                 <DialogContent><Typography>No movie details available.</Typography></DialogContent>
+                <>
+                    <DialogTitle>Movie Details</DialogTitle>
+                    <DialogContent>
+                        <Box sx={{ p: 3, textAlign: 'center' }}>
+                            <Typography>No movie selected or data unavailable.</Typography>
+                        </Box>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={onClose} variant="contained">Close</Button>
+                    </DialogActions>
+                </>
             )}
         </Dialog>
     );
 };
 
 // Use default export if that's your convention
-export default MovieDetailsModalComponent;
+export default MovieDetailsModal;
 // --- END OF FILE MovieDetailsModal.tsx ---

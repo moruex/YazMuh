@@ -1,7 +1,7 @@
 // --- START OF FILE RecommendationsPage.tsx ---
 import React, { useState } from 'react';
 import { useQuery, useMutation, ApolloError } from '@apollo/client';
-import { Box, CircularProgress, Alert } from '@mui/material'; // Import necessary MUI components
+import { Box, CircularProgress, Alert, Typography, Paper } from '@mui/material'; // Import necessary MUI components
 
 import CategorySection from './CategorySection'; // Adjust path
 import AddMovieModal from './AddMovieModal'; // Adjust path
@@ -11,10 +11,15 @@ import DeleteConfirmation from '@components/modals/DeleteConfirmation'; // Adjus
 // Import API types
 import type { ApiRecommendationSection } from '@interfaces/recommendation.interfaces';
 import type { ApiMovieCore } from '@interfaces/movie.interfaces';
-import { ADD_MOVIE_TO_SECTION, GET_RECOMMENDATION_SECTIONS, REMOVE_MOVIE_FROM_SECTION } from '@graphql/index';
+// Proper imports from queries and mutations
+import { GET_RECOMMENDATION_SECTIONS } from '@graphql/queries/recommendation.queries';
+import { ADD_MOVIE_TO_SECTION, REMOVE_MOVIE_FROM_SECTION } from '@graphql/mutations/recommendation.mutations';
+import { useAuth } from '@contexts/AuthContext';
 
 
 export const RecommendationsPage: React.FC = () => {
+    const { admin, isAuthenticated } = useAuth();
+    
     // State for Modals
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
@@ -41,9 +46,6 @@ export const RecommendationsPage: React.FC = () => {
 
     // State for API Errors
     const [mutationError, setMutationError] = useState<string | null>(null);
-
-    // State for removed movies (unused for now, keep if needed later)
-    // const [removedMovies, setRemovedMovies] = useState<Record<number, string[]>>({});
 
     // --- Data Fetching ---
     const { data, loading: loadingSections, error: queryError, refetch } = useQuery<{ recommendations: ApiRecommendationSection[] }>(
@@ -73,9 +75,9 @@ export const RecommendationsPage: React.FC = () => {
         // awaitRefetchQueries: true, // Ensure refetch completes before proceeding if needed
     });
 
-    const [removeMovieMutation, { /* loading: removingMovie */ }] = useMutation(REMOVE_MOVIE_FROM_SECTION, {
+    const [removeMovieMutation, { loading: removingMovie }] = useMutation(REMOVE_MOVIE_FROM_SECTION, {
          onError: (err) => handleMutationError(err, 'remove movie'),
-         onCompleted: (/* removedData */) => { // removedData is unused
+         onCompleted: () => {
              setMutationError(null);
              // If removing selected movies, clear selection
              if (deleteActionContext?.type === 'single' && deleteActionContext.movie) {
@@ -86,10 +88,9 @@ export const RecommendationsPage: React.FC = () => {
              setDeleteActionContext(null); // Clear context
              refetch(); // Refetch sections
          },
-         // awaitRefetchQueries: true,
     });
 
-    // const isMutating = addingMovie || removingMovie; // Unused variable
+    const isMutating = addingMovie || removingMovie;
 
     // --- Handlers ---
 
@@ -108,6 +109,10 @@ export const RecommendationsPage: React.FC = () => {
     // Function passed to AddMovieModal to confirm adding
     const handleConfirmAddMovies = async (sectionId: string, moviesToAdd: ApiMovieCore[]) => {
         setMutationError(null);
+        if (!admin?.id) { // Check for admin id
+            setMutationError("Admin authentication required.");
+            return;
+        }
         try {
             // Calculate starting display order (simple approach: max + 1)
             const section = sections.find(s => s.id === sectionId);
@@ -121,7 +126,7 @@ export const RecommendationsPage: React.FC = () => {
                 // Ideally, use display_order from DB if available, otherwise index
                 const displayOrder = maxOrder + 1 + i;
                 await addMovieMutation({
-                    variables: { sectionId, movieId: movie.id, displayOrder }
+                    variables: { performingAdminId: admin.id, sectionId, movieId: movie.id, displayOrder }
                 });
                 // Add a small delay if needed to avoid rate limiting
                 // await new Promise(resolve => setTimeout(resolve, 50));
@@ -158,16 +163,21 @@ export const RecommendationsPage: React.FC = () => {
     const handleConfirmDelete = async () => {
         if (!deleteActionContext) return;
         setMutationError(null);
+        if (!admin?.id) { // Check for admin id
+            setMutationError("Admin authentication required.");
+            handleCloseDeleteConfirmation(); // Close modal if auth fails
+            return;
+        }
         const { type, section, movie } = deleteActionContext;
 
         try {
             if (type === 'single' && movie) {
-                await removeMovieMutation({ variables: { sectionId: section.id, movieId: movie.id } });
+                await removeMovieMutation({ variables: { performingAdminId: admin.id, sectionId: section.id, movieId: movie.id } });
             } else if (type === 'bulk') {
                 const moviesToRemove = selectedMoviesMap[section.id] ?? [];
                 // Run deletes sequentially or parallel
                 for (const movieToRemove of moviesToRemove) {
-                    await removeMovieMutation({ variables: { sectionId: section.id, movieId: movieToRemove.id } });
+                    await removeMovieMutation({ variables: { performingAdminId: admin.id, sectionId: section.id, movieId: movieToRemove.id } });
                      // Optional delay
                     // await new Promise(resolve => setTimeout(resolve, 50));
                 }
@@ -249,97 +259,133 @@ export const RecommendationsPage: React.FC = () => {
     const handleLoadMore = (section: ApiRecommendationSection) => {
         setLoadedMoviesCount(prev => ({
             ...prev,
-            [section.id]: (prev[section.id] || 10) + 10,
+            [section.id]: Math.min((prev[section.id] ?? 5) + 5, section.movieCount),
         }));
     };
 
-     const handleShowLess = (section: ApiRecommendationSection) => {
+    const handleShowLess = (section: ApiRecommendationSection) => {
         setLoadedMoviesCount(prev => ({
             ...prev,
-            [section.id]: 10, // Reset to initial limit
+            [section.id]: Math.max((prev[section.id] ?? 5) - 5, 5),
         }));
     };
 
     const handleLoadAll = (section: ApiRecommendationSection) => {
         setLoadedMoviesCount(prev => ({
             ...prev,
-            [section.id]: section.movieCount, // Use total count from API
+            [section.id]: section.movieCount,
         }));
     };
 
 
-    // --- Render Logic ---
-    if (loadingSections) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}><CircularProgress /></Box>;
-    }
+    // Disabled Actions Status
+    const isActionDisabled = !isAuthenticated || isMutating;
 
-    if (queryError) {
-        return <Alert severity="error">Error loading recommendations: {queryError.message}</Alert>;
+    // Render the main component
+    if (loadingSections && !data) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+                <CircularProgress />
+            </Box>
+        );
     }
 
     return (
-        // Keep existing container class name
-        <Box className="recommendations-container" sx={{ p: 2 }}>
-            {/* Display mutation errors */}
-             {mutationError && <Alert severity="warning" onClose={() => setMutationError(null)} sx={{ mb: 2 }}>{mutationError}</Alert>}
+        <Box className="recommendations-container">
+            {/* Page Header */}
+            <Box className="recommendations-header" sx={{ mb: 4 }}>
+                <Typography variant="h4" component="h1" gutterBottom>
+                    Movie Recommendations
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                    Manage recommendation sections displayed to users. Add or remove movies from sections.
+                </Typography>
+            </Box>
 
-            {sections.map(section => (
-                <CategorySection
-                    key={section.id}
-                    // Pass API data directly
-                    category={section}
-                    // Pass state maps and handlers
-                    loadedMovies={loadedMoviesCount}
-                    selectedMovies={selectedMoviesMap}
-                    areAllSelected={areAllSelected}
-                    handleAddMovies={handleOpenAddModal} // Use modal opener
-                    handleToggleSelectAll={handleToggleSelectAll}
-                    handleViewDetails={handleViewDetails}
-                    handleOpenDeleteConfirmationBulk={handleOpenDeleteConfirmationBulk} // Use confirmation opener
-                    toggleMovieSelection={toggleMovieSelection}
-                    handleShowLess={handleShowLess}
-                    handleLoadMore={handleLoadMore}
-                    handleLoadAll={handleLoadAll}
-                    handleOpenDeleteConfirmationSingle={handleOpenDeleteConfirmationSingle} // Use confirmation opener
-                />
-            ))}
+            {/* Error Alert */}
+            {queryError && (
+                <Alert severity="error" sx={{ mb: 3 }}>
+                    Error loading recommendations: {queryError.message}
+                </Alert>
+            )}
 
-             {/* Add Movie Modal */}
+            {mutationError && (
+                <Alert severity="error" sx={{ mb: 3 }}>
+                    {mutationError}
+                </Alert>
+            )}
+
+            {/* Sections List */}
+            {sections.length === 0 ? (
+                <Paper sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography variant="h6" gutterBottom>No recommendation sections found</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                        Contact your administrator to create recommendation sections.
+                    </Typography>
+                </Paper>
+            ) : (
+                <Box className="recommendations-sections">
+                    {sections.map((section) => (
+                        <CategorySection
+                            key={section.id}
+                            section={section}
+                            onAddMovie={() => handleOpenAddModal(section)}
+                            onDeleteMovie={(movie) => handleOpenDeleteConfirmationSingle(section, movie)}
+                            onDeleteSelected={() => handleOpenDeleteConfirmationBulk(section)}
+                            onViewDetails={() => handleViewDetails(section.id)}
+                            selectedMovies={selectedMoviesMap[section.id] ?? []}
+                            onToggleSelect={(movie) => toggleMovieSelection(section, movie)}
+                            onToggleSelectAll={() => handleToggleSelectAll(section.id, areAllSelected(section.id))}
+                            areAllSelected={areAllSelected(section.id)}
+                            loadedMoviesCount={loadedMoviesCount[section.id] ?? 5}
+                            onLoadMore={() => handleLoadMore(section)}
+                            onShowLess={() => handleShowLess(section)}
+                            onLoadAll={() => handleLoadAll(section)}
+                            disabled={isActionDisabled}
+                        />
+                    ))}
+                </Box>
+            )}
+
+            {/* Modals */}
             <AddMovieModal
                 open={openAddDialog}
                 onClose={handleCloseAddModal}
                 selectedSection={sectionForAddModal}
-                onConfirmAdd={handleConfirmAddMovies} // Pass the confirmation handler
-                isConfirming={addingMovie} // Pass loading state
+                onConfirmAdd={handleConfirmAddMovies}
+                isConfirming={addingMovie}
             />
 
-             {/* Movie Details Modal */}
-             {/* Ensure MovieDetailsModal expects ApiMovieCore */}
             <MovieDetailsModal
                 open={openDetailsDialog}
                 onClose={handleCloseDetailsModal}
-                currentSectionId={sectionIdForDetailsModal}
-                selectedMoviesMap={selectedMoviesMap}
-                detailsActiveStep={detailsActiveStep}
-                handleNext={handleNextDetails}
-                handleBack={handleBackDetails}
-                sections={sections} // Pass all sections to find title
+                movies={sectionIdForDetailsModal ? (selectedMoviesMap[sectionIdForDetailsModal] ?? []) : []}
+                activeStep={detailsActiveStep}
+                onNext={handleNextDetails}
+                onBack={handleBackDetails}
             />
 
-            {/* Delete Confirmation Modal */}
             <DeleteConfirmation
                 open={openDeleteConfirmation}
                 onClose={handleCloseDeleteConfirmation}
-                onConfirm={handleConfirmDelete} // Call the delete handler
-                // isLoading={removingMovie} // Pass loading state
-                // itemName={ // Dynamic item name based on context
-                //     deleteActionContext?.type === 'single'
-                //         ? `the movie "${deleteActionContext.movie?.title}"`
-                //         : `${selectedMoviesMap[deleteActionContext?.section.id ?? '']?.length ?? 0} selected movies`
-                // }
-                // confirmationText={`Are you sure you want to remove ${ deleteActionContext?.type === 'single' ? `the movie "${deleteActionContext.movie?.title}"` : `${selectedMoviesMap[deleteActionContext?.section.id ?? '']?.length ?? 0} selected movies` } from the section "${deleteActionContext?.section.title}"? This action cannot be undone.`}
+                onConfirm={handleConfirmDelete}
+                title={
+                    deleteActionContext?.type === 'single'
+                        ? 'Remove Movie from Section'
+                        : 'Remove Selected Movies'
+                }
+                message={
+                    deleteActionContext?.type === 'single'
+                        ? `Are you sure you want to remove "${deleteActionContext?.movie?.title}" from the "${deleteActionContext?.section.title}" section?`
+                        : `Are you sure you want to remove ${(selectedMoviesMap[deleteActionContext?.section.id ?? ''] ?? []).length} selected movies from the "${deleteActionContext?.section.title}" section?`
+                }
+                // confirmText="Remove"
+                // cancelText="Cancel"
+                // isConfirming={removingMovie}
             />
         </Box>
     );
 };
+
+export default RecommendationsPage;
 // --- END OF FILE RecommendationsPage.tsx ---
