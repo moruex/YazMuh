@@ -9,24 +9,36 @@ import {
 import { Add } from '@mui/icons-material';
 
 // Import updated components and GraphQL operations
-import { GET_NEWS_LIST, CREATE_NEWS, UPDATE_NEWS, DELETE_NEWS } from '../../graphql'; // Adjust path
-import type { ApiNews, NewsInputData } from '../../interfaces'; // Adjust path
+import { 
+    GET_NEWS_ARTICLES, 
+    CREATE_NEWS_ARTICLE, 
+    UPDATE_NEWS_ARTICLE, 
+    DELETE_NEWS_ARTICLE,
+    PUBLISH_NEWS_ARTICLE 
+} from '../../graphql';
+import type { ApiNewsArticle, CreateNewsArticleInput, UpdateNewsArticleInput } from '../../interfaces';
 import { NewsTable } from './NewsTable';
 import { AddEditNewsModal } from './AddEditNewsModal';
 import { ViewNewsModal } from './ViewNewsModal';
 import { Search } from 'lucide-react';
+import { useAuth } from '@contexts/AuthContext';
 
 // Define types for query data and variables
 interface NewsQueryData {
-    newsList: ApiNews[];
-    newsCount: number;
+    newsArticles: ApiNewsArticle[];
+    newsArticleCount: number;
 }
 
 interface NewsQueryVars {
     limit: number;
     offset: number;
-    search?: string | null;
-    movieId?: string | null; // Keep if filtering by movie is needed elsewhere
+    search?: string;
+    status?: string;
+    categoryId?: string;
+    authorId?: string;
+    tag?: string;
+    sortBy?: string;
+    sortOrder?: string;
 }
 
 export const NewsPage = () => {
@@ -35,41 +47,45 @@ export const NewsPage = () => {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+    const [status, setStatus] = useState<string | undefined>(undefined);
 
     const [openAddModal, setOpenAddModal] = useState(false);
     const [openEditModal, setOpenEditModal] = useState(false);
     const [openViewModal, setOpenViewModal] = useState(false);
-    const [currentNews, setCurrentNews] = useState<ApiNews | null>(null); // Use ApiNews type
+    const [currentNews, setCurrentNews] = useState<ApiNewsArticle | null>(null);
 
     const [mutationLoading, setMutationLoading] = useState(false);
-    const [mutationError, setMutationError] = useState<ApolloError | null>(null); // Specific state for mutation errors
+    const [mutationError, setMutationError] = useState<ApolloError | null>(null);
     const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
         open: false, message: '', severity: 'success'
     });
+
+    const { admin } = useAuth();
 
     // --- Apollo Query ---
     const queryVariables = useMemo(() => ({
         limit: rowsPerPage,
         offset: page * rowsPerPage,
-        search: debouncedSearchTerm.trim() || null,
-        // movieId: null, // Set if needed
-    }), [rowsPerPage, page, debouncedSearchTerm]);
+        search: debouncedSearchTerm.trim() || undefined,
+        status: status,
+        sortBy: "published_at",
+        sortOrder: "DESC"
+    }), [rowsPerPage, page, debouncedSearchTerm, status]);
 
     const { data, loading: queryLoading, error: queryError, refetch } = useQuery<
         NewsQueryData,
         NewsQueryVars
-    >(GET_NEWS_LIST, {
+    >(GET_NEWS_ARTICLES, {
         variables: queryVariables,
         fetchPolicy: 'cache-and-network',
         notifyOnNetworkStatusChange: true,
     });
 
     // --- Apollo Mutations ---
-    const [createNews] = useMutation(CREATE_NEWS);
-    const [updateNews] = useMutation(UPDATE_NEWS);
-    // Ensure DELETE_NEWS hook is correct based on updated mutation definition
-    const [deleteNews] = useMutation<{ deleteNews: boolean }, { id: string }>(DELETE_NEWS);
-
+    const [createNewsArticle] = useMutation(CREATE_NEWS_ARTICLE);
+    const [updateNewsArticle] = useMutation(UPDATE_NEWS_ARTICLE);
+    const [deleteNewsArticle] = useMutation(DELETE_NEWS_ARTICLE);
+    const [publishNewsArticle] = useMutation(PUBLISH_NEWS_ARTICLE);
 
     // --- Debounce Search ---
     const debouncedSearch = useCallback(
@@ -92,6 +108,7 @@ export const NewsPage = () => {
 
     const handlePageChange = (_event: unknown, newPage: number) => {
         setPage(newPage);
+        setStatus("");
     };
 
     const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,13 +122,13 @@ export const NewsPage = () => {
         setMutationError(null); // Clear previous errors
     };
 
-    const handleOpenEditModal = (newsItem: ApiNews) => {
+    const handleOpenEditModal = (newsItem: ApiNewsArticle) => {
         setCurrentNews(newsItem);
         setOpenEditModal(true);
         setMutationError(null);
     };
 
-    const handleOpenViewModal = (newsItem: ApiNews) => {
+    const handleOpenViewModal = (newsItem: ApiNewsArticle) => {
         setCurrentNews(newsItem);
         setOpenViewModal(true);
     };
@@ -120,38 +137,47 @@ export const NewsPage = () => {
         setOpenAddModal(false);
         setOpenEditModal(false);
         setOpenViewModal(false);
-        // Delay clearing currentNews slightly if needed for modal close animation
-        // setTimeout(() => setCurrentNews(null), 150);
     };
 
-    /* // Unused function
-    const handleCloseSnackbar = (reason?: string) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setSnackbar({ ...snackbar, open: false });
-    };
-    */
+    // const handleCloseSnackbar = () => {
+    //     setSnackbar({ ...snackbar, open: false });
+    // };
 
     // Submit Handler for Add/Edit
-    const handleSubmit = async (formData: NewsInputData) => {
+    const handleSubmit = async (formData: CreateNewsArticleInput | UpdateNewsArticleInput) => {
+        if (!admin?.id) {
+            setSnackbar({ 
+                open: true, 
+                message: 'You must be logged in as an admin to perform this action', 
+                severity: 'error' 
+            });
+            return;
+        }
+
         setMutationLoading(true);
         setMutationError(null);
-        const mode = openAddModal ? 'add' : 'edit'; // Determine mode inside handler
+        const mode = openAddModal ? 'add' : 'edit';
 
         try {
             if (mode === 'add') {
-                await createNews({
-                    variables: { input: formData },
-                    refetchQueries: [{ query: GET_NEWS_LIST, variables: queryVariables }],
-                    // update(cache, { data }) { ... } // Optional cache update
+                const createInput = formData as CreateNewsArticleInput;
+                await createNewsArticle({
+                    variables: { 
+                        performingAdminId: admin.id,
+                        input: createInput
+                    },
+                    refetchQueries: [{ query: GET_NEWS_ARTICLES, variables: queryVariables }],
                 });
                 setSnackbar({ open: true, message: 'News article created successfully!', severity: 'success' });
             } else if (mode === 'edit' && currentNews) {
-                await updateNews({
-                    variables: { id: currentNews.id, input: formData },
-                    refetchQueries: [{ query: GET_NEWS_LIST, variables: queryVariables }],
-                    // update(cache, { data }) { ... } // Optional cache update
+                const updateInput = formData as UpdateNewsArticleInput;
+                await updateNewsArticle({
+                    variables: { 
+                        performingAdminId: admin.id,
+                        id: currentNews.id, 
+                        input: updateInput 
+                    },
+                    refetchQueries: [{ query: GET_NEWS_ARTICLES, variables: queryVariables }],
                 });
                 setSnackbar({ open: true, message: 'News article updated successfully!', severity: 'success' });
             }
@@ -159,45 +185,83 @@ export const NewsPage = () => {
         } catch (err) {
             console.error("Mutation error:", err);
             const apolloError = err as ApolloError;
-            setMutationError(apolloError); // Store error for potential display in modal
+            setMutationError(apolloError);
             setSnackbar({ open: true, message: `Error: ${apolloError.message}`, severity: 'error' });
         } finally {
             setMutationLoading(false);
         }
     };
 
-
     const handleDelete = async (id: string) => {
+        if (!admin?.id) {
+            setSnackbar({ 
+                open: true, 
+                message: 'You must be logged in as an admin to delete articles', 
+                severity: 'error' 
+            });
+            return;
+        }
+
         if (!window.confirm("Are you sure you want to delete this news article? This action cannot be undone.")) {
             return;
         }
-        // Use a specific loading state or the general one
+        
         setMutationLoading(true);
         setMutationError(null);
         try {
-            const { data: deleteData } = await deleteNews({
-                variables: { id },
-                refetchQueries: [{ query: GET_NEWS_LIST, variables: queryVariables }],
-                // Optimistic update or cache modification can be complex with pagination
+            const { data: deleteData } = await deleteNewsArticle({
+                variables: { 
+                    performingAdminId: admin.id,
+                    id 
+                },
+                refetchQueries: [{ query: GET_NEWS_ARTICLES, variables: queryVariables }],
             });
-            // Check backend response if it indicates success/failure differently
-            if (deleteData?.deleteNews) {
+            
+            if (deleteData?.deleteNewsArticle) {
                 setSnackbar({ open: true, message: 'News article deleted successfully!', severity: 'success' });
                 // Optionally adjust page number if the last item on a page was deleted
-                if (data?.newsList.length === 1 && page > 0) {
+                if (data?.newsArticles.length === 1 && page > 0) {
                     setPage(page - 1);
                 } else {
-                    refetch(); // Refetch might still be needed if pagination logic isn't handled perfectly
+                    refetch();
                 }
             } else {
-                // Handle case where mutation succeeded but returned false (e.g., not found)
-                setSnackbar({ open: true, message: 'Failed to delete news article (maybe not found).', severity: 'error' });
+                setSnackbar({ open: true, message: 'Failed to delete news article.', severity: 'error' });
             }
         } catch (err) {
             console.error("Delete error:", err);
             const apolloError = err as ApolloError;
             setMutationError(apolloError);
             setSnackbar({ open: true, message: `Error deleting news: ${apolloError.message}`, severity: 'error' });
+        } finally {
+            setMutationLoading(false);
+        }
+    };
+
+    const handlePublish = async (id: string) => {
+        if (!admin?.id) {
+            setSnackbar({ 
+                open: true, 
+                message: 'You must be logged in as an admin to publish articles', 
+                severity: 'error' 
+            });
+            return;
+        }
+
+        setMutationLoading(true);
+        try {
+            await publishNewsArticle({
+                variables: { 
+                    performingAdminId: admin.id,
+                    id
+                },
+                refetchQueries: [{ query: GET_NEWS_ARTICLES, variables: queryVariables }],
+            });
+            setSnackbar({ open: true, message: 'News article published successfully!', severity: 'success' });
+        } catch (err) {
+            console.error("Publish error:", err);
+            const apolloError = err as ApolloError;
+            setSnackbar({ open: true, message: `Error publishing: ${apolloError.message}`, severity: 'error' });
         } finally {
             setMutationLoading(false);
         }
@@ -212,7 +276,7 @@ export const NewsPage = () => {
                     <Search size={18} />
                     <input
                         type="text"
-                        placeholder="Search movies..."
+                        placeholder="Search news articles..."
                         onChange={handleSearchChange}
                     />
                 </div>
@@ -223,7 +287,7 @@ export const NewsPage = () => {
                     color="primary"
                     startIcon={<Add />}
                     onClick={handleOpenAddModal}
-                    disabled={queryLoading || mutationLoading}
+                    disabled={queryLoading || mutationLoading || !admin?.id}
                     className="add-button"
                 >
                     Add Article
@@ -235,23 +299,23 @@ export const NewsPage = () => {
                     Failed to load news: {queryError.message}
                 </Alert>
             )}
-            {mutationError && !snackbar.open && ( // Show persistent mutation error if snackbar isn't shown
+            {mutationError && !snackbar.open && (
                 <Alert severity="error" sx={{ mb: 2 }}>
                     Operation failed: {mutationError.message}
                 </Alert>
             )}
 
-
             {/* Table */}
             <NewsTable
-                news={data?.newsList ?? null}
-                loading={queryLoading && !data?.newsList?.length} // Show skeleton only on initial/empty load
+                news={data?.newsArticles ?? null}
+                loading={queryLoading && !data?.newsArticles?.length}
                 error={queryError}
                 onEdit={handleOpenEditModal}
                 onView={handleOpenViewModal}
                 onDelete={handleDelete}
+                onPublish={handlePublish}
                 // Pagination Props
-                count={data?.newsCount ?? 0}
+                count={data?.newsArticleCount ?? 0}
                 page={page}
                 rowsPerPage={rowsPerPage}
                 onPageChange={handlePageChange}
@@ -259,18 +323,18 @@ export const NewsPage = () => {
             />
 
             {/* Modals */}
-            {(openAddModal || openEditModal) && ( // Conditionally render AddEdit modal
+            {(openAddModal || openEditModal) && (
                 <AddEditNewsModal
                     mode={openAddModal ? 'add' : 'edit'}
                     open={openAddModal || openEditModal}
                     onClose={handleCloseModals}
                     onSubmit={handleSubmit}
                     isLoading={mutationLoading}
-                    news={currentNews} // Pass only in edit mode
+                    news={currentNews}
                 />
             )}
 
-            {openViewModal && currentNews && ( // Conditionally render View modal
+            {openViewModal && currentNews && (
                 <ViewNewsModal
                     isOpen={openViewModal}
                     onClose={handleCloseModals}
