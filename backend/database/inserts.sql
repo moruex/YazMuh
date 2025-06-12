@@ -1,349 +1,445 @@
-INSERT INTO public.users VALUES (5, 'Semih', 'Çantal', 'semih', 'semih@gmail.com', '123456', NULL, NULL, '2025-04-02 14:53:35.676416+03', '2025-04-02 14:53:35.676416+03');
-INSERT INTO public.users VALUES (3, 'Akif', 'Binici', 'akifbnc', 'akifbnc@gmail.com', '123456', NULL, NULL, '2025-04-02 14:53:35.676416+03', '2025-04-02 14:53:35.676416+03');
-INSERT INTO public.users VALUES (2, 'Furkan', 'Sayar', 'moruex', 'furkan42sayar@gmail.com', '123456', NULL, NULL, '2025-04-02 14:49:53.261402+03', '2025-04-02 14:49:53.261402+03');
-INSERT INTO public.users VALUES (1, 'Ylyas', 'Yylkybayev', 'ylyas04', 'yylkybayewylyas@gmail.com', '123456', 'https://lh3.googleusercontent.com/-5ZJ-KComA3g/AAAAAAAAAAI/AAAAAAAAAAA/ALKGfkkR06ybPn8Tn91H7Fg2lMYQ0Xx0BQ/photo.jpg', 'Hello World!', '2025-04-02 14:49:53.261402+03', '2025-04-04 00:00:34.360457+03');
-INSERT INTO public.users VALUES (6, 'Admin', '', 'admin', 'admin@gmail.com', '123456', NULL, NULL, '2025-04-02 16:16:12.65102+03', '2025-04-04 00:29:21.08603+03');
-INSERT INTO public.users VALUES (4, 'Abdullah', 'Kural', 'abdullah', 'abdullah@gmail.com', '123456', 'https://media.licdn.com/dms/image/v2/D4D03AQETstvVmpMLCQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1685612516415?e=1749686400&v=beta&t=Xm8UjJpM8cbHIOJ9qtrF8tfM__DhTA0AYDwBX58NY0M', NULL, '2025-04-02 14:53:35.676416+03', '2025-04-07 19:18:41.37366+03');
+--
+-- PostgreSQL database dump
+--
 
-INSERT INTO public.admins VALUES (2, 2, 'moruex', '$2b$12$/385Xg.sKf6fJURkbMetAOUewsX.ULHhoAK4QO0uJQ.Xp5tKpQ/7a', 'ADMIN', '2025-04-02 14:53:42.812931+03', '2025-04-02 16:18:48.339744+03');
-INSERT INTO public.admins VALUES (3, 3, 'akifbnc', '$2b$12$mmOOqUonID3390TMLa1AR.CfWqsCBExrWp0UDWIfc.NgYbgbc8mLW', 'ADMIN', '2025-04-02 14:53:42.812931+03', '2025-04-02 16:18:48.339744+03');
-INSERT INTO public.admins VALUES (5, 5, 'semih', '$2b$12$.VolkWkQara7.I/Wv8xVUu.fixMVU/BcDDncG2jZoc2t9q.EmA.jG', 'ADMIN', '2025-04-02 14:53:42.812931+03', '2025-04-02 16:18:48.339744+03');
-INSERT INTO public.admins VALUES (4, 4, 'apo', '$2b$12$38Ab2iv80yrKsiEmjXUz4.GQ1L9IH.NdY8iteNWPcMq9IqfmeK8Ny', 'ADMIN', '2025-04-02 14:53:42.812931+03', '2025-04-02 16:18:48.339744+03');
-INSERT INTO public.admins VALUES (6, 6, 'admin', '$2b$12$b3pE9EnufJHvUTfg6JouEORuU87U8gZVDWnnbtQjp23hJ0D08kbpm', 'ADMIN', '2025-04-02 16:16:43.900213+03', '2025-04-04 00:29:09.624326+03');
-INSERT INTO public.admins VALUES (1, 1, 'ylyas04', '$2b$12$vRxPVzie2Chg8e6oJA3dXO.KnlGqYUpGxog1fry8yE8rhhsY52SfW', 'SUPER_ADMIN', '2025-04-02 14:53:42.812931+03', '2025-04-07 19:22:44.980487+03');
+-- Dumped from database version 17.4
+-- Dumped by pg_dump version 17.4
 
-INSERT INTO public.censorship_reasons VALUES ('HATE_SPEECH', 'Contains hate speech, discrimination, or harassment.', true);
-INSERT INTO public.censorship_reasons VALUES ('SPAM', 'Unsolicited advertising or irrelevant content.', true);
-INSERT INTO public.censorship_reasons VALUES ('SPOILER', 'Contains untagged spoilers for the movie.', true);
-INSERT INTO public.censorship_reasons VALUES ('PERSONAL_INFO', 'Contains private or personally identifiable information.', true);
-INSERT INTO public.censorship_reasons VALUES ('OFF_TOPIC', 'Significantly deviates from the discussion topic.', true);
-INSERT INTO public.censorship_reasons VALUES ('VIOLENCE_THREAT', 'Contains threats or promotes violence.', true);
-INSERT INTO public.censorship_reasons VALUES ('OTHER', 'Violates community guidelines (admin notes required).', true);
-INSERT INTO public.censorship_reasons VALUES ('OLD_REASON', 'An example of a retired reason.', false);
+-- Started on 2025-06-10 10:37:36
 
-INSERT INTO public.movies VALUES (1, 'The Shawshank Redemption', '1994-09-23', 'Framed in the 1940s for the double murder of his wife and her lover, upstanding banker Andy Dufresne begins a new life at the Shawshank prison, where he puts his accounting skills to work for an amoral warden. During his long stretch in prison, Dufresne comes to be admired by the other inmates -- including an older prisoner named Red -- for his integrity and unquenchable sense of hope.', 'https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_.jpg', 142, 'https://www.youtube.com/watch?v=6hB3S9bIaco', 4.90, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (2, 'The Godfather', '1972-03-24', 'Widely regarded as one of the greatest films of all time, this mob drama, based on Mario Puzo''s novel of the same name, focuses on the powerful Italian-American crime family of Don Vito Corleone. When the don''s youngest son, Michael, reluctantly joins the Mafia, he becomes involved in the inevitable cycle of violence and betrayal.', 'https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg', 175, 'https://www.youtube.com/watch?v=sY1S34973zA', 4.80, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (3, 'The Dark Knight', '2008-07-18', 'With the help of allies Lt. Jim Gordon and DA Harvey Dent, Batman has been able to keep a tight lid on crime in Gotham City. But when a vile young criminal calling himself the Joker suddenly throws the town into chaos, the caped Crusader begins to tread a fine line between heroism and vigilantism.', 'https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_.jpg', 152, 'https://www.youtube.com/watch?v=EXeTwQWrcwY', 4.80, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (4, 'Pulp Fiction', '1994-10-14', 'Quentin Tarantino''s Pulp Fiction is a nonlinear crime film that weaves together several interconnected stories about Los Angeles mobsters, fringe players, small-time criminals, and a mysterious briefcase.', 'https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg', 154, 'https://www.youtube.com/watch?v=s7EdQ4FqbhY', 4.70, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (5, 'Inception', '2010-07-16', 'Dom Cobb is a skilled thief, the absolute best in the dangerous art of extraction, stealing valuable secrets from deep within the subconscious during the dream state. Cobb''s rare ability has made him a coveted player in this treacherous new world of corporate espionage, but it has also made him an international fugitive.', 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg', 148, 'https://www.youtube.com/watch?v=YoHD9XEInc0', 4.60, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (6, 'Fight Club', '1999-10-15', 'A depressed man suffering from insomnia meets a strange soap salesman named Tyler Durden and soon finds himself living in his squalid house after his perfect apartment is destroyed. The two bored men form an underground club with strict rules and fight other men who are fed up with their mundane lives.', 'https://m.media-amazon.com/images/M/MV5BMmEzNTkxYjQtZTc0MC00YTVjLTg5ZTEtZWMwOWVlYzY0NWIwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg', 139, 'https://www.youtube.com/watch?v=SUXWAEX2jlg', 4.50, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (8, 'The Matrix', '1999-03-31', 'Neo believes that Morpheus, an elusive figure considered to be the most dangerous man alive, can answer his question -- What is the Matrix? Neo is contacted by Trinity, a beautiful stranger who leads him into an underworld where he meets Morpheus. They fight a brutal battle for their lives against a cadre of viciously intelligent secret agents.', 'https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg', 136, 'https://www.youtube.com/watch?v=vKQi3bBA1y8', 4.60, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (9, 'Goodfellas', '1990-09-21', 'A young man grows up in the mob and works very hard to advance himself through the ranks. He enjoys his life of money and luxury, but is oblivious to the horror that he causes. A drug addiction and a few mistakes ultimately unravel his climb to the top.', 'https://m.media-amazon.com/images/M/MV5BY2NkZjEzMDgtN2RjYy00YzM1LWI4ZmQtMjIwYjFjNmI3ZGEwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg', 146, 'https://www.youtube.com/watch?v=qo5jJpHtI1Y', 4.60, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (10, 'The Silence of the Lambs', '1991-02-14', 'Clarice Starling is a top student at the FBI''s training academy. Jack Crawford wants Clarice to interview Dr. Hannibal Lecter, a brilliant psychiatrist who is also a violent psychopath, serving life behind bars for various acts of murder and cannibalism. Crawford believes that Lecter may have insight into a case and that Starling, as an attractive young woman, may be just the bait to draw him out.', 'https://m.media-amazon.com/images/M/MV5BNjNhZTk0ZmEtNjJhMi00YzFlLWE1MmEtYzM1M2ZmMGMwMTU4XkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg', 118, 'https://www.youtube.com/watch?v=RuX2MQeb8UM', 4.50, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (11, 'Interstellar', '2014-11-07', 'Earth''s future has been riddled by disasters, famines, and droughts. There is only one way to ensure mankind''s survival: interstellar travel. A newly discovered wormhole in the far reaches of our solar system allows a team of astronauts to go where no man has gone before, a planet that may have the right environment to sustain human life.', 'https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg', 169, 'https://www.youtube.com/watch?v=zSWdZVtXT7E', 4.70, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (12, 'Parasite', '2019-05-30', 'The Kims - mother and father Chung-sook and Ki-taek, and their young adult offspring, son Ki-woo and daughter Ki-jung - are a poor family living in a shabby and cramped half basement apartment in a busy lower working class commercial district of Seoul. Without even knowing it, they, especially Mr. and Mrs. Kim, literally smell of poverty.', 'https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_.jpg', 132, 'https://www.youtube.com/watch?v=5xH0HfJHsaY', 4.70, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (13, 'The Lord of the Rings: The Fellowship of the Ring', '2001-12-19', 'The future of civilization rests in the fate of the One Ring, which has been lost for centuries. Powerful forces are unrelenting in their search for it. But fate has placed it in the hands of a young Hobbit named Frodo Baggins, who inherits the Ring and steps into legend.', 'https://m.media-amazon.com/images/M/MV5BN2EyZjM3NzUtNWUzMi00MTgxLWI0NTctMzY4M2VlOTdjZWRiXkEyXkFqcGdeQXVyNDUzOTQ5MjY@._V1_.jpg', 178, 'https://www.youtube.com/watch?v=V75dMMIW2B4', 4.80, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (14, 'The Lord of the Rings: The Two Towers', '2002-12-18', 'The sequel to the Golden Globe-nominated and AFI Award-winning ''The Lord of the Rings: The Fellowship of the Ring,'' ''The Two Towers'' follows the continuing quest of Frodo and the Fellowship to destroy the One Ring.', 'https://m.media-amazon.com/images/M/MV5BZGMxZTdjZmYtMmE2Ni00ZTdkLWI5NTgtNjlmMjBiNzU2MmI5XkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg', 179, 'https://www.youtube.com/watch?v=LbfMDwc4azU', 4.80, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (15, 'The Lord of the Rings: The Return of the King', '2003-12-17', 'The culmination of nearly 10 years'' work and conclusion to Peter Jackson''s epic trilogy based on the timeless J.R.R. Tolkien classic, ''The Lord of the Rings: The Return of the King'' presents the final confrontation between the forces of good and evil fighting for control of the future of Middle-earth.', 'https://m.media-amazon.com/images/M/MV5BNzA5ZDNlZWMtM2NhNS00NDJjLTk4NDItYTRmY2EwMWZlMTY3XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg', 201, 'https://www.youtube.com/watch?v=r5X-hFf6Bwo', 4.90, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (16, 'The Avengers', '2012-05-04', 'When an unexpected enemy emerges that threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster.', 'https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg', 143, 'https://www.youtube.com/watch?v=eOrNdBpGMv8', 4.50, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (17, 'Avengers: Endgame', '2019-04-26', 'Adrift in space with no food or water, Tony Stark sends a message to Pepper Potts as his oxygen supply starts to dwindle. Meanwhile, the remaining Avengers -- Thor, Black Widow, Captain America and Bruce Banner -- must figure out a way to bring back their vanquished allies for an epic showdown with Thanos.', 'https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_.jpg', 181, 'https://www.youtube.com/watch?v=TcMBFSGVi1c', 4.80, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (18, 'Spirited Away', '2001-07-20', '10-year-old Chihiro and her parents stumble upon a seemingly abandoned amusement park. After her mother and father are turned into giant pigs, Chihiro meets the mysterious Haku, who explains that the park is a resort for supernatural beings who need a break from their time spent in the earthly realm, and that she must work there to free herself and her parents.', 'https://m.media-amazon.com/images/M/MV5BMjlmZmI5MDctNDE2YS00YWE0LWE5ZWItZDBhYWQ0NTcxNWRhXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg', 125, 'https://www.youtube.com/watch?v=ByXuk9QqQkk', 4.70, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (19, 'The Lion King', '1994-06-24', 'This Disney animated feature follows the adventures of the young lion Simba, the heir of his father, Mufasa. Simba''s wicked uncle, Scar, plots to usurp Mufasa''s throne by luring father and son into a stampede of wildebeests.', 'https://m.media-amazon.com/images/M/MV5BYTYxNGMyZTYtMjE3MS00MzNjLWFjNmYtMDk3N2FmM2JiM2M1XkEyXkFqcGdeQXVyNjY5NDU4NzI@._V1_.jpg', 88, 'https://www.youtube.com/watch?v=4sj1MT05lAA', 4.60, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (20, 'Gladiator', '2000-05-05', 'Commodus takes over power and demotes Maximus, one of the preferred generals of his father, Emperor Marcus Aurelius. As a result, Maximus is relegated to fighting till death as a gladiator.', 'https://m.media-amazon.com/images/M/MV5BMDliMmNhNDEtODUyOS00MjNlLTgxODEtN2U3NzIxMGVkZTA1L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg', 155, 'https://www.youtube.com/watch?v=owK1qxDselE', 4.70, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (21, 'The Social Network', '2010-10-01', 'In 2003, Harvard undergrad and computer genius Mark Zuckerberg begins work on a new concept that eventually turns into the global social network known as Facebook. Six years later, he is one of the youngest billionaires ever, but Zuckerberg finds that his unprecedented success leads to both personal and legal complications.', 'https://m.media-amazon.com/images/M/MV5BOGUyZDUxZjEtMmIzMC00MzlmLTg4MGItZWJmMzBhZjE0Mjc1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg', 120, 'https://www.youtube.com/watch?v=lB95KLmpLR4', 4.40, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (22, 'Whiplash', '2014-10-15', 'Andrew Neiman is an ambitious young jazz drummer, single-minded in his pursuit to rise to the top of his elite east coast music conservatory. Terence Fletcher, an instructor known for his terrifying teaching methods, discovers Andrew and transfers the aspiring drummer into his band.', 'https://m.media-amazon.com/images/M/MV5BOTA5NDZlZGUtMjAxOS00YTRkLTkwYmMtYWQ0NWEwZDZiNjEzXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg', 106, 'https://www.youtube.com/watch?v=7d_jQycdQGo', 4.60, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (23, 'The Grand Budapest Hotel', '2014-03-28', 'In the 1930s, the Grand Budapest Hotel is a popular European ski resort, presided over by concierge Gustave H. Zero, a junior lobby boy, becomes Gustave''s friend and protege. Gustave prides himself on providing first-class service to the hotel''s guests, including satisfying the sexual needs of the many elderly women who stay there.', 'https://m.media-amazon.com/images/M/MV5BMzM5NjUxOTEyMl5BMl5BanBnXkFtZTgwNjEyMDM0MDE@._V1_.jpg', 99, 'https://www.youtube.com/watch?v=1Fg5iWmQjwk', 4.40, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (24, 'La La Land', '2016-12-25', 'Sebastian and Mia are drawn together by their common desire to do what they love. But as success mounts they are faced with decisions that begin to fray the fragile fabric of their love affair, and the dreams they worked so hard to maintain in each other threaten to rip them apart.', 'https://m.media-amazon.com/images/M/MV5BMzUzNDM2NzM2MV5BMl5BanBnXkFtZTgwNTM3NTg4OTE@._V1_.jpg', 128, 'https://www.youtube.com/watch?v=0pdqf4P9MB8', 4.50, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (25, 'The Shining', '1980-05-23', 'Jack Torrance becomes winter caretaker at the isolated Overlook Hotel in Colorado, hoping to cure his writer''s block. He settles in along with his wife, Wendy, and his son, Danny, who is plagued by psychic premonitions. As Jack''s writing goes nowhere and Danny''s visions become more disturbing, Jack discovers the hotel''s dark secrets and begins to unravel into a homicidal maniac hell-bent on terrorizing his family.', 'https://m.media-amazon.com/images/M/MV5BZWFlYmY2MGEtZjVkYS00YzU4LTg0YjQtYzY1ZGE3NTA5NGQxXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg', 146, 'https://www.youtube.com/watch?v=5Cb3ik6zP2I', 4.50, '2025-04-01 19:02:27.271682+03', '2025-04-01 19:02:27.271682+03');
-INSERT INTO public.movies VALUES (26, 'Joker', '2019-09-26', 'Arthur Fleck works as a clown and is an aspiring stand-up comic. He has mental health issues, part of which involves uncontrollable laughter. Times are tough and, due to his issues and occupation, Arthur has an even worse time than most. Over time these issues bear down on him, shaping his actions, making him ultimately take on the persona he is more known as...Joker.', 'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg', 122, 'https://www.youtube.com/watch?v=zAGVQLHvwOY', 4.60, '2025-04-01 19:02:27.271682+03', '2025-04-02 20:49:36.769872+03');
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
 
-INSERT INTO public.comments VALUES (3, 1, 1, 'Hi!', NULL, 0, false, '2025-04-03 05:56:10.731161+03', '2025-04-03 05:58:55.146537+03');
-INSERT INTO public.comments VALUES (4, 1, 1, 'ergtfdvcsef', NULL, 0, false, '2025-04-03 05:59:15.047771+03', '2025-04-03 05:59:15.047771+03');
-INSERT INTO public.comments VALUES (5, 1, 1, 'dfgbvdcsx', NULL, 0, false, '2025-04-03 05:59:18.12732+03', '2025-04-03 05:59:18.12732+03');
-INSERT INTO public.comments VALUES (6, 1, 1, 'wefrgthngbfvdcs', NULL, 0, false, '2025-04-03 05:59:22.108551+03', '2025-04-03 05:59:22.108551+03');
-INSERT INTO public.comments VALUES (7, 1, 1, 'gnhbfvdcsxdregbfv', NULL, 0, false, '2025-04-03 05:59:25.247258+03', '2025-04-03 05:59:25.247258+03');
-INSERT INTO public.comments VALUES (8, 1, 1, 'fghjnbfvdcsx', NULL, 0, false, '2025-04-03 05:59:29.354713+03', '2025-04-03 05:59:29.354713+03');
-INSERT INTO public.comments VALUES (9, 1, 2, 'dfgbhnjbvdcsx', NULL, 0, false, '2025-04-03 05:59:34.375073+03', '2025-04-03 05:59:34.375073+03');
-INSERT INTO public.comments VALUES (10, 1, 3, 'ernthgfbvdc', NULL, 0, false, '2025-04-03 05:59:39.048647+03', '2025-04-03 05:59:39.048647+03');
-INSERT INTO public.comments VALUES (11, 1, 5, 'fbgdvc', NULL, 0, false, '2025-04-03 05:59:43.530839+03', '2025-04-03 05:59:43.530839+03');
-INSERT INTO public.comments VALUES (13, 1, 4, 'rgtheyjukimjdgbfvcsx', NULL, 0, true, '2025-04-03 06:00:04.986186+03', '2025-04-03 06:04:28.631053+03');
-INSERT INTO public.comments VALUES (1, 1, 11, 'Hello World!!!', NULL, 0, true, '2025-04-03 05:46:59.248432+03', '2025-04-03 06:15:01.153124+03');
-INSERT INTO public.comments VALUES (14, 1, 1, 'Hifdgv', NULL, 0, true, '2025-04-03 06:14:48.554472+03', '2025-04-03 06:15:09.922856+03');
-INSERT INTO public.comments VALUES (15, 1, 4, 'fghbfvdcsxa', NULL, 0, false, '2025-04-04 00:46:16.572179+03', '2025-04-04 00:46:16.572179+03');
-INSERT INTO public.comments VALUES (16, 1, 4, 'rgthyjukiyktjhr', NULL, 0, false, '2025-04-04 00:46:23.336787+03', '2025-04-04 00:46:23.336787+03');
-INSERT INTO public.comments VALUES (17, 1, 4, 'mjk,ghndfbvcddh', NULL, 0, true, '2025-04-04 00:46:28.631751+03', '2025-04-07 19:16:36.66381+03');
+--
+-- TOC entry 5118 (class 0 OID 18903)
+-- Dependencies: 217
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: -
+--
 
-INSERT INTO public.comment_censorship_log VALUES (1, 3, 1, 'HATE_SPEECH', NULL, '2025-04-03 05:58:49.816605+03', 'Hi!');
-INSERT INTO public.comment_censorship_log VALUES (2, 13, 1, 'OTHER', NULL, '2025-04-03 06:04:28.631053+03', 'rgtheyjukimjdgbfvcsx');
-INSERT INTO public.comment_censorship_log VALUES (3, 1, 1, 'OFF_TOPIC', NULL, '2025-04-03 06:15:01.153124+03', 'Hello World!!!');
-INSERT INTO public.comment_censorship_log VALUES (4, 14, 1, 'HATE_SPEECH', NULL, '2025-04-03 06:15:09.922856+03', 'Hifdgv');
-INSERT INTO public.comment_censorship_log VALUES (6, 17, 1, 'SPOILER', NULL, '2025-04-07 19:16:36.66381+03', 'mjk,ghndfbvcddh');
+INSERT INTO public.users VALUES (0, 'Ylyas', 'Yylkybayev', 'ylyas04', 'itisylyas2004@gmail.com', '1234', 'https://lh3.googleusercontent.com/ogw/AF2bZyhG0xthRbEA0XtfJZSOSbPYMNwToUnm_TPaiFdRxac6EpA=s512-c-mo', '1234', '2025-05-14 17:33:13.979887+03', '2025-05-15 14:34:19.605324+03');
+INSERT INTO public.users VALUES (1, 'Admin', 'Admin', 'admin', 'admin@gmail.com', '$2b$12$/.Oqw7TjcB7/kd1zsjyjdeE01RFRMF6X3PWv5MeINR2ID.Qlpn0i6', 'https://lh3.googleusercontent.com/ogw/AF2bZyhG0xthRbEA0XtfJZSOSbPYMNwToUnm_TPaiFdRxac6EpA=s512-c-mo', 'Admin', '2025-05-15 14:39:09.469156+03', '2025-05-15 14:39:09.469156+03');
+INSERT INTO public.users VALUES (2, NULL, NULL, 'ylyas01', 'yylkybayewylyas@gmail.com', '$2a$12$stu/hnaVJx6wKGt0p2Ixz.bqdrBk9Yx8wgMOvJtMS..KiGKg0BKqe', NULL, NULL, '2025-05-28 22:10:53.266456+03', '2025-05-28 22:10:53.266456+03');
+INSERT INTO public.users VALUES (3, NULL, NULL, 'user', 'user@gmail.com', '$2a$12$xZALqJdIjwSz8UDohDOktOUNmUJTlg/O4j4FZMEdi98N9hhrpWV3u', 'https://upload.wikimedia.org/wikipedia/tr/3/30/NarutoUzumaki.jpg', NULL, '2025-06-09 13:22:48.89573+03', '2025-06-09 14:57:05.050578+03');
 
-INSERT INTO public.genres VALUES (38, 'Drama', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (77, 'Crime', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (79, 'Adventure', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (80, 'Sci-Fi', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (81, 'Romance', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (82, 'Biography', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (83, 'Thriller', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (84, 'Comedy', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (85, 'Fantasy', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (86, 'Animation', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (87, 'Family', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (88, 'Music', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (89, 'Horror', NULL, NULL, false, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (90, 'Classics', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (91, 'Prison Films', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (92, 'Mafia Movies', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (93, 'DC Comics', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (94, 'Superhero', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (95, 'Quentin Tarantino', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (96, 'Mind-Bending', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (97, 'Cult Classics', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (98, 'Oscar Winners', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (99, 'Sci-Fi Classics', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (100, 'Thrillers', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (101, 'Space Exploration', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (102, 'Lord of the Rings', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (103, 'Marvel Cinematic Universe', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (104, 'Studio Ghibli', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (105, 'Disney Classics', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (106, 'Historical Epics', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (107, 'Tech Stories', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (108, 'Music Films', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (109, 'Wes Anderson', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (110, 'Musicals', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (111, 'Stephen King', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (112, 'Horror Classics', NULL, NULL, true, '2025-04-02 14:44:36.298482+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.genres VALUES (78, 'Top 100 Comedy', '', 'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg', true, '2025-04-02 14:44:36.298482+03', '2025-04-07 19:14:18.013429+03');
 
-INSERT INTO public.movie_genres VALUES (1, 38);
-INSERT INTO public.movie_genres VALUES (1, 90);
-INSERT INTO public.movie_genres VALUES (1, 91);
-INSERT INTO public.movie_genres VALUES (2, 77);
-INSERT INTO public.movie_genres VALUES (2, 38);
-INSERT INTO public.movie_genres VALUES (2, 90);
-INSERT INTO public.movie_genres VALUES (2, 92);
-INSERT INTO public.movie_genres VALUES (3, 78);
-INSERT INTO public.movie_genres VALUES (3, 77);
-INSERT INTO public.movie_genres VALUES (3, 38);
-INSERT INTO public.movie_genres VALUES (3, 93);
-INSERT INTO public.movie_genres VALUES (3, 94);
-INSERT INTO public.movie_genres VALUES (4, 77);
-INSERT INTO public.movie_genres VALUES (4, 38);
-INSERT INTO public.movie_genres VALUES (4, 90);
-INSERT INTO public.movie_genres VALUES (4, 95);
-INSERT INTO public.movie_genres VALUES (5, 78);
-INSERT INTO public.movie_genres VALUES (5, 79);
-INSERT INTO public.movie_genres VALUES (5, 80);
-INSERT INTO public.movie_genres VALUES (5, 96);
-INSERT INTO public.movie_genres VALUES (6, 38);
-INSERT INTO public.movie_genres VALUES (6, 97);
-INSERT INTO public.movie_genres VALUES (8, 78);
-INSERT INTO public.movie_genres VALUES (8, 80);
-INSERT INTO public.movie_genres VALUES (8, 99);
-INSERT INTO public.movie_genres VALUES (9, 82);
-INSERT INTO public.movie_genres VALUES (9, 77);
-INSERT INTO public.movie_genres VALUES (9, 38);
-INSERT INTO public.movie_genres VALUES (9, 92);
-INSERT INTO public.movie_genres VALUES (10, 77);
-INSERT INTO public.movie_genres VALUES (10, 38);
-INSERT INTO public.movie_genres VALUES (10, 83);
-INSERT INTO public.movie_genres VALUES (10, 100);
-INSERT INTO public.movie_genres VALUES (11, 79);
-INSERT INTO public.movie_genres VALUES (11, 38);
-INSERT INTO public.movie_genres VALUES (11, 80);
-INSERT INTO public.movie_genres VALUES (11, 101);
-INSERT INTO public.movie_genres VALUES (12, 84);
-INSERT INTO public.movie_genres VALUES (12, 38);
-INSERT INTO public.movie_genres VALUES (12, 83);
-INSERT INTO public.movie_genres VALUES (12, 98);
-INSERT INTO public.movie_genres VALUES (13, 79);
-INSERT INTO public.movie_genres VALUES (13, 85);
-INSERT INTO public.movie_genres VALUES (13, 102);
-INSERT INTO public.movie_genres VALUES (14, 79);
-INSERT INTO public.movie_genres VALUES (14, 85);
-INSERT INTO public.movie_genres VALUES (14, 102);
-INSERT INTO public.movie_genres VALUES (15, 79);
-INSERT INTO public.movie_genres VALUES (15, 85);
-INSERT INTO public.movie_genres VALUES (15, 102);
-INSERT INTO public.movie_genres VALUES (16, 78);
-INSERT INTO public.movie_genres VALUES (16, 79);
-INSERT INTO public.movie_genres VALUES (16, 80);
-INSERT INTO public.movie_genres VALUES (16, 103);
-INSERT INTO public.movie_genres VALUES (17, 78);
-INSERT INTO public.movie_genres VALUES (17, 79);
-INSERT INTO public.movie_genres VALUES (17, 80);
-INSERT INTO public.movie_genres VALUES (17, 103);
-INSERT INTO public.movie_genres VALUES (18, 86);
-INSERT INTO public.movie_genres VALUES (18, 79);
-INSERT INTO public.movie_genres VALUES (18, 87);
-INSERT INTO public.movie_genres VALUES (18, 104);
-INSERT INTO public.movie_genres VALUES (19, 86);
-INSERT INTO public.movie_genres VALUES (19, 79);
-INSERT INTO public.movie_genres VALUES (19, 38);
-INSERT INTO public.movie_genres VALUES (19, 105);
-INSERT INTO public.movie_genres VALUES (20, 78);
-INSERT INTO public.movie_genres VALUES (20, 79);
-INSERT INTO public.movie_genres VALUES (20, 38);
-INSERT INTO public.movie_genres VALUES (20, 106);
-INSERT INTO public.movie_genres VALUES (21, 82);
-INSERT INTO public.movie_genres VALUES (21, 38);
-INSERT INTO public.movie_genres VALUES (21, 107);
-INSERT INTO public.movie_genres VALUES (22, 38);
-INSERT INTO public.movie_genres VALUES (22, 88);
-INSERT INTO public.movie_genres VALUES (22, 108);
-INSERT INTO public.movie_genres VALUES (23, 79);
-INSERT INTO public.movie_genres VALUES (23, 84);
-INSERT INTO public.movie_genres VALUES (23, 38);
-INSERT INTO public.movie_genres VALUES (23, 109);
-INSERT INTO public.movie_genres VALUES (24, 84);
-INSERT INTO public.movie_genres VALUES (24, 38);
-INSERT INTO public.movie_genres VALUES (24, 88);
-INSERT INTO public.movie_genres VALUES (24, 110);
-INSERT INTO public.movie_genres VALUES (25, 38);
-INSERT INTO public.movie_genres VALUES (25, 89);
-INSERT INTO public.movie_genres VALUES (25, 111);
-INSERT INTO public.movie_genres VALUES (25, 112);
-INSERT INTO public.movie_genres VALUES (26, 77);
-INSERT INTO public.movie_genres VALUES (26, 38);
-INSERT INTO public.movie_genres VALUES (26, 83);
-INSERT INTO public.movie_genres VALUES (26, 93);
+--
+-- TOC entry 5120 (class 0 OID 18912)
+-- Dependencies: 219
+-- Data for Name: admins; Type: TABLE DATA; Schema: public; Owner: -
+--
 
-INSERT INTO public.news VALUES (2, 'Joker', 'webnhgbf', 'vdfgbhnjmkghnb', 1, 'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg', '2025-04-03 02:09:00+03', '2025-04-03 02:09:50.817938+03', '2025-04-03 02:09:50.817938+03');
-INSERT INTO public.news VALUES (3, 'Joker1', 'dcfvgbf', 'efrgbfvdcsx', 1, 'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg', '2025-04-03 02:10:00+03', '2025-04-03 02:10:32.309528+03', '2025-04-03 02:10:32.309528+03');
-INSERT INTO public.news VALUES (4, 'Joker2', 'fgbv', 'dcvgbhfvdc', 1, 'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg', '2025-04-03 02:10:00+03', '2025-04-03 02:10:42.043975+03', '2025-04-03 02:10:42.043975+03');
+INSERT INTO public.admins VALUES (0, 0, 'ylyas04', '$2b$12$kiUs7tIZ4zIoR1QTWJssPO699nIx1N2hdTGINR.GVFbmpL4w1aFTK', 'SUPER_ADMIN');
+INSERT INTO public.admins VALUES (2, 1, 'admin', '$2b$12$6egAo2hEpWVQq6N52bTr5.HoQ2IPzqegqJZuWA74IdXv1Ut0uJqaG', 'ADMIN');
 
-INSERT INTO public.persons VALUES (1, 'David Fincher', NULL, NULL, NULL, '2025-04-01 19:01:33.479932+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (2, 'Brad Pitt', NULL, NULL, NULL, '2025-04-01 19:01:33.582805+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (3, 'Edward Norton', NULL, NULL, NULL, '2025-04-01 19:01:33.688751+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (4, 'Helena Bonham Carter', NULL, NULL, NULL, '2025-04-01 19:01:33.798642+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (5, 'Robert Zemeckis', NULL, NULL, NULL, '2025-04-01 19:01:33.898385+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (6, 'Tom Hanks', NULL, NULL, NULL, '2025-04-01 19:01:34.002983+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (7, 'Robin Wright', NULL, NULL, NULL, '2025-04-01 19:01:34.096824+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (8, 'Gary Sinise', NULL, NULL, NULL, '2025-04-01 19:01:34.20477+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (9, 'Lana Wachowski', NULL, NULL, NULL, '2025-04-01 19:01:34.310572+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (10, 'Lilly Wachowski', NULL, NULL, NULL, '2025-04-01 19:01:34.418675+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (11, 'Keanu Reeves', NULL, NULL, NULL, '2025-04-01 19:01:34.530394+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (12, 'Laurence Fishburne', NULL, NULL, NULL, '2025-04-01 19:01:34.638811+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (13, 'Carrie-Anne Moss', NULL, NULL, NULL, '2025-04-01 19:01:34.748654+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (14, 'Martin Scorsese', NULL, NULL, NULL, '2025-04-01 19:01:34.84887+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (15, 'Robert De Niro', NULL, NULL, NULL, '2025-04-01 19:01:34.959037+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (16, 'Ray Liotta', NULL, NULL, NULL, '2025-04-01 19:01:35.096553+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (17, 'Joe Pesci', NULL, NULL, NULL, '2025-04-01 19:01:35.206382+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (18, 'Jonathan Demme', NULL, NULL, NULL, '2025-04-01 19:01:35.306693+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (19, 'Jodie Foster', NULL, NULL, NULL, '2025-04-01 19:01:35.416891+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (20, 'Anthony Hopkins', NULL, NULL, NULL, '2025-04-01 19:01:35.528437+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (21, 'Lawrence A. Bonney', NULL, NULL, NULL, '2025-04-01 19:01:35.636739+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (22, 'Matthew McConaughey', NULL, NULL, NULL, '2025-04-01 19:01:35.752852+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (23, 'Anne Hathaway', NULL, NULL, NULL, '2025-04-01 19:01:35.858927+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (24, 'Jessica Chastain', NULL, NULL, NULL, '2025-04-01 19:01:35.96676+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (25, 'Bong Joon Ho', NULL, NULL, NULL, '2025-04-01 19:01:36.072527+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (26, 'Song Kang-ho', NULL, NULL, NULL, '2025-04-01 19:01:36.176672+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (27, 'Lee Sun-kyun', NULL, NULL, NULL, '2025-04-01 19:01:36.286847+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (28, 'Cho Yeo-jeong', NULL, NULL, NULL, '2025-04-01 19:01:36.394872+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (29, 'Peter Jackson', NULL, NULL, NULL, '2025-04-01 19:01:36.51875+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (30, 'Elijah Wood', NULL, NULL, NULL, '2025-04-01 19:01:36.628675+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (31, 'Ian McKellen', NULL, NULL, NULL, '2025-04-01 19:01:36.73967+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (32, 'Orlando Bloom', NULL, NULL, NULL, '2025-04-01 19:01:36.864592+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (33, 'Viggo Mortensen', NULL, NULL, NULL, '2025-04-01 19:01:36.970498+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (34, 'Joss Whedon', NULL, NULL, NULL, '2025-04-01 19:01:37.080814+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (35, 'Robert Downey Jr.', NULL, NULL, NULL, '2025-04-01 19:01:37.188732+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (36, 'Chris Evans', NULL, NULL, NULL, '2025-04-01 19:01:37.286537+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (37, 'Scarlett Johansson', NULL, NULL, NULL, '2025-04-01 19:01:37.392622+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (38, 'Anthony Russo', NULL, NULL, NULL, '2025-04-01 19:01:37.498488+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (39, 'Joe Russo', NULL, NULL, NULL, '2025-04-01 19:01:37.608584+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (40, 'Mark Ruffalo', NULL, NULL, NULL, '2025-04-01 19:01:37.708753+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (41, 'Hayao Miyazaki', NULL, NULL, NULL, '2025-04-01 19:01:37.832748+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (42, 'Rumi Hiiragi', NULL, NULL, NULL, '2025-04-01 19:01:37.945658+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (43, 'Miyu Irino', NULL, NULL, NULL, '2025-04-01 19:01:38.049645+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (44, 'Mari Natsuki', NULL, NULL, NULL, '2025-04-01 19:01:38.162447+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (45, 'Roger Allers', NULL, NULL, NULL, '2025-04-01 19:01:38.270686+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (46, 'Rob Minkoff', NULL, NULL, NULL, '2025-04-01 19:01:38.380558+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (47, 'Matthew Broderick', NULL, NULL, NULL, '2025-04-01 19:01:38.490641+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (48, 'Jeremy Irons', NULL, NULL, NULL, '2025-04-01 19:01:38.598608+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (49, 'James Earl Jones', NULL, NULL, NULL, '2025-04-01 19:01:38.706676+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (50, 'Ridley Scott', NULL, NULL, NULL, '2025-04-01 19:01:38.816525+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (51, 'Russell Crowe', NULL, NULL, NULL, '2025-04-01 19:01:38.914642+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (52, 'Joaquin Phoenix', NULL, NULL, NULL, '2025-04-01 19:01:39.022466+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (53, 'Connie Nielsen', NULL, NULL, NULL, '2025-04-01 19:01:39.126613+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (54, 'Jesse Eisenberg', NULL, NULL, NULL, '2025-04-01 19:01:39.23273+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (56, 'Justin Timberlake', NULL, NULL, NULL, '2025-04-01 19:01:39.460761+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (57, 'Damien Chazelle', NULL, NULL, NULL, '2025-04-01 19:01:39.570584+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (58, 'Miles Teller', NULL, NULL, NULL, '2025-04-01 19:01:39.686555+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (59, 'J.K. Simmons', NULL, NULL, NULL, '2025-04-01 19:01:39.794746+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (60, 'Melissa Benoist', NULL, NULL, NULL, '2025-04-01 19:01:39.91099+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (61, 'Wes Anderson', NULL, NULL, NULL, '2025-04-01 19:01:40.018803+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (62, 'Ralph Fiennes', NULL, NULL, NULL, '2025-04-01 19:01:40.114611+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (63, 'F. Murray Abraham', NULL, NULL, NULL, '2025-04-01 19:01:40.230322+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (64, 'Mathieu Amalric', NULL, NULL, NULL, '2025-04-01 19:01:40.336409+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (65, 'Ryan Gosling', NULL, NULL, NULL, '2025-04-01 19:01:40.450384+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (66, 'Emma Stone', NULL, NULL, NULL, '2025-04-01 19:01:40.554725+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (67, 'John Legend', NULL, NULL, NULL, '2025-04-01 19:01:40.660425+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (68, 'Stanley Kubrick', NULL, NULL, NULL, '2025-04-01 19:01:40.766479+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (69, 'Jack Nicholson', NULL, NULL, NULL, '2025-04-01 19:01:40.860671+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (70, 'Shelley Duvall', NULL, NULL, NULL, '2025-04-01 19:01:40.985472+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (71, 'Danny Lloyd', NULL, NULL, NULL, '2025-04-01 19:01:41.12125+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (72, 'Todd Phillips', NULL, NULL, NULL, '2025-04-01 19:01:41.255481+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (73, 'Zazie Beetz', NULL, NULL, NULL, '2025-04-01 19:01:41.386397+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (74, 'Frank Darabont', NULL, NULL, NULL, '2025-04-01 19:01:55.580598+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (75, 'Tim Robbins', NULL, NULL, NULL, '2025-04-01 19:01:55.707679+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (76, 'Morgan Freeman', NULL, NULL, NULL, '2025-04-01 19:01:55.803892+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (77, 'Bob Gunton', NULL, NULL, NULL, '2025-04-01 19:01:55.937586+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (78, 'Francis Ford Coppola', NULL, NULL, NULL, '2025-04-01 19:01:56.056821+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (79, 'Marlon Brando', NULL, NULL, NULL, '2025-04-01 19:01:56.182435+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (81, 'James Caan', NULL, NULL, NULL, '2025-04-01 19:01:56.432722+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (82, 'Christopher Nolan', NULL, NULL, NULL, '2025-04-01 19:01:56.569923+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (83, 'Christian Bale', NULL, NULL, NULL, '2025-04-01 19:01:56.683524+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (84, 'Heath Ledger', NULL, NULL, NULL, '2025-04-01 19:01:56.795736+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (86, 'Quentin Tarantino', NULL, NULL, NULL, '2025-04-01 19:01:57.128726+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (87, 'John Travolta', NULL, NULL, NULL, '2025-04-01 19:01:57.2248+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (88, 'Uma Thurman', NULL, NULL, NULL, '2025-04-01 19:01:57.33047+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (89, 'Samuel L. Jackson', NULL, NULL, NULL, '2025-04-01 19:01:57.490863+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (90, 'Leonardo DiCaprio', NULL, NULL, NULL, '2025-04-01 19:01:57.602799+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (91, 'Joseph Gordon-Levitt', NULL, NULL, NULL, '2025-04-01 19:01:57.718595+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (92, 'Ellen Page', NULL, NULL, NULL, '2025-04-01 19:02:16.49631+03', '2025-04-02 14:44:36.298482+03');
-INSERT INTO public.persons VALUES (80, 'Al Pacino', NULL, NULL, NULL, '2025-04-01 19:01:56.314589+03', '2025-04-03 02:46:08.227099+03');
-INSERT INTO public.persons VALUES (55, 'Joker', NULL, NULL, 'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg', '2025-04-01 19:01:39.354485+03', '2025-04-07 10:24:09.337618+03');
 
-INSERT INTO public.quiz_questions VALUES (1, 'Who are you?', 1, '2025-04-03 02:56:12.093701+03');
+--
+-- TOC entry 5134 (class 0 OID 18967)
+-- Dependencies: 233
+-- Data for Name: censorship_reasons; Type: TABLE DATA; Schema: public; Owner: -
+--
 
-INSERT INTO public.quiz_choices VALUES (1, 1, 'Joker', 'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg', '2025-04-03 02:56:12.093701+03');
-INSERT INTO public.quiz_choices VALUES (2, 1, 'Batman', 'https://th.bing.com/th/id/OIP.4GSMSLO41PiLz88uijT7_gHaHa?w=250&h=250&c=8&rs=1&qlt=90&o=6&dpr=1.1&pid=3.1&rm=2', '2025-04-03 02:56:12.093701+03');
-INSERT INTO public.quiz_choices VALUES (3, 1, 'Ylyas Yylkybayev', 'https://lh3.googleusercontent.com/-5ZJ-KComA3g/AAAAAAAAAAI/AAAAAAAAAAA/ALKGfkkR06ybPn8Tn91H7Fg2lMYQ0Xx0BQ/photo.jpg', '2025-04-03 02:56:12.093701+03');
+INSERT INTO public.censorship_reasons VALUES ('0', 'Spoiler', true);
+INSERT INTO public.censorship_reasons VALUES ('1', 'Inappropriate Language', true);
 
-INSERT INTO public.recommendation_sections VALUES (1, 'Trending Now', 'POPULAR', 'Movies generating buzz right now.', 0, true, '2025-04-03 03:27:57.391212+03', '2025-04-03 03:27:57.391212+03');
-INSERT INTO public.recommendation_sections VALUES (2, 'New Releases', 'LATEST', 'Check out the latest additions.', 1, true, '2025-04-03 03:27:57.391212+03', '2025-04-03 03:27:57.391212+03');
-INSERT INTO public.recommendation_sections VALUES (3, 'Critically Acclaimed', 'MOST_RATED', 'Top-rated movies based on user reviews.', 2, true, '2025-04-03 03:27:57.391212+03', '2025-04-03 03:27:57.391212+03');
-INSERT INTO public.recommendation_sections VALUES (4, 'Staff Picks', 'ADMIN_DEFINED', 'Hand-picked selections from our team.', 3, true, '2025-04-03 03:27:57.391212+03', '2025-04-03 03:27:57.391212+03');
-INSERT INTO public.recommendation_sections VALUES (5, 'Coming Soon', 'LATEST', 'Movies arriving shortly (example).', 4, false, '2025-04-03 03:27:57.391212+03', '2025-04-03 03:27:57.391212+03');
 
-INSERT INTO public.recommendation_section_movies VALUES (1, 1, 17, 0, '2025-04-03 03:28:22.336068+03');
-INSERT INTO public.recommendation_section_movies VALUES (2, 1, 16, 1, '2025-04-03 03:28:40.114177+03');
-INSERT INTO public.recommendation_section_movies VALUES (3, 2, 26, 0, '2025-04-03 03:29:32.166392+03');
-INSERT INTO public.recommendation_section_movies VALUES (4, 3, 26, 0, '2025-04-03 03:29:36.624107+03');
-INSERT INTO public.recommendation_section_movies VALUES (5, 4, 15, 0, '2025-04-03 03:29:53.800817+03');
-INSERT INTO public.recommendation_section_movies VALUES (6, 4, 14, 1, '2025-04-03 03:29:53.850534+03');
-INSERT INTO public.recommendation_section_movies VALUES (7, 4, 13, 2, '2025-04-03 03:29:53.911675+03');
-INSERT INTO public.recommendation_section_movies VALUES (8, 1, 23, 2, '2025-04-03 03:39:35.656767+03');
-INSERT INTO public.recommendation_section_movies VALUES (9, 1, 21, 3, '2025-04-03 03:39:35.887383+03');
-INSERT INTO public.recommendation_section_movies VALUES (10, 1, 3, 4, '2025-04-03 03:39:35.988294+03');
-INSERT INTO public.recommendation_section_movies VALUES (11, 1, 15, 5, '2025-04-03 03:39:36.091067+03');
-INSERT INTO public.recommendation_section_movies VALUES (12, 1, 11, 6, '2025-04-03 03:40:04.324987+03');
-INSERT INTO public.recommendation_section_movies VALUES (13, 1, 5, 7, '2025-04-03 03:40:04.595731+03');
-INSERT INTO public.recommendation_section_movies VALUES (14, 1, 14, 8, '2025-04-03 03:40:04.702022+03');
-INSERT INTO public.recommendation_section_movies VALUES (15, 1, 13, 9, '2025-04-03 03:40:04.856727+03');
-INSERT INTO public.recommendation_section_movies VALUES (16, 1, 12, 10, '2025-04-03 03:41:04.68006+03');
-INSERT INTO public.recommendation_section_movies VALUES (17, 1, 24, 11, '2025-04-03 03:41:05.017128+03');
-INSERT INTO public.recommendation_section_movies VALUES (18, 1, 22, 12, '2025-04-03 03:41:05.11813+03');
-INSERT INTO public.recommendation_section_movies VALUES (19, 1, 20, 13, '2025-04-03 03:41:05.232385+03');
-INSERT INTO public.recommendation_section_movies VALUES (20, 1, 10, 14, '2025-04-03 03:41:05.359868+03');
+--
+-- TOC entry 5126 (class 0 OID 18933)
+-- Dependencies: 225
+-- Data for Name: movies; Type: TABLE DATA; Schema: public; Owner: -
+--
 
-INSERT INTO public.user_lists VALUES (19, 5, 'favorites', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (20, 5, 'watched', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (21, 5, 'watchlist', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (22, 3, 'favorites', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (23, 3, 'watched', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (24, 3, 'watchlist', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (25, 2, 'favorites', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (26, 2, 'watched', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (27, 2, 'watchlist', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (28, 1, 'favorites', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (29, 1, 'watched', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (30, 1, 'watchlist', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (31, 4, 'favorites', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (32, 4, 'watched', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (33, 4, 'watchlist', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (34, 6, 'favorites', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (35, 6, 'watched', '2025-04-03 05:12:13.535162+03');
-INSERT INTO public.user_lists VALUES (36, 6, 'watchlist', '2025-04-03 05:12:13.535162+03');
+INSERT INTO public.movies VALUES (7, 'wfegfv', '2025-05-28', 'dbfgvc', 'hgfb', 0, 'fdghmgnbvc', 8.00, 0.0, 0.0, '2025-06-09 18:46:07.290007+03', 'wfegfv');
+INSERT INTO public.movies VALUES (5, 'The Shawshank Redemption', '1994-06-11', 'A banker convicted of uxoricide forms a friendship over a quarter century with a hardened convict, while maintaining his innocence and trying to remain hopeful through simple compassion.', 'https://images.squarespace-cdn.com/content/v1/657716dc6cd59d329f8cc943/1702303456952-89SVMRXKDUZ65S4279HJ/TSRL+Poster.jpg', 142, 'https://youtu.be/PLl99DlL6b4?si=h9jCF1SApKvrPRqS', 8.00, 9.3, 8.8, '2025-06-09 18:54:41.449149+03', 'the-shawshank-redemption');
+INSERT INTO public.movies VALUES (6, 'The Godfather', '1972-06-04', 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.', 'https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_QL75_UY281_CR4,0,190,281_.jpg', 175, 'https://youtu.be/UaVTIH8mujA?si=ZfAER0MZJN5H9Mgv', 8.50, 9.2, 9.0, '2025-06-09 18:54:41.449149+03', 'the-godfather');
+INSERT INTO public.movies VALUES (3, 'Venom 3', '2025-04-24', 'Venom 3', 'https://static.hdrezka.ac/i/2025/1/14/d8b79442a1034sd97p69e.jpg', 210, '', 7.00, 9.0, 9.0, '2025-06-09 18:57:55.000375+03', 'venom-3');
+
+
+--
+-- TOC entry 5130 (class 0 OID 18950)
+-- Dependencies: 229
+-- Data for Name: comments; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.comments VALUES (0, 0, 3, 'Hello', NULL, 6, false, '2025-05-15 16:21:11.940146+03', '2025-05-15 16:21:11.940146+03');
+INSERT INTO public.comments VALUES (1, 2, 6, 'hello i am ylyas04', NULL, 0, false, '2025-05-28 22:47:56.712611+03', '2025-05-28 22:47:56.712611+03');
+INSERT INTO public.comments VALUES (4, 2, 5, 'How are you?', NULL, 0, false, '2025-05-28 22:49:23.450139+03', '2025-05-28 22:49:23.450139+03');
+INSERT INTO public.comments VALUES (3, 2, 3, 'Hi', NULL, 0, true, '2025-05-28 22:49:04.080194+03', '2025-05-28 22:54:13.329974+03');
+INSERT INTO public.comments VALUES (5, 3, 6, 'hi ylyas!', NULL, 0, false, '2025-06-09 13:23:53.630308+03', '2025-06-09 13:23:53.630308+03');
+
+
+--
+-- TOC entry 5135 (class 0 OID 18973)
+-- Dependencies: 234
+-- Data for Name: comment_censorship_log; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.comment_censorship_log VALUES (1, 3, 0, '0', NULL, '2025-05-28 22:54:13.329974+03', 'Hi');
+
+
+--
+-- TOC entry 5132 (class 0 OID 18961)
+-- Dependencies: 231
+-- Data for Name: comment_likes; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- TOC entry 5124 (class 0 OID 18925)
+-- Dependencies: 223
+-- Data for Name: genres; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.genres VALUES (3, '2025 Movies', '', 'https://static.hdrezka.ac/i/2024/7/22/nd054a71c1e0fxi19u99m.jpg', true, '2025-movies');
+INSERT INTO public.genres VALUES (4, 'Family', '', '', false, 'family');
+INSERT INTO public.genres VALUES (1, 'Comedy', '', '', false, 'comedy');
+INSERT INTO public.genres VALUES (5, 'Action', '', '', false, 'action');
+INSERT INTO public.genres VALUES (6, 'Animation', '', '', false, 'animation');
+INSERT INTO public.genres VALUES (7, 'Documentary', '', '', false, 'documentary');
+INSERT INTO public.genres VALUES (8, 'Science Fiction', '', '', false, 'science-fiction');
+INSERT INTO public.genres VALUES (9, 'Biography', '', '', false, 'biography');
+INSERT INTO public.genres VALUES (12, 'Romance', '', '', false, 'romance');
+INSERT INTO public.genres VALUES (13, 'Horror', '', '', false, 'horror');
+INSERT INTO public.genres VALUES (14, 'Adventure', '', '', false, 'adventure');
+INSERT INTO public.genres VALUES (15, 'Thriller', '', '', false, 'thriller');
+INSERT INTO public.genres VALUES (10, 'Drama', '', '', false, 'drama');
+INSERT INTO public.genres VALUES (11, 'Fantasy', '', '', false, 'fantasy');
+
+
+--
+-- TOC entry 5122 (class 0 OID 18918)
+-- Dependencies: 221
+-- Data for Name: persons; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.persons VALUES (8, 'Tim Robbins', 'Born in West Covina, California, but raised in New York City, Tim Robbins is the son of former The Highwaymen singer Gil Robbins and actress Mary Robbins (née Bledsoe). Robbins studied drama at UCLA, where he graduated with honors in 1981. ', '2025-06-19', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRPSAHPPPKqjoW1B5LQSY5bd4IipXkHCs_Ew&s', 'tim-robbins');
+INSERT INTO public.persons VALUES (5, 'Tom Hardy', 'Hello man', '1977-09-16', 'https://static.hdrezka.ac/i/2016/3/10/q4cc01fedbec8tk54v94z.jpg', 'tom-hardy');
+INSERT INTO public.persons VALUES (9, 'Frank Darabont', 'Three-time Oscar nominee Frank Darabont was born in a refugee camp in 1959 in Montbeliard, France, the son of Hungarian parents who had fled Budapest during the failed 1956 Hungarian revolution. Brought to America as an infant, he settled with his family in Los Angeles and attended Hollywood High School. His first job in movies was as a production assistant on the 1981 low-budget film, Hell Night (1981), starring Linda Blair. He spent the next six years working in the art department as a set dresser and in set construction while struggling to establish himself as a writer. His first produced writing credit (shared) was on the 1987 film, A Nightmare on Elm Street 3: Dream Warriors (1987), directed by Chuck Russell. Darabont is one of only six filmmakers in history with the unique distinction of having his first two feature films receive nominations for the Best Picture Academy Award: 1994''s The Shawshank Redemption (1994) (with a total of seven nominations) and 1999''s The Green Mile (1999) (four nominations). Darabont himself collected Oscar nominations for Best Adapted Screenplay for each film (both based on works by Stephen King), as well as nominations for both films from the Director''s Guild of America, and a nomination from the Writers Guild of America for The Shawshank Redemption (1994). ', NULL, NULL, 'frank-darabont');
+INSERT INTO public.persons VALUES (7, 'Morgan Freeman', 'With an authoritative voice and calm demeanor, this ever popular American actor has grown into one of the most respected figures in modern US cinema. Morgan was born on June 1, 1937 in Memphis, Tennessee, to Mayme Edna (Revere), a teacher, and Morgan Porterfield Freeman, a barber. The young Freeman attended Los Angeles City College before serving several years in the US Air Force as a mechanic between 1955 and 1959. His first dramatic arts exposure was on the stage including appearing in an all-African American production of the exuberant musical Hello, Dolly!.', '1990-07-02', 'https://m.media-amazon.com/images/M/MV5BMTc0MDMyMzI2OF5BMl5BanBnXkFtZTcwMzM2OTk1MQ@@._V1_.jpg', 'morgan-freeman');
+
+
+--
+-- TOC entry 5128 (class 0 OID 18944)
+-- Dependencies: 227
+-- Data for Name: movie_crew; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- TOC entry 5129 (class 0 OID 18947)
+-- Dependencies: 228
+-- Data for Name: movie_genres; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.movie_genres VALUES (3, 1);
+INSERT INTO public.movie_genres VALUES (5, 10);
+INSERT INTO public.movie_genres VALUES (6, 10);
+INSERT INTO public.movie_genres VALUES (6, 5);
+INSERT INTO public.movie_genres VALUES (7, 5);
+
+
+--
+-- TOC entry 5153 (class 0 OID 19292)
+-- Dependencies: 252
+-- Data for Name: movie_person_roles; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.movie_person_roles VALUES (15, 3, 6, 'CREW', NULL, NULL, 'Director', 'Directing', '2025-05-14 21:19:30.090216+03');
+INSERT INTO public.movie_person_roles VALUES (22, 4, 5, 'CREW', NULL, NULL, 'Director', 'Directing', '2025-05-14 21:20:06.966601+03');
+INSERT INTO public.movie_person_roles VALUES (23, 5, 7, 'ACTOR', NULL, 1, NULL, NULL, '2025-05-21 16:56:33.542937+03');
+INSERT INTO public.movie_person_roles VALUES (26, 5, 8, 'ACTOR', NULL, 2, NULL, NULL, '2025-05-21 16:56:33.571444+03');
+INSERT INTO public.movie_person_roles VALUES (24, 5, 9, 'CREW', NULL, NULL, 'Director', 'Directing', '2025-05-21 16:56:33.546666+03');
+INSERT INTO public.movie_person_roles VALUES (29, 7, 8, 'ACTOR', NULL, 1, NULL, NULL, '2025-05-28 17:15:42.919344+03');
+INSERT INTO public.movie_person_roles VALUES (30, 7, 7, 'CREW', NULL, NULL, 'Director', 'Directing', '2025-05-28 17:15:42.925254+03');
+INSERT INTO public.movie_person_roles VALUES (31, 6, 9, 'ACTOR', NULL, 1, NULL, NULL, '2025-05-28 17:38:31.519531+03');
+INSERT INTO public.movie_person_roles VALUES (35, 6, 8, 'ACTOR', NULL, 2, NULL, NULL, '2025-05-28 17:38:31.588295+03');
+INSERT INTO public.movie_person_roles VALUES (38, 6, 7, 'ACTOR', NULL, 3, NULL, NULL, '2025-05-28 17:38:31.614386+03');
+INSERT INTO public.movie_person_roles VALUES (39, 6, 5, 'ACTOR', NULL, 4, NULL, NULL, '2025-05-28 17:38:31.624737+03');
+INSERT INTO public.movie_person_roles VALUES (32, 6, 9, 'CREW', NULL, NULL, 'Director', 'Directing', '2025-05-28 17:38:31.528324+03');
+INSERT INTO public.movie_person_roles VALUES (34, 6, 7, 'CREW', NULL, NULL, 'Director', 'Directing', '2025-05-28 17:38:31.586498+03');
+INSERT INTO public.movie_person_roles VALUES (36, 6, 8, 'CREW', NULL, NULL, 'Director', 'Directing', '2025-05-28 17:38:31.600881+03');
+INSERT INTO public.movie_person_roles VALUES (37, 6, 5, 'CREW', NULL, NULL, 'Director', 'Directing', '2025-05-28 17:38:31.610027+03');
+INSERT INTO public.movie_person_roles VALUES (47, 3, 5, 'ACTOR', NULL, 1, NULL, NULL, '2025-05-28 22:51:25.749767+03');
+
+
+--
+-- TOC entry 5137 (class 0 OID 18981)
+-- Dependencies: 236
+-- Data for Name: news; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.news VALUES (0, 'Hello', 'Hello', 'Hello', NULL, 'Hello', '2025-05-15 15:21:18.78179+03', '2025-05-15 15:21:18.78179+03');
+INSERT INTO public.news VALUES (1, 'Sci-Fi Epic "Nebula Rising" Breaks Box Office Records', 'Interstellar adventure film earns $350M in opening weekend', 'Director Lena Zhao''s space opera "Nebula Rising" has shattered expectations with record-breaking global earnings. The film''s groundbreaking visual effects and emotional storyline about generational space colonists have resonated with audiences worldwide. Industry analysts predict it could surpass $1B within 3 weeks.', NULL, 'https://example.com/nebula_rising.jpg', '2025-05-28 18:13:32.513586+03', '2025-05-28 18:13:32.513586+03');
+INSERT INTO public.news VALUES (2, 'Vintage Hollywood Biopic Enters Awards Season Race', 'Renowned actor transforms into classic film legend', 'The upcoming biopic "Silver Screen Magic" featuring Daniel Thorne as 1940s superstar Robert Vance is generating Oscar buzz after early screenings. Costume designers recreated 37 iconic outfits from Vance''s films using original techniques. The film releases November 15.', NULL, 'https://example.com/silver_screen.jpg', '2025-05-28 18:13:32.513586+03', '2025-05-28 18:13:32.513586+03');
+INSERT INTO public.news VALUES (3, 'Animated Sequel "Paws & Claws 3" Releases First Trailer', 'Beloved animal heroes return for new adventure', 'Studio Animax unveiled the first trailer for the third installment of their hit franchise, featuring new voice cast members. This time, the furry heroes face climate challenges in the Arctic while discovering ancient animal civilizations. Environmental themes dominate this chapter.', NULL, 'https://example.com/paws_claws3.jpg', '2025-05-28 18:13:32.513586+03', '2025-05-28 18:13:32.513586+03');
+INSERT INTO public.news VALUES (4, 'Classic 80s Fantasy Film Gets Modern Reimagining', 'Practical effects meet CGI in "Labyrinth Rebom"', 'Director Chloe Finch confirms her remake will honor the practical puppetry of the 1986 original while expanding the magical universe. Casting announcements reveal Grammy-winning artist Maya Rivera as the Goblin Queen. Production begins this fall in Prague.', NULL, 'https://example.com/labyrinth_remake.jpg', '2025-05-28 18:13:32.513586+03', '2025-05-28 18:13:32.513586+03');
+INSERT INTO public.news VALUES (5, 'Documentary Exposes Golden Age of Hong Kong Cinema', 'Forgotten martial arts masters finally get recognition', '"Dragon Shadows" explores the 1970s-90s Hong Kong film explosion through never-before-seen footage and interviews. The film reveals how stunt performers revolutionized action choreography while working with minimal safety equipment. Premiering at Cannes next month.', NULL, 'https://example.com/dragon_shadows.jpg', '2025-05-28 18:13:32.513586+03', '2025-05-28 18:13:32.513586+03');
+INSERT INTO public.news VALUES (6, 'Marvel Announces Phase 6 Villain Casting', 'Oscar-winner joins superhero universe as cosmic threat', 'After months of speculation, Kevin Feige confirmed Javier Rodriguez will play the reality-warping antagonist in the upcoming "Avengers: Secret Wars". Rodriguez''s theater background brings new depth to the role. Filming begins January 2026.', NULL, 'https://example.com/marvel_villain.jpg', '2025-05-28 18:13:32.513586+03', '2025-05-28 18:13:32.513586+03');
+INSERT INTO public.news VALUES (7, 'Indie Horror "Whispering Pines" Becomes Cult Hit', 'Micro-budget film terrifies festival audiences', 'Made for just $120,000, this psychological thriller about paranatural investigators in Appalachia has secured worldwide distribution after winning Best Feature at ScreamFest. Critics praise its atmospheric tension and authentic folk horror elements.', NULL, 'https://example.com/whispering_pines.jpg', '2025-05-28 18:13:32.513586+03', '2025-05-28 18:13:32.513586+03');
+INSERT INTO public.news VALUES (8, 'Historic Movie Palace Reopens After Restoration', '1927 Grand Cinema returns to original splendor', 'After a 5-year, $45M renovation, Los Angeles'' iconic movie theater reopened with a premiere of "Singing in the Rain". The restoration included recreating the original atmospheric ceiling with twinkling stars and cloud machines. Public tours begin next week.', NULL, 'https://example.com/movie_palace.jpg', '2025-05-28 18:13:32.513586+03', '2025-05-28 18:13:32.513586+03');
+INSERT INTO public.news VALUES (9, 'Rom-Com Revival Hits Streaming Platforms', 'New wave of romantic films dominates digital charts', 'Platforms report 300% increase in rom-com viewership as films like "The Paris Misunderstanding" and "Wedding Crashers 2" break records. Analysts attribute this to post-pandemic demand for uplifting content. Several theatrical releases now fast-tracked.', NULL, 'https://example.com/romcom_revival.jpg', '2025-05-28 18:13:32.513586+03', '2025-05-28 18:13:32.513586+03');
+INSERT INTO public.news VALUES (10, 'Method Actor Hospitalized After Extreme Preparation', 'Star lost 60 pounds for prison drama role', 'During filming of "Stone Walls", actor Ethan Blackwell required medical intervention after extreme weight loss for his role as a death row inmate. The incident has reignited debates about acting techniques and studio duty of care. The film''s release may be delayed.', NULL, 'https://example.com/method_actor.jpg', '2025-05-28 18:13:32.513586+03', '2025-05-28 18:13:32.513586+03');
+
+
+--
+-- TOC entry 5139 (class 0 OID 18990)
+-- Dependencies: 238
+-- Data for Name: news_movies; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- TOC entry 5140 (class 0 OID 18993)
+-- Dependencies: 239
+-- Data for Name: quiz_questions; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.quiz_questions VALUES (1, 'Who are you?123456', 1);
+INSERT INTO public.quiz_questions VALUES (8, 'Who are you?132456u', 1);
+INSERT INTO public.quiz_questions VALUES (7, 'Who are you?', 1);
+
+
+--
+-- TOC entry 5142 (class 0 OID 19002)
+-- Dependencies: 241
+-- Data for Name: quiz_choices; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.quiz_choices VALUES (11, 1, 'gbfvdc', 'https://static.hdrezka.ac/i/2020/12/26/na1c844e25dabbb53r41x.jpg');
+INSERT INTO public.quiz_choices VALUES (12, 1, 'gbfvdc456', 'https://static.hdrezka.ac/i/2024/7/22/nd054a71c1e0fxi19u99m.jpg');
+INSERT INTO public.quiz_choices VALUES (13, 8, 'ertgfd', 'https://static.hdrezka.ac/i/2024/7/22/nd054a71c1e0fxi19u99m.jpg');
+INSERT INTO public.quiz_choices VALUES (14, 7, 'gbfvdc', 'https://static.hdrezka.ac/i/2024/7/22/nd054a71c1e0fxi19u99m.jpg');
+
+
+--
+-- TOC entry 5148 (class 0 OID 19036)
+-- Dependencies: 247
+-- Data for Name: recommendation_sections; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.recommendation_sections VALUES (0, 'Popular', 'POPULAR', NULL, 0, true, '2025-05-15 15:07:29.081825+03');
+INSERT INTO public.recommendation_sections VALUES (2, 'From Admin', 'ADMIN_DEFINED', NULL, 2, true, '2025-05-28 17:30:11.787804+03');
+INSERT INTO public.recommendation_sections VALUES (4, 'Most Commented', 'MOST_COMMENTED', NULL, 4, true, '2025-05-28 23:25:28.648262+03');
+INSERT INTO public.recommendation_sections VALUES (5, 'Most Rated', 'MOST_RATED', NULL, 5, true, '2025-05-28 23:25:36.868795+03');
+INSERT INTO public.recommendation_sections VALUES (1, 'Latest', 'LATEST', NULL, 1, true, '2025-05-28 23:46:24.44497+03');
+
+
+--
+-- TOC entry 5150 (class 0 OID 19047)
+-- Dependencies: 249
+-- Data for Name: recommendation_section_movies; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.recommendation_section_movies VALUES (3, 0, 3, 1, '2025-05-15 15:07:21.996483+03');
+INSERT INTO public.recommendation_section_movies VALUES (6, 1, 5, 1, '2025-05-28 17:05:56.951752+03');
+INSERT INTO public.recommendation_section_movies VALUES (10, 2, 6, 0, '2025-05-28 17:30:11.784425+03');
+INSERT INTO public.recommendation_section_movies VALUES (11, 4, 3, 0, '2025-05-28 23:25:28.57083+03');
+INSERT INTO public.recommendation_section_movies VALUES (12, 4, 5, 1, '2025-05-28 23:25:28.644328+03');
+INSERT INTO public.recommendation_section_movies VALUES (13, 5, 5, 0, '2025-05-28 23:25:36.785502+03');
+INSERT INTO public.recommendation_section_movies VALUES (14, 5, 6, 1, '2025-05-28 23:25:36.864288+03');
+INSERT INTO public.recommendation_section_movies VALUES (15, 1, 6, 1, '2025-05-28 23:46:20.817963+03');
+INSERT INTO public.recommendation_section_movies VALUES (16, 1, 3, 2, '2025-05-28 23:46:24.440783+03');
+
+
+--
+-- TOC entry 5155 (class 0 OID 19304)
+-- Dependencies: 254
+-- Data for Name: user_movie_lists; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.user_movie_lists VALUES (4, 3, 3, 'WATCHLIST', '2025-06-09 18:26:48.321175+03');
+INSERT INTO public.user_movie_lists VALUES (5, 3, 5, 'WATCHLIST', '2025-06-09 18:27:03.593545+03');
+INSERT INTO public.user_movie_lists VALUES (8, 3, 5, 'FAVORITES', '2025-06-09 19:01:02.884078+03');
+INSERT INTO public.user_movie_lists VALUES (9, 3, 6, 'WATCHED', '2025-06-09 19:23:24.486038+03');
+
+
+--
+-- TOC entry 5144 (class 0 OID 19009)
+-- Dependencies: 243
+-- Data for Name: user_quiz_answers; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- TOC entry 5146 (class 0 OID 19028)
+-- Dependencies: 245
+-- Data for Name: user_ratings; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.user_ratings VALUES (44, 2, 6, 9, '2025-05-28 22:42:53.519123+03', '2025-06-09 18:54:41.449149+03');
+INSERT INTO public.user_ratings VALUES (75, 3, 5, 8, '2025-06-09 17:41:18.526358+03', '2025-06-09 18:54:41.449149+03');
+INSERT INTO public.user_ratings VALUES (94, 3, 6, 8, '2025-06-09 18:51:30.121079+03', '2025-06-09 18:54:41.449149+03');
+INSERT INTO public.user_ratings VALUES (96, 3, 3, 7, '2025-06-09 18:57:55.000375+03', '2025-06-09 18:57:55.000375+03');
+
+
+--
+-- TOC entry 5161 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: admins_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.admins_id_seq', 2, true);
+
+
+--
+-- TOC entry 5162 (class 0 OID 0)
+-- Dependencies: 235
+-- Name: comment_censorship_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.comment_censorship_log_id_seq', 1, true);
+
+
+--
+-- TOC entry 5163 (class 0 OID 0)
+-- Dependencies: 232
+-- Name: comment_likes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.comment_likes_id_seq', 1, false);
+
+
+--
+-- TOC entry 5164 (class 0 OID 0)
+-- Dependencies: 230
+-- Name: comments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.comments_id_seq', 5, true);
+
+
+--
+-- TOC entry 5165 (class 0 OID 0)
+-- Dependencies: 224
+-- Name: genres_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.genres_id_seq', 15, true);
+
+
+--
+-- TOC entry 5166 (class 0 OID 0)
+-- Dependencies: 251
+-- Name: movie_person_roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.movie_person_roles_id_seq', 48, true);
+
+
+--
+-- TOC entry 5167 (class 0 OID 0)
+-- Dependencies: 226
+-- Name: movies_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.movies_id_seq', 7, true);
+
+
+--
+-- TOC entry 5168 (class 0 OID 0)
+-- Dependencies: 237
+-- Name: news_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.news_id_seq', 1, false);
+
+
+--
+-- TOC entry 5169 (class 0 OID 0)
+-- Dependencies: 222
+-- Name: persons_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.persons_id_seq', 10, true);
+
+
+--
+-- TOC entry 5170 (class 0 OID 0)
+-- Dependencies: 242
+-- Name: quiz_choices_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.quiz_choices_id_seq', 14, true);
+
+
+--
+-- TOC entry 5171 (class 0 OID 0)
+-- Dependencies: 240
+-- Name: quiz_questions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.quiz_questions_id_seq', 8, true);
+
+
+--
+-- TOC entry 5172 (class 0 OID 0)
+-- Dependencies: 250
+-- Name: recommendation_section_movies_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.recommendation_section_movies_id_seq', 16, true);
+
+
+--
+-- TOC entry 5173 (class 0 OID 0)
+-- Dependencies: 248
+-- Name: recommendation_sections_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.recommendation_sections_id_seq', 1, false);
+
+
+--
+-- TOC entry 5174 (class 0 OID 0)
+-- Dependencies: 253
+-- Name: user_movie_lists_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.user_movie_lists_id_seq', 9, true);
+
+
+--
+-- TOC entry 5175 (class 0 OID 0)
+-- Dependencies: 244
+-- Name: user_quiz_answers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.user_quiz_answers_id_seq', 1, false);
+
+
+--
+-- TOC entry 5176 (class 0 OID 0)
+-- Dependencies: 246
+-- Name: user_ratings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.user_ratings_id_seq', 96, true);
+
+
+--
+-- TOC entry 5177 (class 0 OID 0)
+-- Dependencies: 218
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 3, true);
+
+
+-- Completed on 2025-06-10 10:37:37
+
+--
+-- PostgreSQL database dump complete
+--
+
