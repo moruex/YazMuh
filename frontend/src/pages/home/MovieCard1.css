@@ -1,69 +1,84 @@
-.hm-movie-card {
-  width: 180px;
-  margin: 0 10px;
-  transition: transform 0.3s ease;
-}
+/* MovieCard1.css */
+/* This file extends the main HomePage.css styles */
+/* Most styles are now defined in HomePage.css for better organization */
 
-.hm-movie-card:hover {
-  transform: translateY(-5px);
+/* Additional specific overrides for MovieCard1 if needed */
+.hm-movie-card {
+  /* Ensure consistent card styling */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .hm-movie-card-link {
-  text-decoration: none;
-  color: inherit;
-  display: block;
-}
-
-.hm-movie-poster {
-  position: relative;
-  overflow: hidden;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.hm-movie-poster img {
-  width: 100%;
-  height: 270px;
-  object-fit: cover;
-  display: block;
-}
-
-.hm-rating-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: #00e054;
-  padding: 3px 6px;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 14px;
+  /* Ensure the link takes full height */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1;
 }
 
 .hm-movie-info {
-  padding: 10px 0;
+  /* Ensure info section takes remaining space */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.hm-movie-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* Hover effects specific to movie cards */
+.hm-movie-card:hover .hm-movie-title {
+  color: var(--accent);
+  transition: color 0.2s ease;
 }
 
-.hm-movie-year {
-  font-size: 14px;
-  color: #888;
-  margin-top: 4px;
-}
-
+/* Genre styling improvements */
 .hm-movie-genres {
-  font-size: 12px;
-  color: #666;
-  margin-top: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-} 
+  font-weight: 400;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.hm-movie-card:hover .hm-movie-genres {
+  opacity: 1;
+}
+
+/* Rating badge improvements */
+.hm-rating-badge {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure proper aspect ratios are maintained */
+.hm-movie-poster {
+  flex-shrink: 0;
+}
+
+/* Loading state for images */
+.hm-movie-poster img {
+  background-color: var(--dark-tertiary);
+  background-image: linear-gradient(45deg, transparent 25%, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.05) 50%, transparent 50%, transparent 75%, rgba(255,255,255,0.05) 75%);
+  background-size: 20px 20px;
+}
+
+/* Focus improvements for keyboard navigation */
+.hm-movie-card-link:focus {
+  outline: none;
+}
+
+.hm-movie-card-link:focus .hm-movie-card,
+.hm-movie-card:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Print styles */
+@media print {
+  .hm-movie-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
