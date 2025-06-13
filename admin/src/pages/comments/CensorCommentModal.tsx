@@ -103,6 +103,12 @@ export const CensorCommentModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMutationError(null);
+    const adminId = localStorage.getItem('adminId'); // Get adminId
+
+    if (!adminId) { // Check if adminId exists
+        setMutationError('Admin ID not found. Please ensure you are logged in as an admin.');
+        return;
+    }
 
     if (action === 'censor') {
         if (!reasonCode) {
@@ -113,9 +119,9 @@ export const CensorCommentModal = ({
             reason_code: reasonCode,
             admin_notes: adminNotes.trim() || null, // Send null if empty
         };
-        await censorCommentMutation({ variables: { id: comment.id, input } });
+        await censorCommentMutation({ variables: { performingAdminId: adminId, commentId: comment.id, input } });
     } else { // action === 'uncensor'
-        await uncensorCommentMutation({ variables: { id: comment.id } });
+        await uncensorCommentMutation({ variables: { performingAdminId: adminId, commentId: comment.id } });
     }
   };
 

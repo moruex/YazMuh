@@ -62,17 +62,22 @@ export const AddCommentModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMutationError(null);
+    const adminId = localStorage.getItem('adminId'); // Get adminId
+
     if (!movieId.trim() || !content.trim()) {
       setMutationError('Movie ID and Comment content are required.');
       return;
     }
-    // Validate if Movie ID is a number/correct format if needed before sending
-    // const parsedMovieId = parseInt(movieId.trim(), 10);
-    // if (isNaN(parsedMovieId)) { ... }
+    if (!adminId) { // Check if adminId exists
+        setMutationError('Admin ID not found. Please ensure you are logged in as an admin.');
+        return;
+    }
 
     const input: AdminAddCommentInput = {
-        movie_id: movieId.trim(), // Send as string as per GraphQL ID type usually
+        performingAdminId: adminId, // Add adminId
+        movie_id: movieId.trim(),
         content: content.trim(),
+        // parent_comment_id is not handled in this modal, which is fine if not needed.
     };
 
     await adminAddCommentMutation({ variables: { input } });
