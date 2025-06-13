@@ -32,7 +32,17 @@ const defaultGenreData: GenreInputData = {
     name: '',
     description: '',
     image_url: '',
+    slug: '',
     is_collection: false, // Default to false
+};
+
+// Helper function to generate a slug from a string
+const generateSlug = (text: string): string => {
+    return text
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '') // Remove non-word chars
+        .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
+        .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 };
 
 export const AddEditGenreModal = ({
@@ -53,6 +63,7 @@ export const AddEditGenreModal = ({
                 name: genre.name ?? '',
                 description: genre.description ?? '',
                 image_url: genre.image_url ?? '',
+                slug: genre.slug ?? generateSlug(genre.name),
                 is_collection: genre.is_collection ?? false,
             });
         } else {
@@ -63,7 +74,17 @@ export const AddEditGenreModal = ({
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        // If name field is changed, also update the slug
+        if (name === 'name') {
+            setFormData(prev => ({ 
+                ...prev, 
+                [name]: value,
+                slug: generateSlug(value)
+            }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,10 +94,9 @@ export const AddEditGenreModal = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // No need to construct data here, formData is already correct
-        await onSubmit(formData);
-        // Consider only closing if submit was successful (parent component handles this)
-        // onClose(); // Let parent decide when to close
+        // Remove the slug field as the backend generates it automatically
+        const { slug, ...dataToSubmit } = formData;
+        await onSubmit(dataToSubmit);
     };
 
     // Get image URL from formData for display
@@ -134,6 +154,18 @@ export const AddEditGenreModal = ({
                                 required
                                 disabled={isLoading}
                                 size="small" // Consistent sizing
+                            />
+                            <TextField
+                                name="slug"
+                                label="Preview Slug"
+                                value={formData.slug}
+                                InputProps={{
+                                    readOnly: true,
+                                }}
+                                disabled
+                                fullWidth
+                                helperText="Auto-generated from name (for reference only)"
+                                size="small"
                             />
                              <TextField // Optional: Add URL validation or use file upload later
                                 name="image_url"
