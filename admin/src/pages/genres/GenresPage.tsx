@@ -12,6 +12,7 @@ import { Add } from '@mui/icons-material';
 import { GenreTable } from '@pages/genres/GenreTable';
 import { AddEditGenreModal } from '@pages/genres/AddEditGenreModal';
 import { GET_GENRES, CREATE_GENRE, UPDATE_GENRE, DELETE_GENRE } from '@graphql/index';
+import { useAuth } from '@contexts/AuthContext';
 import type { ApiGenreCore, GenreInputData } from '@interfaces/index';
 import { Search } from 'lucide-react';
 
@@ -40,6 +41,8 @@ export const GenresPage = () => {
   const [currentGenre, setCurrentGenre] = useState<ApiGenreCore | null>(null);
 
   const [mutationLoading, setMutationLoading] = useState(false);
+
+  const { admin, isLoading: authLoading } = useAuth();
 
   const queryVariables = useMemo(() => {
     const trimmedSearch = debouncedSearchTerm.trim();
@@ -120,17 +123,23 @@ export const GenresPage = () => {
   const handleSubmit = async (formData: GenreInputData) => {
     setMutationLoading(true);
     const mode = openAddModal ? 'add' : openEditModal ? 'edit' : undefined;
+    
+    if (!admin?.id) {
+      alert("You need to be logged in as an admin to perform this action");
+      setMutationLoading(false);
+      return;
+    }
 
     try {
       if (mode === 'add') {
         await createGenre({
-          variables: { input: formData },
+          variables: { performingAdminId: admin.id, input: formData },
           refetchQueries: [{ query: GET_GENRES, variables: queryVariables }],
         });
         console.log('Genre created successfully!');
       } else if (mode === 'edit' && currentGenre) {
         await updateGenre({
-          variables: { id: currentGenre.id, input: formData },
+          variables: { performingAdminId: admin.id, id: currentGenre.id, input: formData },
           refetchQueries: [{ query: GET_GENRES, variables: queryVariables }],
         });
         console.log('Genre updated successfully!');
@@ -154,14 +163,30 @@ export const GenresPage = () => {
     if (!window.confirm(`Are you sure you want to delete this genre? This action cannot be undone.`)) {
       return;
     }
+    
+    if (!admin?.id) {
+      alert("You need to be logged in as an admin to delete a genre");
+      return;
+    }
 
     setMutationLoading(true);
     try {
-      await deleteGenre({
-        variables: { id },
+      const { data: deleteData, errors } = await deleteGenre({
+        variables: { performingAdminId: admin.id, id },
         refetchQueries: [{ query: GET_GENRES, variables: queryVariables }],
       });
-      console.log('Genre deleted successfully!');
+
+      if (errors) {
+        console.error("Delete error response:", errors);
+        throw new Error(errors.map(e => e.message).join(', '));
+      }
+
+      if (deleteData && deleteData.deleteGenre === true) {
+        console.log('Genre deleted successfully!');
+      } else {
+        console.warn('Genre deletion may not have been successful or returned an unexpected value.', deleteData);
+        alert('Genre deletion failed or returned an unexpected status.');
+      }
     } catch (err) {
       console.error("Delete error:", err);
       let errorMessage = 'An unknown error occurred during deletion.';
@@ -178,6 +203,10 @@ export const GenresPage = () => {
 
   const mode = openAddModal ? 'add' : openEditModal ? 'edit' : undefined;
 
+  if (authLoading) {
+    return <div>Loading authentication state...</div>;
+  }
+
   return (
     <div className="genre-management-container">
       <div className="genre-toolbar">
@@ -186,7 +215,7 @@ export const GenresPage = () => {
           <Search size={18} />
           <input
             type="text"
-            placeholder="Search movies..."
+            placeholder="Search genres..."
             onChange={handleSearchChange}
           />
         </div>
@@ -210,7 +239,7 @@ export const GenresPage = () => {
           color="primary"
           startIcon={<Add />}
           onClick={handleOpenAddModal}
-          disabled={queryLoading || mutationLoading}
+          disabled={queryLoading || mutationLoading || !admin?.id}
           className="add-button"
         >
           Add Genre
