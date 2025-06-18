@@ -21,18 +21,32 @@ async function startApolloServer() {
 
     // --- CORS Setup ---
 
+    // Log incoming origins for debugging
+    app.use((req, res, next) => {
+        console.log('CORS request from:', req.headers.origin);
+        next();
+    });
+
+    const allowedOrigins = [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:5175',
+        'https://movieeq.netlify.app',
+        'https://movieq.com.tr',
+        'https://movieq-admin.netlify.app'
+    ];
+
     const corsOptions = {
-        origin: [
-            'http://localhost:5173',
-            'http://localhost:5174',
-            'http://localhost:5175',
-            'https://movieeq.netlify.app',      // Netlify preview frontend
-            'https://movieq.com.tr',            // Production frontend
-            'https://movieq-admin.netlify.app'
-        ],
+        origin: function (origin, callback) {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true,
         allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-id'],
-    }; 
+    };
     
     app.use(cors(corsOptions));
 
