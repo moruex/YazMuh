@@ -35,7 +35,7 @@ if (process.env.DATABASE_URL) {
 if (config.nodeEnv === 'production') {
     // Assuming production requires SSL, adjust as needed
     poolConfig.ssl = {
-        rejectUnauthorized: true, // More secure for production
+        rejectUnauthorized: false, // More secure for production
         // ca: fs.readFileSync("./ca.pem").toString(), // Uncomment if using self-signed certs
     };
     console.log('>>> db.js: Production SSL enabled');
