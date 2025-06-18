@@ -31,6 +31,7 @@ async function startApolloServer() {
             'https://movieq-admin.netlify.app'
         ],
         credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-id'],
     }; 
     
     app.use(cors(corsOptions));
@@ -106,7 +107,7 @@ exports.handler = async (event, context) => {
             statusCode: 200,
             headers: {
                 'Access-Control-Allow-Origin': event.headers.origin || '*',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-id',
                 'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
                 'Access-Control-Allow-Credentials': 'true',
             },
@@ -122,7 +123,7 @@ exports.handler = async (event, context) => {
         result.headers = {
             ...(result.headers || {}),
             'Access-Control-Allow-Origin': event.headers.origin || '*',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-id',
             'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
             'Access-Control-Allow-Credentials': 'true',
         };
@@ -133,7 +134,7 @@ exports.handler = async (event, context) => {
             statusCode: 500,
             headers: {
                 'Access-Control-Allow-Origin': event.headers.origin || '*',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-id',
                 'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
                 'Access-Control-Allow-Credentials': 'true',
             },
