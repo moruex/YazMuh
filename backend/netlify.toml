@@ -9,6 +9,10 @@
   # Specify Node.js version (use a recent LTS version compatible with your dependencies)
   environment = { NODE_VERSION = "18" }
 
+# Function settings (for all functions in the "src" directory)
+[functions]
+  included_files = ["src/ca.pem"]
+
 # Redirect rule to map the /graphql endpoint to our serverless function.
 # Netlify automatically names the function based on the filename (index.js -> index).
 [[redirects]]
