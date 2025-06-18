@@ -31,20 +31,13 @@ if (process.env.DATABASE_URL) {
   };
 }
 
-// Add SSL configuration only for production environment
-if (config.nodeEnv === 'production') {
-    // Use ca.pem for SSL in production
-    const caPath = require('path').join(__dirname, '../ca.pem');
-    poolConfig.ssl = {
-        rejectUnauthorized: true, // Enforce certificate validation
-        ca: fs.readFileSync(caPath).toString(),
-    };
-    console.log('>>> db.js: Production SSL enabled with ca.pem');
-} else {
-    // For development or other environments, disable SSL
-    poolConfig.ssl = false; 
-    console.log('>>> db.js: SSL disabled for non-production environment');
-}
+// Always use ca.pem for SSL in all environments
+const caPath = require('path').join(__dirname, '../ca.pem');
+poolConfig.ssl = {
+    rejectUnauthorized: true, // Enforce certificate validation
+    ca: fs.readFileSync(caPath).toString(),
+};
+console.log('>>> db.js: SSL enabled with ca.pem for all environments');
 
 const pool = new Pool(poolConfig);
 
