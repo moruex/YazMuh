@@ -32,7 +32,7 @@ if (process.env.DATABASE_URL) {
 }
 
 // Always use ca.pem for SSL in all environments
-const caPath = require('path').join(__dirname, '../ca.pem');
+const caPath = require('path').join(__dirname, 'ca.pem');
 poolConfig.ssl = {
     rejectUnauthorized: false, // Allow self-signed or untrusted certs
     ca: fs.readFileSync(caPath).toString(),
