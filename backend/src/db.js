@@ -34,10 +34,10 @@ if (process.env.DATABASE_URL) {
 // Always use ca.pem for SSL in all environments
 const caPath = require('path').join(__dirname, '../ca.pem');
 poolConfig.ssl = {
-    rejectUnauthorized: true, // Enforce certificate validation
+    rejectUnauthorized: false, // Allow self-signed or untrusted certs
     ca: fs.readFileSync(caPath).toString(),
 };
-console.log('>>> db.js: SSL enabled with ca.pem for all environments');
+console.log('>>> db.js: SSL enabled with ca.pem for all environments, rejectUnauthorized: false');
 
 const pool = new Pool(poolConfig);
 
