@@ -1,35 +1,57 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./MoviesPage.css";
 import MovieCard7 from "./MovieCard7";
 import Footer from "@src/components/app/Footer";
+import {
+  getMoviesForPage,
+  getMoviesPageCount,
+  getAllGenres as getGenres,
+  Movie as BackendMovie, // Fetched movie structure from API
+  Genre as ApiGenre,
+  MoviesPageParams,
+} from "@src/services/movieNewsService";
+import { useTranslation } from 'react-i18next';
 
+// Local Movie type for what MovieCard7 and this page will use internally
 export interface Movie {
-  id: number;
+  id: string;
   title: string;
-  year: number;
-  posterUrl: string;
-  rating: number;
-  imdbRating?: number;
-  rtRating?: number;
-  mcRating?: number;
-  genres: string[];
-  director?: string;
-  runtime?: number;
-  language?: string;
+  year?: number;
+  posterUrl?: string | null;
+  rating?: number | null; // Combined from movieq_rating / imdb_rating
+  imdbRating?: number | null;
+  genres: { id: string; name: string }[] | null;
+  duration_minutes?: number | null;
+  slug?: string;
+  plot_summary?: string | null;
+  language?: string; // Keep this if we plan to get it from backend Movie type directly (not crew)
+  directors?: { id: string; name: string; slug?: string | null; }[];
+  actors?: { id: string; name: string; slug?: string | null; character_name?: string | null; }[];
 }
 
-// Define the possible sort keys explicitly for type safety
-export type SortByType = "rating" | "title" | "year";
+const sortMap: { [key: string]: string } = {
+  rating_desc: "VOTE_AVERAGE_DESC",
+  rating_asc: "VOTE_AVERAGE_ASC",
+  title_asc: "TITLE_ASC",
+  title_desc: "TITLE_DESC",
+  year_desc: "RELEASE_DATE_DESC",
+  year_asc: "RELEASE_DATE_ASC",
+  popularity_desc: "POPULARITY_DESC",
+  popularity_asc: "POPULARITY_ASC",
+};
+export type SortByType = keyof typeof sortMap;
 
 export interface FiltersState {
   sortBy: SortByType;
-  year: string; // Keep as string from input, parse when filtering
-  minRating: string; // Keep as string from input, parse when filtering
-  category: string;
+  year: string;
+  minRating: string;
+  category: string; // Genre ID
+  search: string;   // Search term for backend 'search' param
 }
 
 export interface FilterControlsProps {
   filters: FiltersState;
+  availableGenres: ApiGenre[];
   onFilterChange: (name: keyof FiltersState, value: string) => void;
   onApplyFilters: () => void;
 }
@@ -40,219 +62,65 @@ export interface PaginationProps {
   onPageChange: (pageNumber: number) => void;
 }
 
-export interface MovieCardProps {
-  movie: Movie;
-}
-// --- Mock Data (Typed) ---
-// Explicitly type mockMovies array
-const mockMovies: Movie[] = [
-  {
-    id: 1,
-    title: "The Shawshank Redemption",
-    year: 1994,
-    posterUrl:
-      "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_FMjpg_UX1000_.jpg",
-    rating: 9.3, // Assuming this is the primary rating for sorting/filtering initially
-    imdbRating: 9.3,
-    rtRating: 91,
-    mcRating: 80,
-    genres: ["Drama"],
-    director: "Frank Darabont",
-    runtime: 142,
-    language: "English",
-  },
-  {
-    id: 2,
-    title: "The Godfather",
-    year: 1972,
-    posterUrl:
-      "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-    rating: 9.2,
-    imdbRating: 9.2,
-    rtRating: 97,
-    mcRating: 100,
-    genres: ["Crime", "Drama"],
-    director: "Francis Ford Coppola",
-    runtime: 175,
-    language: "English",
-  },
-  {
-    id: 3,
-    title: "Pulp Fiction",
-    year: 1994,
-    posterUrl:
-      "https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-    rating: 8.9,
-    imdbRating: 8.9,
-    rtRating: 92,
-    mcRating: 94,
-    genres: ["Crime", "Drama"],
-    director: "Quentin Tarantino",
-    runtime: 154,
-    language: "English",
-  },
-  {
-    id: 6,
-    title: "Inception",
-    year: 2010,
-    posterUrl:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.8,
-    imdbRating: 8.8,
-    rtRating: 87,
-    mcRating: 74,
-    genres: ["Action", "Adventure", "Sci-Fi"],
-    director: "Christopher Nolan",
-    runtime: 148,
-    language: "English",
-  },
-  {
-    id: 7,
-    title: "Interstellar",
-    year: 2014,
-    posterUrl:
-      "https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.6,
-    imdbRating: 8.6,
-    rtRating: 73,
-    mcRating: 74,
-    genres: ["Adventure", "Drama", "Sci-Fi"],
-    director: "Christopher Nolan",
-    runtime: 169,
-    language: "English",
-  },
-  {
-    id: 9,
-    title: "The Dark Knight",
-    year: 2008,
-    posterUrl:
-      "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_FMjpg_UX1000_.jpg",
-    rating: 9.0,
-    imdbRating: 9.0,
-    rtRating: 94,
-    mcRating: 84,
-    genres: ["Action", "Crime", "Drama"],
-    director: "Christopher Nolan",
-    runtime: 152,
-    language: "English",
-  },
-  {
-    id: 10,
-    title: "Fight Club",
-    year: 1999,
-    posterUrl:
-      "https://m.media-amazon.com/images/M/MV5BMmEzNTkxYjQtZTc0MC00YTVjLTg5ZTEtZWMwOWVlYzY0NWIwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.8,
-    imdbRating: 8.8,
-    rtRating: 79,
-    mcRating: 66,
-    genres: ["Drama"],
-    director: "David Fincher",
-    runtime: 139,
-    language: "English",
-  },
-  {
-    id: 11,
-    title: "Naruto: The Last",
-    year: 2014,
-    posterUrl:
-      "https://static.hdrezka.ac/i/2022/9/28/d3abc7fdf9382ef67g21p.jpg",
-    rating: 8.2,
-    imdbRating: 8.2,
-    rtRating: 80,
-    mcRating: 62,
-    genres: ["Animation", "Action", "Adventure"],
-    director: "Tsuneo Kobayashi",
-    runtime: 112,
-    language: "Japanese",
-  },
-  {
-    id: 17,
-    title: "Spirited Away",
-    year: 2001,
-    posterUrl:
-      "https://m.media-amazon.com/images/M/MV5BMjlmZmI5MDctNDE2YS00YWE0LWE5ZWItZDBhYWQ0NTcxNWRhXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.6,
-    imdbRating: 8.6,
-    rtRating: 97,
-    mcRating: 96,
-    genres: ["Animation", "Adventure", "Family"],
-    director: "Hayao Miyazaki",
-    runtime: 125,
-    language: "Japanese",
-  },
-  {
-    id: 15,
-    title: "Parasite",
-    year: 2019,
-    posterUrl:
-      "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_FMjpg_UX1000_.jpg",
-    rating: 8.6,
-    imdbRating: 8.6,
-    rtRating: 99,
-    mcRating: 96,
-    genres: ["Comedy", "Drama", "Thriller"],
-    director: "Bong Joon-ho",
-    runtime: 132,
-    language: "Korean",
-  },
-  // ... rest of mock movies
-];
-
-// --- FilterControls Component (Typed) ---
 const FilterControls: React.FC<FilterControlsProps> = ({
   filters,
+  availableGenres,
   onFilterChange,
   onApplyFilters,
 }) => {
-  const genres = [
-    "Action",
-    "Adventure",
-    "Animation",
-    "Comedy",
-    "Crime",
-    "Drama",
-    "Family",
-    "Fantasy",
-    "Horror",
-    "Mystery",
-    "Romance",
-    "Sci-Fi",
-    "Thriller",
-    "Documentary",
-  ];
-
-  // Type the sort options array
+  const { t } = useTranslation();
   const sortOptions: { value: SortByType; label: string }[] = [
-    { value: "rating", label: "By IMDb Rating" },
-    { value: "title", label: "By Title" },
-    { value: "year", label: "By Year" },
+    { value: "rating_desc", label: t("ratingHighToLow") },
+    { value: "rating_asc", label: t("ratingLowToHigh") },
+    { value: "popularity_desc", label: t("popularityMost") },    
+    { value: "title_asc", label: t("titleAZ") },
+    { value: "title_desc", label: t("titleZA") },
+    { value: "year_desc", label: t("yearNewest") },
+    { value: "year_asc", label: t("yearOldest") },
   ];
 
-  // Type the event parameter
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    // Assert the name is a key of FiltersState for type safety with onFilterChange
     const name = e.target.name as keyof FiltersState;
     const value = e.target.value;
     onFilterChange(name, value);
   };
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    handleChange(e);
-    // onApplyFilters(); // Optional: Trigger apply on select change
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onApplyFilters(); // Call the existing apply filters function
+    }
+  };
+  
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onFilterChange("sortBy", e.target.value);
+    // Trigger apply on sort change to re-fetch immediately
+    // This assumes onApplyFilters will use the latest state from the parent
+    // We will call onApplyFilters directly in the parent for sort changes to ensure timing
   };
 
   return (
     <div className="filter-controls">
+      <div className="filter-group search-group">
+        <input
+          type="text"
+          name="search"
+          id="search"
+          value={filters.search}
+          onChange={handleChange}
+          onKeyDown={handleSearchKeyDown}
+          placeholder={t("searchByTitle")}
+          className="filter-input search"
+        />
+      </div>
       <div className="filter-group">
-        <label htmlFor="sortBy">Sort by:</label>
+        <label htmlFor="sortBy">{t("sortBy")}:</label>
         <select
           name="sortBy"
           id="sortBy"
           value={filters.sortBy}
-          onChange={handleSelectChange}
+          onChange={handleSortChange} 
           className="filter-select"
         >
           {sortOptions.map((option) => (
@@ -262,24 +130,20 @@ const FilterControls: React.FC<FilterControlsProps> = ({
           ))}
         </select>
       </div>
-
       <div className="filter-group">
-        {/* Year Input - Input type is number but value is managed as string in state */}
         <input
           type="number"
           name="year"
           id="year"
           value={filters.year}
           onChange={handleChange}
-          placeholder="Year"
+          placeholder={t("yearExample")}
           className="filter-input year"
           min="1900"
           max={new Date().getFullYear()}
         />
       </div>
-
       <div className="filter-group">
-        {/* Min Rating Input */}
         <input
           type="number"
           step="0.1"
@@ -289,295 +153,231 @@ const FilterControls: React.FC<FilterControlsProps> = ({
           id="minRating"
           value={filters.minRating}
           onChange={handleChange}
-          placeholder="Min IMDb Rating"
+          placeholder={t("minRatingRange")}
           className="filter-input rating"
         />
       </div>
-
       <div className="filter-group">
         <select
           name="category"
           id="category"
           value={filters.category}
-          onChange={handleSelectChange} // Use specific handler or combine if desired
+          onChange={handleChange}
           className="filter-select category"
         >
-          <option value="">Select Category</option>
-          {genres.map((genre) => (
-            <option key={genre} value={genre}>
-              {genre}
+          <option value="">{t("allGenres")}</option>
+          {availableGenres.map((genre) => (
+            <option key={genre.id} value={genre.id}>
+              {genre.name}
             </option>
           ))}
         </select>
       </div>
-
       <button
         type="button"
         onClick={onApplyFilters}
         className="filter-apply-button"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="currentColor"
-          viewBox="0 0 16 16"
-          className="filter-icon"
-        >
-          {/* SVG Path */}
-          <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z" />
-        </svg>
-        Apply
+        {t("applyFilters")}
       </button>
     </div>
   );
 };
 
-// --- Pagination Component (Typed) ---
-const Pagination: React.FC<PaginationProps> = ({
-  currentPage,
-  totalPages,
-  onPageChange,
-}) => {
-  if (totalPages <= 1) {
-    return null;
-  }
-
+const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+  const { t } = useTranslation();
+  if (totalPages <= 1) return null;
   const getPageNumbers = (): (number | string)[] => {
-    // Return type includes string for "..."
     const delta = 1;
-    const pages: (number | string)[] = []; // Allow numbers or "..." string
-
-    pages.push(1);
-
-    if (currentPage > delta + 2) {
-      pages.push("...");
-    }
-
+    const pages: (number | string)[] = [1];
+    if (currentPage > delta + 2) pages.push("...");
     const start = Math.max(2, currentPage - delta);
     const end = Math.min(totalPages - 1, currentPage + delta);
-    for (let i = start; i <= end; i++) {
-      if (!pages.includes(i)) {
-        pages.push(i);
-      }
-    }
-
-    if (currentPage < totalPages - delta - 1) {
-      if (end < totalPages - 1) {
-        pages.push("...");
-      }
-    }
-
-    if (totalPages > 1 && !pages.includes(totalPages)) {
-      pages.push(totalPages);
-    }
-
+    for (let i = start; i <= end; i++) if (!pages.includes(i)) pages.push(i);
+    if (currentPage < totalPages - delta - 1 && end < totalPages - 1) pages.push("...");
+    if (totalPages > 1 && !pages.includes(totalPages)) pages.push(totalPages);
     return pages;
   };
-
   const pageNumbers = getPageNumbers();
-
   return (
     <div className="ms-pagination-container">
-      <button
-        className="ms-pagination-button"
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        aria-label="Go to previous page"
-      >
-        Previous
-      </button>
-
+      <button className="ms-pagination-button" onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>{t("previous")}</button>
       {pageNumbers.map((page, index) =>
         typeof page === "string" ? (
-          <span key={`ellipsis-${index}`} className="ms-pagination-ellipsis">
-            {page}
-          </span>
+          <span key={`ellipsis-${index}`} className="ms-pagination-ellipsis">{page}</span>
         ) : (
-          <button
-            key={page}
-            className={`ms-pagination-button ${
-              currentPage === page ? "ms-pagination-active" : ""
-            }`}
-            // Type assertion needed here if TS can't infer page is number
-            onClick={() => onPageChange(page as number)}
-            aria-label={`Go to page ${page}`}
-            aria-current={currentPage === page ? "page" : undefined}
-          >
-            {page}
-          </button>
+          <button key={page} className={`ms-pagination-button ${currentPage === page ? "ms-pagination-active" : ""}`} onClick={() => onPageChange(page as number)}>{page}</button>
         )
       )}
-
-      <button
-        className="ms-pagination-button"
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        aria-label="Go to next page"
-      >
-        Next
-      </button>
+      <button className="ms-pagination-button" onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages}>{t("next")}</button>
     </div>
   );
 };
 
-// --- MoviesPage Component (Typed) ---
 const MoviesPage: React.FC = () => {
-  // Use React.FC for functional components
-  // Type the state for filters
+  const { t } = useTranslation();
   const [filters, setFilters] = useState<FiltersState>({
-    sortBy: "rating", // Default sort matches SortByType
+    sortBy: "rating_desc",
     year: "",
     minRating: "",
     category: "",
+    search: "",
   });
 
-  // Explicitly type the state for filteredMovies
-  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [totalMovies, setTotalMovies] = useState(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 6;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [availableGenres, setAvailableGenres] = useState<ApiGenre[]>([]);
 
-  const applyFiltersAndSort = () => {
-    let results = [...mockMovies];
+  const itemsPerPage = 12; // Adjusted items per page
 
-    results = results.filter((movie) => {
-      const filterYear = parseInt(filters.year, 10);
-      if (!isNaN(filterYear) && movie.year !== filterYear) {
-        return false;
+  const fetchMoviesData = useCallback(async (pageToFetch: number, currentFilters: FiltersState) => {
+    setLoading(true);
+    setError(null);
+    const offset = (pageToFetch - 1) * itemsPerPage;
+
+    const apiParams: MoviesPageParams = {
+      limit: itemsPerPage,
+      offset,
+      sortBy: sortMap[currentFilters.sortBy],
+      search: currentFilters.search && currentFilters.search.trim() !== "" ? currentFilters.search.trim() : undefined,
+      filter: {},
+    };
+
+    if (currentFilters.category) {
+      apiParams.filter.genreIds = [currentFilters.category];
+    }
+    if (currentFilters.year) {
+      const yearNum = parseInt(currentFilters.year, 10);
+      if (!isNaN(yearNum)) {
+        apiParams.filter.minReleaseYear = yearNum;
+        apiParams.filter.maxReleaseYear = yearNum;
       }
-
-      const minRatingValue = parseFloat(filters.minRating);
-      if (!isNaN(minRatingValue) && (movie.imdbRating === undefined || movie.imdbRating < minRatingValue)) {
-        return false;
+    }
+    if (currentFilters.minRating) {
+      const ratingNum = parseFloat(currentFilters.minRating);
+      if(!isNaN(ratingNum)) {
+        apiParams.filter.minMovieqRating = ratingNum;
       }
+    }
+    if (Object.keys(apiParams.filter).length === 0) {
+      delete apiParams.filter;
+    }
 
-      if (filters.category && !movie.genres.includes(filters.category)) {
-        return false;
+    try {
+      // Fetch count first or in parallel
+      const countData = await getMoviesPageCount({ filter: apiParams.filter, search: apiParams.search });
+      setTotalMovies(countData);
+      
+      if (countData === 0) {
+        setMovies([]);
+      } else {
+        const moviesData = await getMoviesForPage(apiParams);
+        const transformedMovies: Movie[] = moviesData.map((apiMovie: BackendMovie) => ({
+          id: String(apiMovie.id),
+          title: apiMovie.title,
+          posterUrl: apiMovie.poster_url,
+          year: apiMovie.release_date ? new Date(apiMovie.release_date).getFullYear() : undefined,
+          rating: apiMovie.movieq_rating ?? apiMovie.imdb_rating,
+          imdbRating: apiMovie.imdb_rating,
+          genres: apiMovie.genres,
+          duration_minutes: apiMovie.duration_minutes,
+          // slug: apiMovie.slug,
+          plot_summary: apiMovie.plot_summary,
+          // language: apiMovie.original_language,
+          directors: apiMovie.crew?.filter(member => member.department === 'Directing' && member.job === 'Director').map(d => d.person) || [],
+          actors: apiMovie.cast?.map(c => ({ ...c.person, character_name: c.character_name })) || [],
+        }));
+        setMovies(transformedMovies);
       }
-      return true;
-    });
+      setCurrentPage(pageToFetch);
+    } catch (err: any) {
+      setError(err.message || t("failedToFetchMovies"));
+      setMovies([]);
+      setTotalMovies(0);
+    }
+    setLoading(false);
+  }, [itemsPerPage, t]); // Added t to dependencies
 
-    // --- Sorting (Type Safe - Revised) ---
-    results.sort((a, b) => {
-      // Access properties directly based on the specific sort key
-      if (filters.sortBy === 'title') {
-        // Here, we know we are dealing with strings
-        return a.title.toLowerCase().localeCompare(b.title.toLowerCase());
-      } else if (filters.sortBy === 'rating') {
-        // Here, we know we are dealing with numbers (or undefined)
-        const ratingA = a.imdbRating ?? a.rating ?? 0; // Prefer imdbRating, fallback to rating
-        const ratingB = b.imdbRating ?? b.rating ?? 0;
-        return ratingB - ratingA; // Descending order for rating
-      } else if (filters.sortBy === 'year') {
-        // Here, we know we are dealing with numbers
-        // Assuming 'year' is always present based on Movie interface, but nullish coalescing is safe
-        return (a.year ?? 0) - (b.year ?? 0); // Ascending order for year
-      }
+  useEffect(() => {
+    getGenres()
+      .then(setAvailableGenres)
+      .catch(err => {
+        console.error("Failed to fetch genres:", err);
+      });
+  }, []);
 
-      // Default case (shouldn't be reached with typed sortBy, but good practice)
-      return 0;
-    });
+  useEffect(() => {
+    fetchMoviesData(currentPage, filters); 
+  }, [fetchMoviesData, currentPage, filters]);
 
-    setFilteredMovies(results);
-    setCurrentPage(1);
-  };
-
-  // Type parameters for handleFilterChange
   const handleFilterChange = (name: keyof FiltersState, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // applyFiltersAndSort(); // Optional instant apply
+    const newFilters = { ...filters, [name]: value };
+    setFilters(newFilters);
+    if (name === 'sortBy' || name === 'category') { // Apply immediately for sort and category changes
+      setCurrentPage(1); // Reset to page 1
+      // fetchMoviesData will be called by useEffect due to filters change
+    }
+    // For other filters like year, minRating, search, fetching is deferred to Apply button or Enter key
   };
 
   const handleApplyFiltersClick = () => {
-    applyFiltersAndSort();
+    setCurrentPage(1); // Reset to first page when applying any new filter combination
+    // The useEffect watching `filters` and `currentPage` will trigger the fetch.
+    // If filters didn't change but currentPage was already 1, we might need to force it, but useEffect should handle it.
+    // To be safe, or if direct fetch is preferred over relying on useEffect for this specific action:
+    fetchMoviesData(1, filters); // Explicitly call to ensure fetch if filters object reference didn't change
   };
 
-  useEffect(() => {
-    applyFiltersAndSort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Initial load
-
-  useEffect(() => {
-    // This effect specifically handles re-sorting when sortBy changes
-    applyFiltersAndSort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.sortBy]); // Re-run only when sortBy changes
-
-  const totalFilteredMovies = filteredMovies.length;
-  const totalPages = Math.ceil(totalFilteredMovies / itemsPerPage);
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  // currentMoviesOnPage is correctly inferred as Movie[]
-  const currentMoviesOnPage = filteredMovies.slice(startIndex, endIndex);
-
-  // Type the parameter for handlePageChange
   const handlePageChange = (pageNumber: number) => {
-    if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const totalPages = Math.ceil(totalMovies / itemsPerPage);
 
   return (
     <>
       <div className="movie-archive-container">
         <div className="archive-header">
-          <h1 className="archive-title">All Movies</h1>
+          <h1 className="archive-title">{t("allMovies")}</h1>
         </div>
-
         <FilterControls
           filters={filters}
+          availableGenres={availableGenres}
           onFilterChange={handleFilterChange}
           onApplyFilters={handleApplyFiltersClick}
         />
-
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-
+        {loading && <div className="loading-indicator">{t("loadingMovies")}</div>}
+        {error && <div className="error-message">{t("error")}: {error}</div>}
+        {!loading && !error && movies.length === 0 && (
+          <div className="no-results">
+            <p>{t("noMoviesFoundMatchingCriteria")}</p>
+          </div>
+        )}
+        {!loading && !error && movies.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
         <div className="results-area">
-          {currentMoviesOnPage.length > 0 ? (
-            // movie is correctly inferred as Movie here
-            currentMoviesOnPage.map((movie) => (
-              <MovieCard7 key={movie.id} movie={movie} />
-            ))
-          ) : (
-            <div className="no-results">
-              <p>No movies found matching your criteria.</p>
-              {(filters.year || filters.minRating || filters.category) && (
-                <button
-                  onClick={() => {
-                    setFilters({
-                      // Reset filters, keeping sortBy
-                      sortBy: filters.sortBy,
-                      year: "",
-                      minRating: "",
-                      category: "",
-                    });
-                    // applyFiltersAndSort(); // No need to call explicitly if state change triggers useEffect
-                  }}
-                  className="clear-filters-button"
-                >
-                  Clear Filters
-                </button>
-              )}
-            </div>
-          )}
+          {!loading && !error && movies.map(movie => (
+            <MovieCard7 key={movie.id} movie={movie} />
+          ))}
         </div>
-
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        {!loading && !error && movies.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
-      <Footer /> {/* Assuming Footer component exists and works */}
+      <Footer />
     </>
   );
 };
