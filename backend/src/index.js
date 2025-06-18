@@ -19,14 +19,14 @@ async function startApolloServer() {
     const httpServer = http.createServer(app);
 
     // --- CORS Setup ---
-    // Apply CORS before Apollo middleware
     const corsOptions = {
         origin: [
             'http://localhost:5173',
             'http://localhost:5174',
             'http://localhost:5175',
             'https://movieeq.netlify.app',
-            'https://movieq-admin.netlify.app'
+            'https://movieq-admin.netlify.app',
+            'https://movieq.com.tr'
         ],
         credentials: true,
     };
@@ -38,7 +38,7 @@ async function startApolloServer() {
     // --- Setup Apollo Server ---
     // Merge the schemas
     const mergedSchema = mergeSchemas({
-      schemas: [schema, schemaFrontend],
+        schemas: [schema, schemaFrontend],
     });
 
     const server = new ApolloServer({
@@ -78,7 +78,7 @@ async function startApolloServer() {
 const initializeHandler = async () => {
     if (serverlessHandler) {
         return serverlessHandler;
-     }
+    }
 
     try {
         console.log("🚀 Initializing Apollo Server for serverless function...");
