@@ -34,6 +34,7 @@ export interface ApiCensorshipReason {
 
 /** Input for the adminAddComment mutation */
 export interface AdminAddCommentInput {
+    performingAdminId: string;
     movie_id: string;
     content: string;
     parent_comment_id?: string | null; // Optional
