@@ -6,6 +6,7 @@ export interface ApiGenreCore {
     name: string;
     description?: string | null;
     image_url?: string | null;
+    slug?: string | null; // Added slug field
     is_collection?: boolean | null; // Added
     movieCount?: number | null; // Optional: Depends on if your API provides this efficiently
 }
@@ -16,5 +17,6 @@ export interface GenreInputData {
     name: string;
     description?: string | null;
     image_url?: string | null;
+    slug?: string | null; // Added slug field
     is_collection: boolean; // Required for create/update
 }
