@@ -27,23 +27,8 @@ async function startApolloServer() {
         next();
     });
 
-    const allowedOrigins = [
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://localhost:5175',
-        'https://movieeq.netlify.app',
-        'https://movieq.com.tr',
-        'https://movieq-admin.netlify.app'
-    ];
-
     const corsOptions = {
-        origin: function (origin, callback) {
-            if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS'));
-            }
-        },
+        origin: '*', // Allow all origins
         credentials: true,
         allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-id'],
     };
