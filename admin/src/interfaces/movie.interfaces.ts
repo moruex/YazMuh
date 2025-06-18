@@ -1,68 +1,149 @@
 // src/interfaces/movie.interfaces.ts
 import type { ApiGenreCore } from './genre.interfaces';
-import type { ApiPersonCore } from './person.interfaces';
+
+/** Represents a person for use in dropdowns */
+export interface PersonOption {
+    id: string;
+    name: string;
+    profile_image_url?: string;
+    slug?: string;
+}
+
+/** Represents a genre for use in dropdowns */
+export interface GenreOption {
+    id: string;
+    name: string;
+    is_collection?: boolean;
+}
 
 /** Represents the Movie structure used primarily in frontend components. */
 export interface Movie {
     id: string;
     title: string;
     imageUrl: string;
-    trailerUrl?: string | null;
+    trailerUrl?: string;
     description: string;
     shortDescription?: string; // Optional summary field for frontend use
     genres: string[]; // Names of genres
     directors: string[]; // Names of directors
     actors: string[]; // Names of actors
-    rating: number; // Typically avg_rating from API
+    rating: number; // Typically vote_average from API
     releaseDate: string; // Formatted date string (e.g., YYYY-MM-DD)
-    duration: number; // Duration in minutes
+    duration: number; // Runtime in minutes
+    movieqRating?: number; // From database movieq_rating
+    imdbRating?: number; // From database imdb_rating
+    letterboxdRating?: number; // From database letterboxd_rating
+    selectedGenreIds?: string[]; // For form handling with dropdown selectors
+    selectedActorIds?: string[]; // For form handling with dropdown selectors
+    selectedDirectorIds?: string[]; // For form handling with dropdown selectors
+    originalTitle?: string; // Original language title
+    imdbId?: string; // IMDB ID (e.g., tt1234567)
+    tmdbId?: number; // TMDB ID
+    status?: string; // Movie status
 }
 
 /**
- * Represents the data structure sent to API mutations (Create/Update Movie).
- * Maps frontend fields to the API's expected field names and structure.
- * IMPORTANT: Relationship updates (genres, persons) might need separate mutations
- * or a different backend input structure depending on your schema.
+ * Input for creating a movie
  */
-export interface MovieInputData {
-    title: string;              // Maps to API title
-    release_date: string;       // Maps from frontend releaseDate (ensure YYYY-MM-DD format)
-    plot_summary: string;       // Maps from frontend description
-    poster_url: string;         // Maps from frontend imageUrl
-    duration_minutes: number;   // Maps from frontend duration
-    trailer_url?: string | null; // Maps from frontend trailerUrl (send null if empty)
-
-    // --- Example Relationship Handling (IF SUPPORTED BY BACKEND INPUT) ---
-    // genreIds?: string[]; // If backend accepts genre IDs directly on update/create
-    // personLinks?: { personId: string; roleType: RoleType; characterName?: string | null }[]; // If backend accepts structured person links
-    //
-    // NOTE: The original comment indicated these were NOT accepted by MovieUpdateInput.
-    // Verify your backend schema for MovieInput and MovieUpdateInput.
+export interface CreateMovieInput {
+    title: string;
+    overview?: string;
+    release_date?: string;
+    runtime?: number;
+    poster_path?: string;
+    backdrop_path?: string;
+    budget?: number;
+    revenue?: number;
+    status?: string; // MovieStatus enum value
+    tagline?: string;
+    tmdb_id?: number;
+    imdb_id?: string;
+    popularity?: number;
+    vote_average?: number;
+    vote_count?: number;
+    trailer_url?: string;
+    movieq_rating?: number; // DB field
+    imdb_rating?: number; // DB field
+    letterboxd_rating?: number; // DB field
 }
 
-/** Core fields representing a Movie from the API, often used in lists. */
+/**
+ * Input for updating a movie
+ */
+export interface UpdateMovieInput {
+    title?: string;
+    overview?: string;
+    release_date?: string;
+    runtime?: number;
+    poster_path?: string;
+    backdrop_path?: string;
+    budget?: number;
+    revenue?: number;
+    status?: string; // MovieStatus enum value
+    tagline?: string;
+    tmdb_id?: number;
+    imdb_id?: string;
+    popularity?: number;
+    vote_average?: number;
+    vote_count?: number;
+    trailer_url?: string;
+    movieq_rating?: number; // DB field
+    imdb_rating?: number; // DB field
+    letterboxd_rating?: number; // DB field
+}
+
+/** Core fields representing a Movie from the API, used in lists. */
 export interface ApiMovieCore {
     id: string;
     title: string;
+    slug: string;
     poster_url?: string | null;
-    release_date?: string | null; // API format (e.g., ISO string or YYYY-MM-DD)
-    avg_rating?: number | null;
+    release_date?: string | null; 
     duration_minutes?: number | null;
-    genres?: Pick<ApiGenreCore, 'id' | 'name'>[]; // Include basic genre info
+    plot_summary?: string | null;
+    trailer_url?: string | null;
+    movieq_rating?: number | null;
+    imdb_rating?: number | null;
+    letterboxd_rating?: number | null;
+    genres?: Pick<ApiGenreCore, 'id' | 'name' | 'is_collection'>[]; 
 }
 
-/** Detailed fields representing a Movie from the API, used for detail views. */
-export interface ApiMovieDetail {
+/** Role type for a person in a movie */
+export enum MovieRoleType {
+    DIRECTOR = 'director',
+    ACTOR = 'actor',
+    WRITER = 'writer',
+    PRODUCER = 'producer',
+    CINEMATOGRAPHER = 'cinematographer',
+    COMPOSER = 'composer'
+}
+
+/** Person in a cast role */
+export interface ApiMovieCastMember {
     id: string;
-    title: string;
-    release_date?: string | null; // API format
-    plot_summary?: string | null;
-    poster_url?: string | null;
-    duration_minutes?: number | null;
-    trailer_url?: string | null;
-    avg_rating?: number | null;
-    created_at: string; // Or DateTime scalar
-    updated_at: string; // Or DateTime scalar
-    genres?: ApiGenreCore[];
-    persons?: ApiPersonCore[];
+    character_name?: string;
+    cast_order?: number;
+    person: {
+        id: string;
+        name: string;
+    };
+}
+
+/** Person in a crew role */
+export interface ApiMovieCrewMember {
+    id: string;
+    job?: string;
+    department?: string;
+    person: {
+        id: string;
+        name: string;
+    };
+}
+
+/** Detailed fields representing a Movie from the API. */
+export interface ApiMovieDetail extends ApiMovieCore {
+    created_at: string;
+    updated_at: string;
+    cast?: ApiMovieCastMember[];
+    crew?: ApiMovieCrewMember[];
 }

@@ -9,3 +9,4 @@ export * from './news.interfaces';
 export * from './person.interfaces';
 export * from './quiz.interfaces';
 export * from './user.interfaces';
+export * from './enums';
