@@ -34,15 +34,17 @@ export interface ApiQuizChoiceInput {
 
 /** Input for creating a new quiz question */
 export interface ApiCreateQuizQuestionInput {
+    quiz_id?: string; // Optional now as it has default in backend
     question_text: string;
     allowed_choices_count?: number | null; // Optional in backend, defaults to 1
     choices: ApiQuizChoiceInput[];
 }
 
-/** Input for updating a quiz question (ASSUMED - adjust based on backend implementation) */
-export interface ApiUpdateQuizQuestionInput extends Partial<ApiCreateQuizQuestionInput> {
-    // Might allow partial updates, structure depends on backend
-    // Could also require all fields like CreateQuizQuestionInput
+/** Input for updating a quiz question */
+export interface ApiUpdateQuizQuestionInput {
+    question_text?: string;
+    allowed_choices_count?: number | null;
+    choices?: ApiQuizChoiceInput[];
 }
 
 
