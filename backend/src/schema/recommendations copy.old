@@ -1,0 +1,90 @@
+const gql = require('graphql-tag');
+
+const typeDefs = gql`
+  type RecommendationSection {
+    id: ID!
+    title: String!
+    section_type: String! # e.g., ADMIN_DEFINED, LATEST, POPULAR
+    description: String
+    display_order: Int!
+    is_active: Boolean!
+    movies(limit: Int = 10, offset: Int = 0): [Movie!] # Fetches movies for this section
+  }
+
+  extend type Query {
+    recommendationSections(activeOnly: Boolean = true, limit: Int = 10, offset: Int = 0): [RecommendationSection!]
+    randomMovies(limit: Int = 18): [Movie!]
+    # moviesByRecommendationSection(sectionId: ID!, limit: Int = 10, offset: Int = 0): [Movie!]
+    # This might not be needed if RecommendationSection.movies resolver is efficient
+  }
+`;
+
+const resolvers = {
+  Query: {
+    recommendationSections: async (_, { activeOnly = true, limit = 10, offset = 0 }, { db }) => {
+      let query = 'SELECT * FROM recommendation_sections';
+      const params = [];
+      if (activeOnly) {
+        query += ' WHERE is_active = true';
+      }
+      query += ' ORDER BY display_order ASC, title ASC';
+      if (limit !== null && limit !== undefined) {
+        params.push(limit);
+        query += ` LIMIT $${params.length}`;
+      }
+      if (offset !== null && offset !== undefined) {
+        params.push(offset);
+        query += ` OFFSET $${params.length}`;
+      }
+      const { rows } = await db.query(query, params);
+      return rows;
+    },
+    randomMovies: async (_, { limit = 18 }, { db }) => {
+      // Simple random for PostgreSQL. For very large tables, other strategies might be better.
+      const { rows } = await db.query('SELECT * FROM movies ORDER BY RANDOM() LIMIT $1', [limit]);
+      return rows;
+    },
+  },
+  RecommendationSection: {
+    movies: async (section, { limit = 10, offset = 0 }, { db }) => {
+      // If section_type is LATEST, POPULAR, etc., we might have custom logic
+      // For now, assumes recommendation_section_movies table is populated for all types,
+      // or these specific types are also manually populated into recommendation_section_movies.
+      
+      let movieQuery = ''
+      const movieParams = [limit, offset];
+
+      if (section.section_type === 'LATEST') {
+        movieQuery = `SELECT m.* 
+                        FROM movies m 
+                        ORDER BY m.release_date DESC NULLS LAST, m.id 
+                        LIMIT $1 OFFSET $2`;
+      } else if (section.section_type === 'POPULAR') {
+        // Example: using movieq_rating. Adjust as needed for your definition of popular.
+        movieQuery = `SELECT m.* 
+                        FROM movies m 
+                        ORDER BY m.movieq_rating DESC NULLS LAST, m.id 
+                        LIMIT $1 OFFSET $2`;
+      } else if (section.section_type === 'ADMIN_DEFINED' || 
+                 section.section_type === 'MOST_RATED' || 
+                 section.section_type === 'MOST_COMMENTED') {
+        // These types rely on the recommendation_section_movies table
+        movieParams.unshift(section.id); // Add section.id as the first parameter
+        movieQuery = `SELECT m.* 
+                        FROM movies m 
+                        JOIN recommendation_section_movies rsm ON m.id = rsm.movie_id 
+                        WHERE rsm.section_id = $1 
+                        ORDER BY rsm.display_order ASC, m.id 
+                        LIMIT $2 OFFSET $3`;
+      } else {
+        // Default or fallback for unknown section types - could return empty or error
+        return []; 
+      }
+      
+      const { rows } = await db.query(movieQuery, movieParams);
+      return rows;
+    },
+  },
+};
+
+module.exports = { typeDefs, resolvers }; 
