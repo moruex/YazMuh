@@ -19,17 +19,19 @@ async function startApolloServer() {
     const httpServer = http.createServer(app);
 
     // --- CORS Setup ---
+
     const corsOptions = {
         origin: [
             'http://localhost:5173',
             'http://localhost:5174',
             'http://localhost:5175',
-            'https://movieeq.netlify.app',
-            'https://movieq-admin.netlify.app',
-            'https://movieq.com.tr'
+            'https://movieeq.netlify.app',      // Netlify preview frontend
+            'https://movieq.com.tr',            // Production frontend
+            'https://movieq-admin.netlify.app'
         ],
         credentials: true,
-    };
+    }; 
+    
     app.use(cors(corsOptions));
 
     // Ensure body parsing middleware is applied *before* Apollo middleware
@@ -97,24 +99,43 @@ const initializeHandler = async () => {
 
 // Export the handler for Netlify
 exports.handler = async (event, context) => {
+    // Handle CORS preflight request
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': event.headers.origin || '*',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+                'Access-Control-Allow-Credentials': 'true',
+            },
+            body: '',
+        };
+    }
+
     try {
         const handler = await initializeHandler();
-        // Log incoming event for debugging (optional)
-        // console.log('Incoming event:', JSON.stringify(event));
-        // console.log('Context:', JSON.stringify(context));
-
-        // Add a small delay if needed for cold starts, although usually not necessary
-        // await new Promise(resolve => setTimeout(resolve, 50));
-
         const result = await handler(event, context);
-        // Log outgoing result for debugging (optional)
-        // console.log('Outgoing result:', JSON.stringify(result));
+
+        // Add CORS headers to the response
+        result.headers = {
+            ...(result.headers || {}),
+            'Access-Control-Allow-Origin': event.headers.origin || '*',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+            'Access-Control-Allow-Credentials': 'true',
+        };
+
         return result;
     } catch (error) {
-        console.error('❌ Error executing handler:', error);
-        // Return a standard server error response
         return {
             statusCode: 500,
+            headers: {
+                'Access-Control-Allow-Origin': event.headers.origin || '*',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+                'Access-Control-Allow-Credentials': 'true',
+            },
             body: JSON.stringify({ error: 'Internal Server Error during handler execution', details: error.message }),
         };
     }
