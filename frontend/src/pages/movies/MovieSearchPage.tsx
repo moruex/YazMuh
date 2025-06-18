@@ -3,292 +3,109 @@ import { useSearchParams } from 'react-router-dom';
 import './MovieSearchPage.css';
 import Footer from '@components/app/Footer';
 import { MovieCard2 } from './MovieCard2';
-import { Movie } from '@src/types/Movie';
-import { Filter, Search } from 'lucide-react';
+import {
+    Movie as ApiMovie,
+    Genre as ApiGenre,
+    getAllGenres,
+    getMoviesForPage,
+    getMoviesPageCount,
+    MoviesPageParams
+} from '@src/services/movieNewsService';
+import { Filter, Search, ListFilter } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import CircularLoader from '@components/app/CircularLoader';
+
+export interface Movie {
+    id: string;
+    title: string;
+    year?: number;
+    posterUrl?: string | null;
+    rating?: number | null;
+    genres?: { id: string; name: string }[] | null;
+    director?: string;
+    runtime?: number;
+    language?: string;
+}
+
+const sortMap: { [key: string]: string } = {
+    title_asc: "TITLE_ASC",
+    title_desc: "TITLE_DESC",
+    year_desc: "RELEASE_DATE_DESC",
+    year_asc: "RELEASE_DATE_ASC",
+    rating_desc: "VOTE_AVERAGE_DESC",
+    rating_asc: "VOTE_AVERAGE_ASC",
+};
+export type SortByType = keyof typeof sortMap;
 
 interface FilterOptions {
     query: string;
-    genres: string[];
+    genreIds: string[];
     yearFrom: string;
     yearTo: string;
-    rating: string;
-    runtime: string;
-    language: string;
-    director: string;
-    sortBy: string;
-    sortOrder: 'asc' | 'desc';
+    minRating: string;
+    sortBy: SortByType;
 }
 
-// MultiSelect component for genres and other multi-select filters
 interface MultiSelectProps {
-    options: string[];
+    options: ApiGenre[];
     selectedValues: string[];
-    onChange: (selected: string[]) => void;
+    onChange: (selectedIds: string[]) => void;
     placeholder: string;
 }
 
-const mockMovies: Movie[] = [
-    {
-        id: 1,
-        title: "The Shawshank Redemption",
-        year: 1994,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_FMjpg_UX1000_.jpg",
-        rating: 9.3,
-        genres: ["Drama"],
-        director: "Frank Darabont",
-        runtime: 142,
-        language: "English"
-    },
-    {
-        id: 2,
-        title: "The Godfather",
-        year: 1972,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-        rating: 9.2,
-        genres: ["Crime", "Drama"],
-        director: "Francis Ford Coppola",
-        runtime: 175,
-        language: "English"
-    },
-    {
-        id: 3,
-        title: "Pulp Fiction",
-        year: 1994,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-        rating: 8.9,
-        genres: ["Crime", "Drama"],
-        director: "Quentin Tarantino",
-        runtime: 154,
-        language: "English"
-    },
-    {
-        id: 6,
-        title: "Inception",
-        year: 2010,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_FMjpg_UX1000_.jpg",
-        rating: 8.8,
-        genres: ["Action", "Adventure", "Sci-Fi"],
-        director: "Christopher Nolan",
-        runtime: 148,
-        language: "English"
-    },
-    {
-        id: 7,
-        title: "Interstellar",
-        year: 2014,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg",
-        rating: 8.6,
-        genres: ["Adventure", "Drama", "Sci-Fi"],
-        director: "Christopher Nolan",
-        runtime: 169,
-        language: "English"
-    },
-    {
-        id: 9,
-        title: "The Dark Knight",
-        year: 2008,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_FMjpg_UX1000_.jpg",
-        rating: 9.0,
-        genres: ["Action", "Crime", "Drama"],
-        director: "Christopher Nolan",
-        runtime: 152,
-        language: "English"
-    },
-    {
-        id: 10,
-        title: "Fight Club",
-        year: 1999,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BMmEzNTkxYjQtZTc0MC00YTVjLTg5ZTEtZWMwOWVlYzY0NWIwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_FMjpg_UX1000_.jpg",
-        rating: 8.8,
-        genres: ["Drama"],
-        director: "David Fincher",
-        runtime: 139,
-        language: "English"
-    },
-    {
-        id: 11,
-        title: "Naruto: The Last",
-        year: 2014,
-        posterUrl: "https://static.hdrezka.ac/i/2022/9/28/d3abc7fdf9382ef67g21p.jpg",
-        rating: 8.2,
-        genres: ["Animation", "Action", "Adventure"],
-        director: "Tsuneo Kobayashi",
-        runtime: 112,
-        language: "Japanese"
-    },
-    {
-        id: 12,
-        title: "Attack on Titan: Chronicle",
-        year: 2020,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BMTY5ODk1NzUyMl5BMl5BanBnXkFtZTgwMjUyNzEyMTE@._V1_FMjpg_UX1000_.jpg",
-        rating: 8.5,
-        genres: ["Animation", "Action", "Drama"],
-        director: "Tetsurō Araki",
-        runtime: 120,
-        language: "Japanese"
-    },
-    {
-        id: 13,
-        title: "The Matrix",
-        year: 1999,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
-        rating: 8.7,
-        genres: ["Action", "Sci-Fi"],
-        director: "Lana & Lilly Wachowski",
-        runtime: 136,
-        language: "English"
-    },
-    {
-        id: 15,
-        title: "Parasite",
-        year: 2019,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_FMjpg_UX1000_.jpg",
-        rating: 8.6,
-        genres: ["Comedy", "Drama", "Thriller"],
-        director: "Bong Joon-ho",
-        runtime: 132,
-        language: "Korean"
-    },
-    {
-        id: 17,
-        title: "Spirited Away",
-        year: 2001,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BMjlmZmI5MDctNDE2YS00YWE0LWE5ZWItZDBhYWQ0NTcxNWRhXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg",
-        rating: 8.6,
-        genres: ["Animation", "Adventure", "Family"],
-        director: "Hayao Miyazaki",
-        runtime: 125,
-        language: "Japanese"
-    },
-    {
-        id: 18,
-        title: "The Avengers",
-        year: 2012,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg",
-        rating: 8.0,
-        genres: ["Action", "Adventure", "Sci-Fi"],
-        director: "Joss Whedon",
-        runtime: 143,
-        language: "English"
-    },
-    {
-        id: 19,
-        title: "Breaking Bad (TV Series)",
-        year: 2008,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BYmQ4YWMxYjUtNjZmYi00MDQ1LWFjMjMtNjA5ZDdiYjdiODU5XkEyXkFqcGdeQXVyMTMzNDExODE5._V1_FMjpg_UX1000_.jpg",
-        rating: 9.5,
-        genres: ["Crime", "Drama", "Thriller"],
-        runtime: 45, // per episode
-        language: "English"
-    },
-    {
-        id: 21,
-        title: "Blade Runner 2049",
-        year: 2017,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BNzA1Njg4NzYxOV5BMl5BanBnXkFtZTgwODk5NjU3MzI@._V1_FMjpg_UX1000_.jpg",
-        rating: 8.0,
-        genres: ["Sci-Fi", "Thriller"],
-        director: "Denis Villeneuve",
-        runtime: 164,
-        language: "English"
-    },
-    {
-        id: 23,
-        title: "Demon Slayer: Mugen Train",
-        year: 2020,
-        posterUrl: "https://pics.blokino.org/anime/05/0530/prev.jpg",
-        rating: 8.3,
-        genres: ["Animation", "Action", "Adventure"],
-        director: "Haruo Sotozaki",
-        runtime: 117,
-        language: "Japanese"
-    },
-    {
-        id: 24,
-        title: "Dune",
-        year: 2021,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BN2FjNmEyNWMtYzM0ZS00NjIyLTg5YzYtYThlMGVjNzE1OGViXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_FMjpg_UX1000_.jpg",
-        rating: 8.0,
-        genres: ["Sci-Fi", "Adventure"],
-        director: "Denis Villeneuve",
-        runtime: 155,
-        language: "English"
-    },
-    {
-        id: 26,
-        title: "The Witcher (TV Series)",
-        year: 2019,
-        posterUrl: "https://static.hdrezka.ac/i/2023/4/26/od101a5553311dy48a81e.jpg",
-        rating: 8.2,
-        genres: ["Action", "Adventure", "Fantasy"],
-        runtime: 60,
-        language: "English"
-    },
-    {
-        id: 28,
-        title: "Tenet",
-        year: 2020,
-        posterUrl: "https://m.media-amazon.com/images/M/MV5BYzg0NGM2NjAtNmIxOC00MDJmLTg5ZmYtYzM0MTE4NWE2NzlhXkEyXkFqcGdeQXVyMTA4NjE0NjEy._V1_FMjpg_UX1000_.jpg",
-        rating: 7.5,
-        genres: ["Action", "Sci-Fi", "Thriller"],
-        director: "Christopher Nolan",
-        runtime: 150,
-        language: "English"
-    },
-    {
-        id: 29,
-        title: "One Piece: Red",
-        year: 2022,
-        posterUrl: "https://static.hdrezka.ac/i/2023/5/5/oc9b75b78b731er75w38t.jpg",
-        rating: 7.3,
-        genres: ["Animation", "Action", "Adventure"],
-        director: "Gorō Taniguchi",
-        runtime: 115,
-        language: "Japanese"
-    },
-];
-
-const MultiSelect: React.FC<MultiSelectProps> = ({ options, selectedValues, onChange, placeholder }) => {
+const MultiSelect = ({ options, selectedValues, onChange, placeholder }: MultiSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const { t } = useTranslation();
 
-    const toggleOption = (option: string) => {
-        const newSelected = selectedValues.includes(option)
-            ? selectedValues.filter(item => item !== option)
-            : [...selectedValues, option];
+    const toggleOption = (optionId: string) => {
+        const newSelected = selectedValues.includes(optionId)
+            ? selectedValues.filter(id => id !== optionId)
+            : [...selectedValues, optionId];
         onChange(newSelected);
     };
 
-    const removeSelected = (option: string) => {
-        onChange(selectedValues.filter(item => item !== option));
+    const removeSelected = (optionId: string) => {
+        onChange(selectedValues.filter(id => id !== optionId));
     };
 
     const filteredOptions = options.filter(option =>
-        option.toLowerCase().includes(searchQuery.toLowerCase())
+        option.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [dropdownRef]);
+
     return (
-        <div className="ms-multi-select-container">
+        <div className="ms-multi-select-container" ref={dropdownRef}>
             <div
                 className={`ms-multi-select-input ${isOpen ? 'active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)} >
                 <span>{selectedValues.length > 0 ? `${selectedValues.length} selected` : placeholder}</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00e054" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="6 9 12 15 18 9" />
-                </svg>
-
+                <ListFilter size={16} />
             </div>
             {selectedValues.length > 0 && (
                 <div className="ms-selected-items">
-                    {selectedValues.map(item => (
-                        <div key={item} className="ms-selected-item">
-                            {item}
-                            <button onClick={(e) => {
-                                e.stopPropagation();
-                                removeSelected(item);
-                            }}>×</button>
-                        </div>
-                    ))}
+                    {selectedValues.map(id => {
+                        const genre = options.find(opt => opt.id === id);
+                        return genre ? (
+                            <div key={id} className="ms-selected-item">
+                                {genre.name}
+                                <button onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeSelected(id);
+                                }}>×</button>
+                            </div>
+                        ) : null;
+                    })}
                 </div>
             )}
             {isOpen && (
@@ -296,27 +113,29 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ options, selectedValues, onCh
                     <div className="ms-multi-select-search" onClick={e => e.stopPropagation()}>
                         <input
                             type="text"
-                            placeholder="Search..."
+                            placeholder={t('search')}
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
                             className='ms-search-input1' />
                     </div>
                     {filteredOptions.map(option => (
                         <div
-                            key={option}
+                            key={option.id}
                             className="ms-multi-select-option"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                toggleOption(option);
+                                toggleOption(option.id);
                             }} >
                             <input
                                 className='ms-multi-select-checkbox'
                                 type="checkbox"
-                                checked={selectedValues.includes(option)}
-                                onChange={() => { }} />
-                            {option}
+                                checked={selectedValues.includes(option.id)}
+                                readOnly
+                            />
+                            {option.name}
                         </div>
                     ))}
+                    {filteredOptions.length === 0 && <div className="ms-no-options">No genres found</div>}
                 </div>
             )}
         </div>
@@ -326,226 +145,197 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ options, selectedValues, onCh
 const MovieSearchPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const queryInputRef = useRef<HTMLInputElement>(null);
+    const { t } = useTranslation();
 
-    // Initialize filters based on initial URL search parameters
-    const initializeFilters = (): FilterOptions => {
+    const initializeFilters = useCallback((): FilterOptions => {
         const query = searchParams.get('query') || '';
-        const genres = searchParams.getAll('genre') || []; // Use getAll for potential multiple values
+        const genreIds = searchParams.getAll('genreId') || [];
         const yearFrom = searchParams.get('yearFrom') || '';
         const yearTo = searchParams.get('yearTo') || '';
-        const rating = searchParams.get('rating') || '';
-        // runtime, language, director are not currently used in the UI filters, so skip for now
-        const sortBy = searchParams.get('sortBy') || 'title';
-        const sortOrderParam = searchParams.get('sortOrder');
-        const sortOrder = (sortOrderParam === 'asc' || sortOrderParam === 'desc') ? sortOrderParam : 'asc';
-
-        return {
-            query: query,
-            genres: genres,
-            yearFrom: yearFrom,
-            yearTo: yearTo,
-            rating: rating,
-            runtime: '', // Not in URL yet
-            language: '', // Not in URL yet
-            director: '', // Not in URL yet
-            sortBy: sortBy,
-            sortOrder: sortOrder
-        };
-    };
+        const minRating = searchParams.get('minRating') || 'Any';
+        const sortByParam = searchParams.get('sortBy') || 'title_asc';
+        const sortBy = Object.keys(sortMap).includes(sortByParam) ? sortByParam as SortByType : 'title_asc';
+        return { query, genreIds, yearFrom, yearTo, minRating, sortBy };
+    }, [searchParams]);
 
     const [filters, setFilters] = useState<FilterOptions>(initializeFilters);
-    const [inputValue, setInputValue] = useState<string>(filters.query); // Initialize input with URL/filter query
-
+    const [tempFilters, setTempFilters] = useState<FilterOptions>(initializeFilters); // Temporary state for filters before applying
     const [movies, setMovies] = useState<Movie[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
     const [advancedSearchOpen, setAdvancedSearchOpen] = useState<boolean>(false);
-
+    const [availableGenres, setAvailableGenres] = useState<ApiGenre[]>([]);
+    const [totalMovies, setTotalMovies] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
     const moviesPerPage = 15;
 
-    const genres = ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary',
-        'Drama', 'Family', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller'];
-
-    const ratings = ['9+', '8+', '7+', '6+', '5+', 'Any'];
-
-    const sortOptions = [
-        { value: 'title', label: 'Title' },
-        { value: 'year', label: 'Release Year' },
-        { value: 'rating', label: 'Rating' },
-        { value: 'runtime', label: 'Runtime' }
+    const ratingOptions = [t('any'), '9+', '8+', '7+', '6+', '5+'];
+    const sortOptionsDisplay: { value: SortByType; labelKey: string }[] = [
+        { value: 'title_asc', labelKey: 'titleAZ' },
+        { value: 'title_desc', labelKey: 'titleZA' },
+        { value: 'year_desc', labelKey: 'yearNewest' },
+        { value: 'year_asc', labelKey: 'yearOldest' },
+        { value: 'rating_desc', labelKey: 'ratingHighToLow' },
+        { value: 'rating_asc', labelKey: 'ratingLowToHigh' },
     ];
 
-    const fetchAndFilterMovies = useCallback(() => {
+    // Update URL with current filters
+    const updateURL = useCallback((newFilters: FilterOptions, resetPage = false) => {
+        const newSearchParams = new URLSearchParams();
+        
+        if (newFilters.query.trim()) {
+            newSearchParams.set('query', newFilters.query.trim());
+        }
+        
+        newFilters.genreIds.forEach(id => {
+            if (id.trim()) {
+                newSearchParams.append('genreId', id);
+            }
+        });
+        
+        if (newFilters.yearFrom.trim()) {
+            newSearchParams.set('yearFrom', newFilters.yearFrom);
+        }
+        
+        if (newFilters.yearTo.trim()) {
+            newSearchParams.set('yearTo', newFilters.yearTo);
+        }
+        
+        if (newFilters.minRating && newFilters.minRating !== 'Any') {
+            newSearchParams.set('minRating', newFilters.minRating);
+        }
+        
+        if (newFilters.sortBy && newFilters.sortBy !== 'title_asc') {
+            newSearchParams.set('sortBy', String(newFilters.sortBy));
+        }
+
+        if (!resetPage && currentPage > 1) {
+            newSearchParams.set('page', currentPage.toString());
+        }
+        
+        setSearchParams(newSearchParams, { replace: true });
+    }, [setSearchParams, currentPage]);
+
+    useEffect(() => {
+        getAllGenres()
+            .then(data => setAvailableGenres(data || []))
+            .catch(err => {
+                console.error("Failed to fetch genres:", err);
+                setError(t('failedToFetchMovies'));
+            });
+    }, [t]);
+
+    const fetchAndFilterMovies = useCallback(async () => {
         setLoading(true);
-        console.log("Fetching/Filtering based on:", filters, "Page:", currentPage);
+        setError(null);
 
-        const timer = setTimeout(() => {
-            let filteredMovies = mockMovies.filter(movie => {
-                if (filters.query && !movie.title.toLowerCase().includes(filters.query.toLowerCase())) {
-                    return false;
-                }
-                if (filters.genres.length > 0 && !movie.genres.some(genre => filters.genres.includes(genre))) {
-                    return false;
-                }
-                if (filters.yearFrom && movie.year < parseInt(filters.yearFrom)) {
-                    return false;
-                }
-                if (filters.yearTo && movie.year > parseInt(filters.yearTo)) {
-                    return false;
-                }
-                if (filters.rating && filters.rating !== 'Any') {
-                    const minRating = parseInt(filters.rating.replace('+', ''));
-                    if (movie.rating < minRating) {
-                        return false;
-                    }
-                }
-                return true;
-            });
+        const apiParams: MoviesPageParams = {
+            limit: moviesPerPage,
+            offset: (currentPage - 1) * moviesPerPage,
+            sortBy: sortMap[filters.sortBy],
+            search: filters.query.trim() || undefined,
+            filter: {},
+        };
 
-            const sortedMovies = [...filteredMovies].sort((a, b) => {
-                const aValue = a[filters.sortBy as keyof Movie];
-                const bValue = b[filters.sortBy as keyof Movie];
+        if (filters.genreIds.length > 0) {
+            apiParams.filter.genreIds = filters.genreIds.filter(id => id.trim());
+        }
+        
+        if (filters.yearFrom.trim()) {
+            const yearNum = parseInt(filters.yearFrom, 10);
+            if (!isNaN(yearNum)) apiParams.filter.minReleaseYear = yearNum;
+        }
+        
+        if (filters.yearTo.trim()) {
+            const yearNum = parseInt(filters.yearTo, 10);
+            if (!isNaN(yearNum)) apiParams.filter.maxReleaseYear = yearNum;
+        }
+        
+        if (filters.minRating && filters.minRating !== 'Any') {
+            const ratingNum = parseFloat(filters.minRating.replace('+', ''));
+            if (!isNaN(ratingNum)) apiParams.filter.minMovieqRating = ratingNum;
+        }
+        
+        if (Object.keys(apiParams.filter).length === 0) {
+            delete apiParams.filter;
+        }
 
-                if (typeof aValue === 'string' && typeof bValue === 'string') {
-                    return filters.sortOrder === 'asc'
-                        ? aValue.localeCompare(bValue)
-                        : bValue.localeCompare(aValue);
-                } else if (typeof aValue === 'number' && typeof bValue === 'number') {
-                    return filters.sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-                }
-                return 0;
-            });
+        try {
+            const count = await getMoviesPageCount({ filter: apiParams.filter, search: apiParams.search });
+            setTotalMovies(count);
+            
+            if (count === 0) {
+                setMovies([]);
+            } else {
+                const moviesData = await getMoviesForPage(apiParams);
+                const transformedMovies: Movie[] = moviesData.map((apiMovie: ApiMovie) => ({
+                    id: String(apiMovie.id),
+                    title: apiMovie.title,
+                    posterUrl: apiMovie.poster_url,
+                    year: apiMovie.release_date ? new Date(apiMovie.release_date).getFullYear() : undefined,
+                    rating: apiMovie.movieq_rating ?? apiMovie.imdb_rating,
+                    genres: apiMovie.genres,
+                }));
+                setMovies(transformedMovies);
+            }
+        } catch (err: any) {
+            console.error("Error fetching movies:", err);
+            setError(t('failedToFetchMovies'));
+            setMovies([]);
+            setTotalMovies(0);
+        }
+        
+        setLoading(false);
+    }, [filters, currentPage, t]);
 
-            setTotalPages(Math.ceil(sortedMovies.length / moviesPerPage));
+    // Initialize from URL params on component mount and URL changes
+    useEffect(() => {
+        const urlFilters = initializeFilters();
+        const urlPage = parseInt(searchParams.get('page') || '1', 10);
+        
+        setFilters(urlFilters);
+        setTempFilters(urlFilters);
+        setCurrentPage(isNaN(urlPage) ? 1 : urlPage);
+    }, [searchParams, initializeFilters]);
 
-            const indexOfLastMovie = currentPage * moviesPerPage;
-            const indexOfFirstMovie = indexOfLastMovie - moviesPerPage;
-            const currentMovies = sortedMovies.slice(indexOfFirstMovie, indexOfLastMovie);
-
-            setMovies(currentMovies);
-            setLoading(false);
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, [filters, currentPage, moviesPerPage]);
-
+    // Fetch movies when filters or page changes
     useEffect(() => {
         fetchAndFilterMovies();
     }, [fetchAndFilterMovies]);
 
-    // Update URL search parameters whenever filters change
-    useEffect(() => {
-        const newSearchParams = new URLSearchParams();
-
-        if (filters.query) {
-            newSearchParams.set('query', filters.query);
-        }
-        filters.genres.forEach(genre => newSearchParams.append('genre', genre)); // Use append for multiple genres
-        if (filters.yearFrom) {
-            newSearchParams.set('yearFrom', filters.yearFrom);
-        }
-        if (filters.yearTo) {
-            newSearchParams.set('yearTo', filters.yearTo);
-        }
-        if (filters.rating) {
-            newSearchParams.set('rating', filters.rating);
-        }
-        // Add other filters like runtime, language, director if/when they are implemented
-        if (filters.sortBy && filters.sortBy !== 'title') { // Don't add default sort
-            newSearchParams.set('sortBy', filters.sortBy);
-        }
-        if (filters.sortOrder && filters.sortOrder !== 'asc') { // Don't add default order
-            newSearchParams.set('sortOrder', filters.sortOrder);
-        }
-
-        // Use replace: true to avoid adding multiple history entries for filter changes
-        setSearchParams(newSearchParams, { replace: true });
-
-        // Only run when filters change. Avoid dependency on setSearchParams.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filters]);
-
-    // React to external URL changes (e.g., from Navbar or back/forward)
-    // This effect now PRIMARILY focuses on syncing the *input field* and *resetting filters*
-    // if the URL is changed externally in a significant way (e.g., query changes).
-    useEffect(() => {
-        // Read filters directly from the *current* URL state
-        const currentUrlFilters = initializeFilters();
-
-        // Update the main filters state if the URL reflects different filter values
-        // This handles back/forward navigation restoring previous filter states.
-        // Use JSON.stringify for simple comparison; for complex objects, a deep comparison might be needed.
-        if (JSON.stringify(currentUrlFilters) !== JSON.stringify(filters)) {
-            console.log("URL changed externally, updating filters state:", currentUrlFilters);
-            setFilters(currentUrlFilters);
-            setCurrentPage(1); // Reset page if filters changed externally
-        }
-
-        // Always ensure the input value reflects the URL query, especially if the input
-        // doesn't have focus.
-        const queryFromUrl = searchParams.get('query') || '';
-        if (queryFromUrl !== inputValue && document.activeElement !== queryInputRef.current) {
-            console.log("Syncing input value from URL:", queryFromUrl);
-            setInputValue(queryFromUrl);
-        }
-
-        // Trigger this effect when the searchParams object itself changes.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchParams]); // Removed filters dependency here to prevent loops
-
+    // Handle search input change (only updates temp state)
     const handleQueryInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(e.target.value);
+        const newQuery = e.target.value;
+        setTempFilters(prev => ({ ...prev, query: newQuery }));
     };
 
+    // Handle filter changes (only updates temp state)
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFilters(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        setCurrentPage(1);
-    };
-
-    const handleGenresChange = (selected: string[]) => {
-        setFilters(prev => ({
-            ...prev,
-            genres: selected
-        }));
-        setCurrentPage(1);
-    };
-
-    const triggerSearch = () => {
-        console.log("Triggering search with input value:", inputValue);
-        // Update the active query filter. This will trigger the useEffect to update the URL.
-        setFilters(prev => ({ ...prev, query: inputValue }));
-        // Reset to page 1 if the query or other filters initiated the search
-        // Note: Filter changes already reset the page. This ensures query changes also reset it.
-        if (currentPage !== 1) {
-            setCurrentPage(1);
-        }
-        queryInputRef.current?.blur();
-    };
-
-    const handleSearchSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        triggerSearch(); // This now updates filters, which triggers URL update
-    };
-
-    const toggleSortOrder = () => {
-        setFilters(prev => ({
-            ...prev,
-            sortOrder: prev.sortOrder === 'asc' ? 'desc' : 'asc'
-        }));
-        setCurrentPage(1);
+        setTempFilters(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setFilters(prev => ({
-            ...prev,
-            sortBy: e.target.value
-        }));
+        const newSortBy = e.target.value as SortByType;
+        setTempFilters(prev => ({ ...prev, sortBy: newSortBy }));
+    };
+
+    const handleGenresChange = (selectedIds: string[]) => {
+        setTempFilters(prev => ({ ...prev, genreIds: selectedIds }));
+    };
+
+    // Apply filters - this updates the actual filters and URL
+    const applyFilters = useCallback(() => {
+        setFilters(tempFilters);
         setCurrentPage(1);
+        updateURL(tempFilters, true);
+        queryInputRef.current?.blur();
+    }, [tempFilters, updateURL]);
+
+    // Handle search form submission
+    const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        applyFilters();
     };
 
     const toggleAdvancedSearch = () => {
@@ -554,6 +344,43 @@ const MovieSearchPage = () => {
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
+        
+        // Update URL with new page
+        const newSearchParams = new URLSearchParams();
+        
+        if (filters.query.trim()) {
+            newSearchParams.set('query', filters.query.trim());
+        }
+        
+        filters.genreIds.forEach(id => {
+            if (id.trim()) {
+                newSearchParams.append('genreId', id);
+            }
+        });
+        
+        if (filters.yearFrom.trim()) {
+            newSearchParams.set('yearFrom', filters.yearFrom);
+        }
+        
+        if (filters.yearTo.trim()) {
+            newSearchParams.set('yearTo', filters.yearTo);
+        }
+        
+        if (filters.minRating && filters.minRating !== 'Any') {
+            newSearchParams.set('minRating', filters.minRating);
+        }
+        
+        if (filters.sortBy && filters.sortBy !== 'title_asc') {
+            newSearchParams.set('sortBy', String(filters.sortBy));
+        }
+
+        if (page > 1) {
+            newSearchParams.set('page', page.toString());
+        }
+        
+        setSearchParams(newSearchParams, { replace: true });
+
+        // Scroll to results
         const resultsContainer = document.querySelector('.ms-results-container') as HTMLElement | null;
         if (resultsContainer) {
             window.scrollTo({ top: resultsContainer.offsetTop, behavior: 'smooth' });
@@ -563,27 +390,26 @@ const MovieSearchPage = () => {
     };
 
     const resetFiltersAndSearch = () => {
-        const initialFilters: FilterOptions = {
+        const resetFilters = {
             query: '',
-            genres: [],
+            genreIds: [],
             yearFrom: '',
             yearTo: '',
-            rating: '',
-            runtime: '',
-            language: '',
-            director: '',
-            sortBy: 'title',
-            sortOrder: 'asc'
+            minRating: 'Any',
+            sortBy: 'title_asc' as SortByType,
         };
-        setInputValue('');
-        setFilters(initialFilters); // This will trigger the useEffect to clear URL parameters
+        
+        setFilters(resetFilters);
+        setTempFilters(resetFilters);
         setCurrentPage(1);
-        queryInputRef.current?.focus(); // Optional: focus query input after reset
+        setSearchParams({}, { replace: true });
     };
 
     const Pagination = () => {
-        const pages = [];
+        const totalPages = Math.ceil(totalMovies / moviesPerPage);
+        if (totalPages <= 1) return null;
 
+        const pages = [];
         for (let i = 1; i <= totalPages; i++) {
             if (
                 i === 1 ||
@@ -610,7 +436,7 @@ const MovieSearchPage = () => {
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                 >
-                    Previous
+                    {t('previous')}
                 </button>
 
                 {uniquePages.map((page, index) =>
@@ -632,7 +458,7 @@ const MovieSearchPage = () => {
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                 >
-                    Next
+                    {t('next')}
                 </button>
             </div>
         );
@@ -642,21 +468,24 @@ const MovieSearchPage = () => {
         <div className='ms-container'>
             <div className='ms-page'>
                 <div className="ms-movie-search-page">
-                    <div className="ms-page-title">Search results for «{filters.query || "All Movies"}»</div>
+                    <div className="ms-page-title">
+                        {t('searchResultsFor', { query: filters.query || t('allMovies') })}
+                    </div>
+
                     <div className="ms-search-container1">
                         <form onSubmit={handleSearchSubmit}>
                             <div className="ms-main-search1">
                                 <input
                                     ref={queryInputRef}
                                     type="text"
-                                    name="queryInput"
-                                    value={inputValue}
+                                    value={tempFilters.query}
                                     onChange={handleQueryInputChange}
-                                    placeholder="Search movies..."
+                                    placeholder={t('searchMovies')}
                                     className="ms-search-input1" />
+                                    
                                 <button type="submit" className="ms-search-button">
                                     <Search size={18} />
-                                    <span className="mvhide-text">Search</span>
+                                    <span className="mvhide-text">{t('search')}</span>
                                 </button>
 
                                 <button
@@ -664,94 +493,101 @@ const MovieSearchPage = () => {
                                     className="ms-advanced-toggle"
                                     onClick={toggleAdvancedSearch}>
                                     <Filter size={18} />
-                                    <span className="mvhide-text">{advancedSearchOpen ? 'Hide' : 'Filters'}</span>
+                                    <span className="mvhide-text">
+                                        {advancedSearchOpen ? t('hide') : t('filters')}
+                                    </span>
                                 </button>
                             </div>
+                            
                             {advancedSearchOpen && (
                                 <div className="ms-advanced-search">
                                     <div className="ms-filter-row">
                                         <div className="ms-filter-group genres">
-                                            <label htmlFor="genres">Genres</label>
+                                            <label htmlFor="genres">{t('genres')}</label>
                                             <MultiSelect
-                                                options={genres}
-                                                selectedValues={filters.genres}
+                                                options={availableGenres}
+                                                selectedValues={tempFilters.genreIds}
                                                 onChange={handleGenresChange}
-                                                placeholder="Any" />
+                                                placeholder={t('anyGenre')} />
                                         </div>
+                                        
                                         <div className="ms-filter-group">
-                                            <label htmlFor="yearRange">Year Range</label>
+                                            <label htmlFor="yearRange">{t('yearRange')}</label>
                                             <div className="ms-year-range-container">
                                                 <input
                                                     type="number"
                                                     name="yearFrom"
-                                                    value={filters.yearFrom}
+                                                    value={tempFilters.yearFrom}
                                                     onChange={handleFilterChange}
-                                                    placeholder="From"
+                                                    placeholder={t('from')}
                                                     className='ms-search-input1'
                                                     min="1900"
                                                     max="2025" />
-                                                <span>to</span>
+                                                <span>{t('to')}</span>
                                                 <input
                                                     type="number"
                                                     name="yearTo"
-                                                    value={filters.yearTo}
+                                                    value={tempFilters.yearTo}
                                                     onChange={handleFilterChange}
-                                                    placeholder="To"
+                                                    placeholder={t('to')}
                                                     className='ms-search-input1'
                                                     min="1900"
                                                     max="2025" />
                                             </div>
                                         </div>
+                                        
                                         <div className="ms-filter-group">
-                                            <label htmlFor="rating">Rating</label>
+                                            <label htmlFor="minRating">{t('minRating')}</label>
                                             <div className='ms-filter-rating-container'>
                                                 <select
-                                                    name="rating"
-                                                    id="rating"
-                                                    value={filters.rating}
+                                                    name="minRating"
+                                                    id="minRating"
+                                                    value={tempFilters.minRating}
                                                     onChange={handleFilterChange}
                                                     className="ms-filter-select rating" >
-                                                    <option value="">Any</option>
-                                                    {ratings.filter(r => r !== 'Any').map(rating => (
-                                                        <option className='option' key={rating} value={rating}>{rating}</option>
+                                                    {ratingOptions.map(rating => (
+                                                        <option className='option' key={rating} value={rating}>
+                                                            {rating === 'Any' ? t('any') : rating}
+                                                        </option>
                                                     ))}
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
+                                    
                                     <div className="ms-filter-row">
                                         <div className="ms-filter-group">
-                                            <label htmlFor="sortBy">Sort By</label>
+                                            <label htmlFor="sortBy">{t('sortBy')}</label>
                                             <div className="ms-sort-container">
                                                 <select
                                                     name="sortBy"
                                                     id="sortBy"
-                                                    value={filters.sortBy}
+                                                    value={tempFilters.sortBy}
                                                     onChange={handleSortByChange}
                                                     className="ms-filter-select" >
-                                                    {sortOptions.map(option => (
-                                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                                    {sortOptionsDisplay.map(option => (
+                                                        <option key={option.value} value={option.value}>
+                                                            {t(option.labelKey)}
+                                                        </option>
                                                     ))}
                                                 </select>
-                                                <button
-                                                    type="button"
-                                                    onClick={toggleSortOrder}
-                                                    className="ms-sort-order-toggle" >
-                                                    {filters.sortOrder === 'asc' ? '↑' : '↓'}
-                                                </button>
                                             </div>
                                         </div>
 
                                         <div className="ms-filter-group ms-filter-actions">
-                                            <button type="button" onClick={triggerSearch} className="ms-apply-filters-button">
-                                                Apply
+                                            <button
+                                                type="button"
+                                                onClick={applyFilters}
+                                                className="ms-apply-filters-button"
+                                            >
+                                                {t('apply')}
                                             </button>
                                             <button
                                                 type="button"
                                                 className="ms-reset-filters-button"
                                                 onClick={resetFiltersAndSearch}
                                             >
-                                                Reset
+                                                {t('reset')}
                                             </button>
                                         </div>
                                     </div>
@@ -759,12 +595,14 @@ const MovieSearchPage = () => {
                             )}
                         </form>
                     </div>
+                    
                     <div className="ms-results-container">
                         {!loading && movies.length > 0 && <Pagination />}
+                        
                         {loading ? (
                             <div className="ms-loading-indicator">
-                                <span className="ms-loader"></span>
-                                <p>Searching for movies...</p>
+                                <CircularLoader />
+                                <p>{t('searchingForMovies')}</p>
                             </div>
                         ) : movies.length > 0 ? (
                             <div className="ms-movie-grid">
@@ -774,14 +612,18 @@ const MovieSearchPage = () => {
                             </div>
                         ) : (
                             <div className="ms-no-results">
-                                <p>No movies found matching your search criteria.</p>
-                                <button
-                                    onClick={resetFiltersAndSearch}
-                                    className="ms-reset-search-button"  >
-                                    Reset Search
-                                </button>
+                                <p>{error || t('noMoviesFoundMatchingCriteria')}</p>
+                                {!error && (
+                                    <button
+                                        onClick={resetFiltersAndSearch}
+                                        className="ms-reset-search-button"
+                                    >
+                                        {t('resetSearch')}
+                                    </button>
+                                )}
                             </div>
                         )}
+                        
                         {!loading && movies.length > 0 && <Pagination />}
                     </div>
                 </div>
