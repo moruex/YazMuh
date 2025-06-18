@@ -11,6 +11,7 @@ const config = require('./config');
 const schema = require('./schema');
 const schemaFrontend = require('./schema-frontend');
 const { db } = require('./db');
+const serverless = require('serverless-http');
 
 let serverlessHandler = null; // Store the handler
 
