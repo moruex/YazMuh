@@ -640,7 +640,7 @@ const MovieDetailsPage: React.FC = () => {
           <div className="md-movie-info">
             <div className="md-movie-ratings">
               <div className="md-rating-item md-average-user-rating-item">
-                <span className="md-rating-label">{t('movieQ')}<span className="accent">i</span></span>
+                <span className="md-rating-label">{Mov<span className="accent">i</span>e<span className="accent">Q</span></span>
                 <div className="md-rating-value">
                   {typeof overallMovieRating === 'number' ? (overallMovieRating * 2).toFixed(1) : '-'}
                 </div>
